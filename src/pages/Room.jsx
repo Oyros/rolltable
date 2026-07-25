@@ -1,0 +1,358 @@
+import { useEffect, useRef, useState } from 'react';
+import { ref, onValue, update, get, remove, onDisconnect } from 'firebase/database';
+import { db } from '../firebase.js';
+import SceneDisplay from '../components/SceneDisplay.jsx';
+import DiceRoller from '../components/DiceRoller.jsx';
+import CharacterSheet from '../components/CharacterSheet.jsx';
+import GMPanel from '../components/GMPanel.jsx';
+import GMAtmospherePanel from '../components/GMAtmospherePanel.jsx';
+import GMNotes from '../components/GMNotes.jsx';
+import PlayerNotes from '../components/PlayerNotes.jsx';
+import PartyOverview from '../components/PartyOverview.jsx';
+import WhisperOverlay from '../components/WhisperOverlay.jsx';
+import GameSetup from './GameSetup.jsx';
+import ParticleEffect from '../components/ParticleEffect.jsx';
+import SessionTimer from '../components/SessionTimer.jsx';
+import NpcNameGenerator from '../components/NpcNameGenerator.jsx';
+import PromptGenerator from '../components/PromptGenerator.jsx';
+import { applyTheme, DEFAULT_THEME_ID } from '../utils/themes.js';
+
+const AMBIANCE_VOLUME_KEY = 'sessizlik_ambiance_volume';
+
+function loadAmbianceVolume() {
+  const raw = localStorage.getItem(AMBIANCE_VOLUME_KEY);
+  const parsed = raw ? parseFloat(raw) : 0.5;
+  return Number.isFinite(parsed) ? Math.min(1, Math.max(0, parsed)) : 0.5;
+}
+
+export default function Room({ session, onLeave }) {
+  const { roomCode, playerId, name, role } = session;
+  const [players, setPlayers] = useState({});
+  const [scene, setScene] = useState(null);
+  const [settings, setSettings] = useState(null);
+  const [gameConfig, setGameConfig] = useState(undefined);
+  const [flashActive, setFlashActive] = useState(false);
+  const [ambianceVolume, setAmbianceVolumeState] = useState(loadAmbianceVolume);
+  const [joinBlocked, setJoinBlocked] = useState(false);
+  const [kicked, setKicked] = useState(false);
+  const flashSeenRef = useRef(undefined);
+  const kickSeenRef = useRef(undefined);
+
+  function setAmbianceVolume(value) {
+    setAmbianceVolumeState(value);
+    localStorage.setItem(AMBIANCE_VOLUME_KEY, String(value));
+  }
+
+  useEffect(() => {
+    if (!gameConfig) return;
+    let cancelled = false;
+
+    async function joinRoom() {
+      const playerRef = ref(db, `rooms/${roomCode}/players/${playerId}`);
+      const snap = await get(playerRef);
+
+      if (!snap.exists()) {
+        if (role !== 'gm') {
+          const lockedSnap = await get(ref(db, `rooms/${roomCode}/settings/locked`));
+          if (lockedSnap.val()) {
+            if (!cancelled) setJoinBlocked(true);
+            return;
+          }
+        }
+        const defaultStats = {};
+        (gameConfig.stats || []).forEach((stat) => {
+          defaultStats[stat.id] = 2;
+        });
+        update(playerRef, {
+          name,
+          role,
+          status: 'iyi',
+          stats: defaultStats,
+          skills: '',
+          inventory: [],
+          raceId: '',
+          classId: '',
+          subclassId: '',
+          traits: [],
+          perks: [],
+          updatedAt: Date.now(),
+        });
+      } else {
+        update(playerRef, { name, role, updatedAt: Date.now() });
+      }
+    }
+
+    joinRoom();
+    return () => {
+      cancelled = true;
+    };
+  }, [roomCode, playerId, name, role, gameConfig]);
+
+  useEffect(() => {
+    const playersRef = ref(db, `rooms/${roomCode}/players`);
+    const unsub = onValue(playersRef, (snap) => setPlayers(snap.val() || {}));
+    return () => unsub();
+  }, [roomCode]);
+
+  useEffect(() => {
+    if (!gameConfig) return undefined;
+    const connectedRef = ref(db, '.info/connected');
+    const presencePath = `rooms/${roomCode}/players/${playerId}`;
+
+    const unsub = onValue(connectedRef, (snap) => {
+      if (snap.val() === true) {
+        onDisconnect(ref(db, `${presencePath}/online`)).set(false);
+        update(ref(db, presencePath), { online: true });
+      }
+    });
+
+    return () => {
+      unsub();
+      update(ref(db, presencePath), { online: false }).catch(() => {});
+    };
+  }, [roomCode, playerId, gameConfig]);
+
+  useEffect(() => {
+    const sceneRef = ref(db, `rooms/${roomCode}/scene`);
+    const unsub = onValue(sceneRef, (snap) => setScene(snap.val()));
+    return () => unsub();
+  }, [roomCode]);
+
+  useEffect(() => {
+    const settingsRef = ref(db, `rooms/${roomCode}/settings`);
+    const unsub = onValue(settingsRef, (snap) => setSettings(snap.val() || {}));
+    return () => unsub();
+  }, [roomCode]);
+
+  useEffect(() => {
+    const gameConfigRef = ref(db, `rooms/${roomCode}/gameConfig`);
+    const unsub = onValue(gameConfigRef, (snap) => setGameConfig(snap.val() || null));
+    return () => unsub();
+  }, [roomCode]);
+
+  useEffect(() => {
+    if (role === 'gm') return;
+    const kickRef = ref(db, `rooms/${roomCode}/kickSignal/${playerId}`);
+    const unsub = onValue(kickRef, (snap) => {
+      const val = snap.val();
+      if (kickSeenRef.current === undefined) {
+        kickSeenRef.current = val ?? null;
+        return;
+      }
+      if (val && val !== kickSeenRef.current) {
+        kickSeenRef.current = val;
+        setKicked(true);
+      }
+    });
+    return () => unsub();
+  }, [roomCode, playerId, role]);
+
+  useEffect(() => {
+    if (scene?.flashAt === undefined) return;
+    if (flashSeenRef.current === undefined) {
+      flashSeenRef.current = scene.flashAt;
+      return;
+    }
+    if (scene.flashAt !== flashSeenRef.current) {
+      flashSeenRef.current = scene.flashAt;
+      setFlashActive(true);
+      setTimeout(() => setFlashActive(false), 600);
+    }
+  }, [scene?.flashAt]);
+
+  useEffect(() => {
+    const v = scene?.vignette ?? 0;
+    const opacity = 0.35 + (v / 100) * 0.55;
+    const inner = 40 - (v / 100) * 25;
+    document.documentElement.style.setProperty('--vignette-opacity', opacity.toFixed(2));
+    document.documentElement.style.setProperty('--vignette-inner', `${inner.toFixed(0)}%`);
+  }, [scene?.vignette]);
+
+  useEffect(() => {
+    return () => {
+      document.documentElement.style.removeProperty('--vignette-opacity');
+      document.documentElement.style.removeProperty('--vignette-inner');
+    };
+  }, []);
+
+  useEffect(() => {
+    if (gameConfig?.theme) applyTheme(gameConfig.theme);
+  }, [gameConfig?.theme]);
+
+  useEffect(() => {
+    return () => applyTheme(DEFAULT_THEME_ID);
+  }, []);
+
+  function kickPlayer(targetId) {
+    update(ref(db, `rooms/${roomCode}/kickSignal`), { [targetId]: Date.now() });
+    remove(ref(db, `rooms/${roomCode}/players/${targetId}`));
+  }
+
+  function deleteRoom() {
+    if (
+      !window.confirm(
+        'Bu odayı ve içindeki tüm verileri (sahne, karakterler, oyun kuralları) kalıcı olarak silmek istediğine emin misin?'
+      )
+    ) {
+      return;
+    }
+    remove(ref(db, `rooms/${roomCode}`));
+    onLeave();
+  }
+
+  const me = players[playerId];
+
+  const header = (
+    <header className="room-header">
+      {settings?.bannerUrl && (
+        <>
+          <img className="room-header-banner" src={settings.bannerUrl} alt="" />
+          <div className="room-header-banner-overlay" />
+        </>
+      )}
+      <div className="room-header-content">
+        <div>
+          <h1 className="title-font">{gameConfig?.name || 'RollTable'}</h1>
+          <span className="room-code">Oda: {roomCode}</span>
+        </div>
+        <div className="header-right">
+          <SessionTimer startedAt={settings?.sessionStartedAt} />
+          <span className="who-am-i">
+            {name} · {role === 'gm' ? 'GM' : 'Oyuncu'}
+          </span>
+          <button className="btn-ghost" onClick={onLeave}>
+            Odadan Çık
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+
+  if (kicked) {
+    return (
+      <div className="room">
+        {header}
+        <div className="room-setup-wrap">
+          <div className="game-setup-card panel">
+            <h1 className="title-font">Odadan Çıkarıldın</h1>
+            <p className="subtitle">GM seni bu odadan çıkardı. İstersen tekrar katılabilirsin.</p>
+            <button type="button" className="btn-primary" onClick={onLeave}>
+              Ana Sayfaya Dön
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (joinBlocked) {
+    return (
+      <div className="room">
+        {header}
+        <div className="room-setup-wrap">
+          <div className="game-setup-card panel">
+            <h1 className="title-font">Oda Kilitli</h1>
+            <p className="subtitle">
+              GM şu anda bu odaya yeni katılımcı kabul etmiyor. Daha sonra tekrar dene.
+            </p>
+            <button type="button" className="btn-primary" onClick={onLeave}>
+              Ana Sayfaya Dön
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!gameConfig) {
+    return (
+      <div className="room">
+        {header}
+        {role === 'gm' ? (
+          <GameSetup roomCode={roomCode} />
+        ) : (
+          <div className="room-setup-wrap">
+            <p className="muted">GM henüz oyunu ayarlıyor, lütfen bekle...</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className={`room${flashActive ? ' shake' : ''}`}>
+      <div className={`flash-overlay${flashActive ? ' active' : ''}`} />
+
+      <ParticleEffect theme={gameConfig?.theme || DEFAULT_THEME_ID} />
+
+      {role !== 'gm' && (
+        <WhisperOverlay whispers={me?.whispers} roomCode={roomCode} playerId={playerId} />
+      )}
+
+      {header}
+
+      <div className="room-body">
+        <aside className="room-sidebar">
+          <PartyOverview
+            players={players}
+            gameConfig={gameConfig}
+            isGM={role === 'gm'}
+            onKick={kickPlayer}
+            playerId={playerId}
+          />
+        </aside>
+
+        <div className="room-content">
+          <SceneDisplay
+            scene={scene}
+            roomCode={roomCode}
+            isGM={role === 'gm'}
+            name={name}
+            playerId={playerId}
+            pinColor={me?.color}
+            ambianceVolume={ambianceVolume}
+            onAmbianceVolumeChange={setAmbianceVolume}
+          />
+
+          <div className="room-bottom">
+            {role === 'gm' ? (
+              <GMPanel
+                roomCode={roomCode}
+                scene={scene}
+                players={players}
+                settings={settings}
+                gameConfig={gameConfig}
+                onDeleteRoom={deleteRoom}
+              />
+            ) : (
+              me && (
+                <CharacterSheet
+                  roomCode={roomCode}
+                  playerId={playerId}
+                  player={me}
+                  gameConfig={gameConfig}
+                />
+              )
+            )}
+          </div>
+        </div>
+
+        <aside className="room-sidebar">
+          <DiceRoller roomCode={roomCode} name={name} isGM={role === 'gm'} />
+          {role !== 'gm' && <PlayerNotes roomCode={roomCode} playerId={playerId} player={me} />}
+          {role === 'gm' && (
+            <GMAtmospherePanel
+              roomCode={roomCode}
+              scene={scene}
+              ambianceVolume={ambianceVolume}
+              onAmbianceVolumeChange={setAmbianceVolume}
+            />
+          )}
+          {role === 'gm' && <GMNotes roomCode={roomCode} settings={settings} />}
+          {role === 'gm' && <NpcNameGenerator />}
+          {role === 'gm' && <PromptGenerator />}
+        </aside>
+      </div>
+    </div>
+  );
+}

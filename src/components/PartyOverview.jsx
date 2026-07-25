@@ -1,0 +1,139 @@
+import { useState } from 'react';
+import { STATUS_LABEL } from '../utils/stats.js';
+import WhisperLog from './WhisperLog.jsx';
+
+function nameOf(list, id) {
+  return list.find((x) => x.id === id)?.name;
+}
+
+export default function PartyOverview({ players, gameConfig, isGM, onKick, playerId }) {
+  const [expandedId, setExpandedId] = useState(null);
+  const list = Object.entries(players || {}).filter(([, p]) => p.role !== 'gm');
+
+  const stats = gameConfig?.stats || [];
+  const races = gameConfig?.races || [];
+  const classes = gameConfig?.classes || [];
+  const subclasses = gameConfig?.subclasses || [];
+  const traits = gameConfig?.traits || [];
+  const perks = gameConfig?.perks || [];
+
+  return (
+    <div className="panel party-overview">
+      <h2 className="title-font">Parti</h2>
+      {list.length === 0 && <p className="muted">Henüz oyuncu yok.</p>}
+      <ul className="party-list">
+        {list.map(([id, p]) => {
+          const expanded = expandedId === id;
+          const raceName = nameOf(races, p.raceId);
+          const className = nameOf(classes, p.classId);
+          const subclassName = nameOf(subclasses, p.subclassId);
+          const traitNames = (p.traits || []).map((tid) => nameOf(traits, tid)).filter(Boolean);
+          const perkNames = (p.perks || []).map((pid) => nameOf(perks, pid)).filter(Boolean);
+
+          return (
+            <li key={id} className={`party-row status-${p.status || 'iyi'}`}>
+              <button
+                type="button"
+                className="party-row-summary"
+                onClick={() => setExpandedId(expanded ? null : id)}
+              >
+                <span className="party-avatar" style={p.color ? { borderColor: p.color } : undefined}>
+                  {p.portraitUrl ? (
+                    <img src={p.portraitUrl} alt={p.name} />
+                  ) : (
+                    <span className="party-avatar-fallback">
+                      {(p.name || '?').charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <span
+                    className={`presence-dot ${p.online ? 'online' : 'offline'}`}
+                    title={p.online ? 'Çevrimiçi' : 'Çevrimdışı'}
+                  />
+                </span>
+                <span className="party-name" style={p.color ? { color: p.color } : undefined}>
+                  {p.name}
+                </span>
+                <span className="party-status-badge">{STATUS_LABEL[p.status] || 'İyi'}</span>
+              </button>
+
+              {expanded && (
+                <div className="party-detail">
+                  {p.portraitUrl && (
+                    <img className="party-detail-image" src={p.portraitUrl} alt={p.name} />
+                  )}
+
+                  {(raceName || className || subclassName) && (
+                    <p className="party-detail-rcs">
+                      {[raceName, className, subclassName].filter(Boolean).join(' · ')}
+                    </p>
+                  )}
+
+                  {stats.length > 0 && (
+                    <div className="party-detail-stats">
+                      {stats.map((s) => (
+                        <div className="stat-box" key={s.id}>
+                          <span className="stat-label">{s.name}</span>
+                          <span className="stat-value">{p.stats?.[s.id] ?? 2}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {traitNames.length > 0 && (
+                    <div className="party-detail-section">
+                      <span className="party-detail-heading">Traitler</span>
+                      <p>{traitNames.join(', ')}</p>
+                    </div>
+                  )}
+
+                  {perkNames.length > 0 && (
+                    <div className="party-detail-section">
+                      <span className="party-detail-heading">Perkler</span>
+                      <p>{perkNames.join(', ')}</p>
+                    </div>
+                  )}
+
+                  {p.skills && (
+                    <div className="party-detail-section">
+                      <span className="party-detail-heading">Yetenek / Dal</span>
+                      <p>{p.skills}</p>
+                    </div>
+                  )}
+
+                  <div className="party-detail-section">
+                    <span className="party-detail-heading">Envanter</span>
+                    {(p.inventory || []).length === 0 ? (
+                      <p className="muted">Boş</p>
+                    ) : (
+                      <ul className="party-detail-inventory">
+                        {(p.inventory || []).map((item, i) => (
+                          <li key={i}>{item}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  {isGM && (
+                    <button
+                      type="button"
+                      className="btn-ghost small danger"
+                      onClick={() => {
+                        if (window.confirm(`${p.name} adlı oyuncuyu odadan atmak istediğine emin misin?`)) {
+                          onKick(id);
+                        }
+                      }}
+                    >
+                      Odadan At
+                    </button>
+                  )}
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+
+      <WhisperLog players={players} playerId={playerId} isGM={isGM} />
+    </div>
+  );
+}
