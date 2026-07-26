@@ -1683,3 +1683,153 @@ button:hover {
 .help-btn {
   flex-shrink: 0;
 }
+
+/* Quest board */
+.quest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.quest-item {
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--amber);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.quest-item.done {
+  border-left-color: var(--ok);
+  opacity: 0.75;
+}
+
+.quest-title {
+  font-weight: 600;
+  color: var(--amber-light);
+  font-size: 0.88rem;
+}
+
+.quest-desc {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin: 4px 0 0;
+}
+
+.quest-item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.quest-done-details summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+}
+
+.quest-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+/* Loot generator */
+.loot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+
+.loot-item {
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.loot-item button {
+  flex-shrink: 0;
+}
+
+/* Calendar */
+.calendar-panel {
+  text-align: center;
+}
+
+.calendar-display {
+  font-family: var(--font-heading);
+  color: var(--amber-light);
+  font-size: 1.1rem;
+  margin: 4px 0 12px;
+}
+
+.calendar-buttons {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.calendar-manual {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.calendar-manual label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  gap: 2px;
+}
+
+.calendar-manual input {
+  width: 56px;
+}
+
+/* Turn indicator */
+.party-row.active-turn {
+  border-left-color: var(--amber);
+  box-shadow: 0 0 0 1px var(--amber-dim);
+}
+
+.active-turn-badge {
+  font-size: 0.85rem;
+}
+
+.turn-banner {
+  text-align: center;
+}
+
+.turn-banner-icon {
+  display: block;
+  font-size: 2.2rem;
+  margin-bottom: 8px;
+}
+
+.turn-banner p {
+  font-family: var(--font-heading);
+  color: var(--amber-light);
+  font-size: 1.3rem;
+  letter-spacing: 0.05em;
+  margin: 0 0 16px;
+}

@@ -53,12 +53,31 @@ export default function HelpGuide({ onClose }) {
         </details>
 
         <details>
+          <summary>🗓️ Takvim</summary>
+          <p>
+            Sol kenarın en üstünde oyun içi gün ve saat gösterilir. GM +1 Saat / +6 Saat / +1 Gün
+            butonlarıyla ilerletebilir, ya da gün/saat/dakikayı elle ayarlayabilir. Herkes aynı
+            takvimi görür.
+          </p>
+        </details>
+
+        <details>
           <summary>👥 Parti Paneli (sol kenar)</summary>
           <p>
             En üstte GM'in kutucuğu (isim, avatar, çevrimiçi/çevrimdışı durumu) bulunur. Altında
             oyuncu listesi vardır — bir oyuncuya tıklayınca statları, ırk/sınıf/alt sınıfı,
             trait/perkleri, yeteneklerini ve envanterini görürsün. GM buradan oyuncuyu odadan
-            atabilir. En altta, sana özel gelen <strong>Fısıltı Geçmişi</strong> listelenir.
+            atabilir. GM birine söz verdiğinde o oyuncunun adının yanında 🎙️ rozeti belirir ve o
+            oyuncunun ekranında "SIRA SENDE!" uyarısı çıkar. En altta, sana özel gelen
+            <strong> Fısıltı Geçmişi</strong> listelenir.
+          </p>
+        </details>
+
+        <details>
+          <summary>📜 Görev Panosu (sol kenar)</summary>
+          <p>
+            GM aktif görevleri ekler, herkes görür. Görev tamamlanınca GM "✅ Tamamla" ile
+            "Tamamlananlar" listesine taşır. Oyuncular sadece görüntüler, düzenleyemez.
           </p>
         </details>
 
@@ -91,6 +110,7 @@ export default function HelpGuide({ onClose }) {
             <li><strong>Üst Menü Afişi</strong> — sayfanın en üstündeki banner görseli.</li>
             <li><strong>Kayıtlı Sahneler</strong> — sık kullandığın sahneleri isimle kaydet, tek tıkla tekrar yayınla.</li>
             <li>Sahne formu — mekan/odak/harita görselleri, sahne adı, müzik linki.</li>
+            <li><strong>Sıra Kimde?</strong> — konuşma/hareket sırasını bir oyuncuya ver, o oyuncunun ekranında ve Parti panelinde belirir.</li>
             <li><strong>Gizli Fısıltı</strong> — tek bir oyuncuya ya da "📢 Herkese" özel mesaj gönder.</li>
           </ul>
         </details>
@@ -111,6 +131,7 @@ export default function HelpGuide({ onClose }) {
             <li><strong>Not Defterim</strong> (oyuncular) / <strong>GM Notları</strong> (GM) — sadece o kişinin gördüğü, otomatik kaydedilen kişisel not alanı.</li>
             <li><strong>NPC İsim Üretici</strong> (GM) — Türkçe/Yabancı/Fantastik/Cyberpunk/Gotik kategorilerinden rastgele isim üretir.</li>
             <li><strong>Mekan / Görev İpucu Üretici</strong> (GM) — rastgele mekan adı veya görev fikri üretir.</li>
+            <li><strong>Ganimet Üretici</strong> (GM) — temaya uygun rastgele eşya/para üretir; "📢 Partiye Duyur" ile herkese fısıltı olarak gönderilir.</li>
           </ul>
         </details>
 

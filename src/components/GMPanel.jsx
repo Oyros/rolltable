@@ -136,6 +136,14 @@ export default function GMPanel({
   const playerList = Object.entries(players || {}).filter(([, p]) => p.role !== 'gm');
   const savedScenes = Object.entries(settings?.savedScenes || {});
 
+  function setActiveTurn(targetId) {
+    if (!targetId) {
+      update(ref(db, `rooms/${roomCode}/settings`), { activeTurn: null });
+      return;
+    }
+    update(ref(db, `rooms/${roomCode}/settings`), { activeTurn: { playerId: targetId, at: Date.now() } });
+  }
+
   return (
     <div className="panel">
       <h2 className="title-font">GM Kontrol Paneli</h2>
@@ -279,6 +287,23 @@ export default function GMPanel({
         <button type="button" className="btn-primary small" onClick={saveCurrentScene}>
           💾 Sahne Olarak Kaydet
         </button>
+      </div>
+
+      <div className="gm-section">
+        <h3 className="title-font gm-section-title">Sıra Kimde?</h3>
+        <div className="inline-form">
+          <select
+            value={settings?.activeTurn?.playerId || ''}
+            onChange={(e) => setActiveTurn(e.target.value || null)}
+          >
+            <option value="">Kimse</option>
+            {playerList.map(([id, p]) => (
+              <option key={id} value={id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="gm-section">

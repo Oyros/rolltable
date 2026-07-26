@@ -16,6 +16,9 @@ import SessionTimer from '../components/SessionTimer.jsx';
 import NpcNameGenerator from '../components/NpcNameGenerator.jsx';
 import PromptGenerator from '../components/PromptGenerator.jsx';
 import HelpGuide from '../components/HelpGuide.jsx';
+import QuestBoard from '../components/QuestBoard.jsx';
+import LootGenerator from '../components/LootGenerator.jsx';
+import GameCalendar from '../components/GameCalendar.jsx';
 import { applyTheme, DEFAULT_THEME_ID } from '../utils/themes.js';
 
 const AMBIANCE_VOLUME_KEY = 'sessizlik_ambiance_volume';
@@ -32,14 +35,17 @@ export default function Room({ session, onLeave }) {
   const [scene, setScene] = useState(null);
   const [settings, setSettings] = useState(null);
   const [gameConfig, setGameConfig] = useState(undefined);
+  const [quests, setQuests] = useState({});
   const [flashActive, setFlashActive] = useState(false);
   const [ambianceVolume, setAmbianceVolumeState] = useState(loadAmbianceVolume);
   const [joinBlocked, setJoinBlocked] = useState(false);
   const [kicked, setKicked] = useState(false);
   const [ownerId, setOwnerId] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [turnBannerActive, setTurnBannerActive] = useState(false);
   const flashSeenRef = useRef(undefined);
   const kickSeenRef = useRef(undefined);
+  const turnSeenRef = useRef(undefined);
 
   function setAmbianceVolume(value) {
     setAmbianceVolumeState(value);
@@ -140,6 +146,12 @@ export default function Room({ session, onLeave }) {
   }, [roomCode]);
 
   useEffect(() => {
+    const questsRef = ref(db, `rooms/${roomCode}/quests`);
+    const unsub = onValue(questsRef, (snap) => setQuests(snap.val() || {}));
+    return () => unsub();
+  }, [roomCode]);
+
+  useEffect(() => {
     if (role === 'gm') return;
     const kickRef = ref(db, `rooms/${roomCode}/kickSignal/${playerId}`);
     const unsub = onValue(kickRef, (snap) => {
@@ -168,6 +180,23 @@ export default function Room({ session, onLeave }) {
       setTimeout(() => setFlashActive(false), 600);
     }
   }, [scene?.flashAt]);
+
+  useEffect(() => {
+    if (role === 'gm') return;
+    const at = settings?.activeTurn?.at;
+    if (at === undefined) return;
+    if (turnSeenRef.current === undefined) {
+      turnSeenRef.current = at;
+      return;
+    }
+    if (at !== turnSeenRef.current) {
+      turnSeenRef.current = at;
+      if (settings?.activeTurn?.playerId === playerId) {
+        setTurnBannerActive(true);
+        setTimeout(() => setTurnBannerActive(false), 3500);
+      }
+    }
+  }, [settings?.activeTurn, role, playerId]);
 
   useEffect(() => {
     const v = scene?.vignette ?? 0;
@@ -305,17 +334,32 @@ export default function Room({ session, onLeave }) {
         <WhisperOverlay whispers={me?.whispers} roomCode={roomCode} playerId={playerId} />
       )}
 
+      {turnBannerActive && (
+        <div className="whisper-overlay">
+          <div className="whisper-box panel turn-banner">
+            <span className="turn-banner-icon">🎙️</span>
+            <p>SIRA SENDE!</p>
+            <button type="button" className="btn-primary small" onClick={() => setTurnBannerActive(false)}>
+              Tamam
+            </button>
+          </div>
+        </div>
+      )}
+
       {header}
 
       <div className="room-body">
         <aside className="room-sidebar">
+          <GameCalendar roomCode={roomCode} calendar={settings?.calendar} isGM={role === 'gm'} />
           <PartyOverview
             players={players}
             gameConfig={gameConfig}
             isGM={role === 'gm'}
             onKick={kickPlayer}
             playerId={playerId}
+            activeTurnPlayerId={settings?.activeTurn?.playerId}
           />
+          <QuestBoard roomCode={roomCode} quests={quests} isGM={role === 'gm'} />
         </aside>
 
         <div className="room-content">
@@ -368,6 +412,9 @@ export default function Room({ session, onLeave }) {
           {role === 'gm' && <GMNotes roomCode={roomCode} settings={settings} />}
           {role === 'gm' && <NpcNameGenerator />}
           {role === 'gm' && <PromptGenerator />}
+          {role === 'gm' && (
+            <LootGenerator roomCode={roomCode} players={players} theme={gameConfig?.theme} />
+          )}
         </aside>
       </div>
     </div>

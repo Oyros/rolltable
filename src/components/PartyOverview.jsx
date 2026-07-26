@@ -6,7 +6,7 @@ function nameOf(list, id) {
   return list.find((x) => x.id === id)?.name;
 }
 
-export default function PartyOverview({ players, gameConfig, isGM, onKick, playerId }) {
+export default function PartyOverview({ players, gameConfig, isGM, onKick, playerId, activeTurnPlayerId }) {
   const [expandedId, setExpandedId] = useState(null);
   const list = Object.entries(players || {}).filter(([, p]) => p.role !== 'gm');
   const gmEntry = Object.entries(players || {}).find(([, p]) => p.role === 'gm');
@@ -62,8 +62,10 @@ export default function PartyOverview({ players, gameConfig, isGM, onKick, playe
           const traitNames = (p.traits || []).map((tid) => nameOf(traits, tid)).filter(Boolean);
           const perkNames = (p.perks || []).map((pid) => nameOf(perks, pid)).filter(Boolean);
 
+          const isActiveTurn = activeTurnPlayerId && activeTurnPlayerId === id;
+
           return (
-            <li key={id} className={`party-row status-${p.status || 'iyi'}`}>
+            <li key={id} className={`party-row status-${p.status || 'iyi'}${isActiveTurn ? ' active-turn' : ''}`}>
               <button
                 type="button"
                 className="party-row-summary"
@@ -85,6 +87,7 @@ export default function PartyOverview({ players, gameConfig, isGM, onKick, playe
                 <span className="party-name" style={p.color ? { color: p.color } : undefined}>
                   {p.name}
                 </span>
+                {isActiveTurn && <span className="active-turn-badge" title="Sırası">🎙️</span>}
                 <span className="party-status-badge">{STATUS_LABEL[p.status] || 'İyi'}</span>
               </button>
 
