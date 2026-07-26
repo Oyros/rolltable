@@ -410,8 +410,8 @@ export default function Room({ session, onLeave }) {
             />
           )}
           {role === 'gm' && <GMNotes roomCode={roomCode} settings={settings} />}
-          {role === 'gm' && <NpcNameGenerator />}
-          {role === 'gm' && <PromptGenerator />}
+          {role === 'gm' && <NpcNameGenerator theme={gameConfig?.theme} />}
+          {role === 'gm' && <PromptGenerator theme={gameConfig?.theme} />}
           {role === 'gm' && (
             <LootGenerator roomCode={roomCode} players={players} theme={gameConfig?.theme} />
           )}

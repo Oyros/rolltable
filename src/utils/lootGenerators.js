@@ -23,26 +23,36 @@ const LOOT_POOLS = {
     'paslı çakı', 'yarı dolu su matarası', 'el yapımı gaz maskesi', 'eski dünya konservesi',
     'kırık ama çalışan pusula', 'radyasyon ölçer', 'kurşun kutusu mühimmat', 'tıbbi kit',
     'benzin bidonu', 'işlevsel el feneri', 'takas edilebilir kapak parası', 'eski dünya fotoğrafı',
+    'ev yapımı süzgeç filtresi', 'kırık gözlük', 'tohum paketi', 'yağmurluk',
+    'eski bir radyo parçası', 'paslanmaz çelik bıçak',
   ],
   cyberpunk: [
     'kırık nöral implant', 'kredi çipi', 'şifreli veri diski', 'kaçak sinir stimülatörü',
     'holografik reklam projektörü', 'siber göz lensi', 'hacklenmiş erişim kartı', 'sentetik uyuşturucu ampulü',
     'silah üstü lazer nişangahı', 'kurumsal kimlik rozeti', 'kendinden temizlenen bıçak', 'kripto cüzdan',
+    'yedek pil hücresi', 'sahte biyometrik parmak izi', 'gürültü engelleyici çip', 'holografik maske',
+    'mini drone gövdesi', 'şifreli iletişim cihazı',
   ],
   'high-fantasy': [
     'büyülü tılsım', 'ejder pulundan yapılma kalkan parçası', 'iksir şişesi', 'eski bir büyü kitabı sayfası',
     'gümüş kaplı hançer', 'peri tozu kesesi', 'runik yüzük', 'kutsanmış su',
     'altın sikke kesesi', 'değerli mücevher', 'antik bir tomar', 'ejder dişi',
+    'büyülenmiş pelerin tokası', 'elf işi bir ok', 'kehanet taşı', 'zehir panzehiri',
+    'gümüş kolye', 'unutulmuş bir kralın mührü',
   ],
   'gothic-horror': [
     'kanla lekeli günlük', 'gümüş haç', 'kurutulmuş kurtboğan çiçeği', 'mumdan yapılmış mühür',
     'eski bir mezar taşı parçası', 'lanetli madalyon', 'kırık ayna parçası', 'kutsal su şişesi',
     'el yazması dua kitabı', 'kemikten yapılmış düğme', 'sararmış bir mektup', 'gümüş kurşun',
+    'siyah dantelli eldiven', 'mumyalanmış bir kuş kalıntısı', 'eski bir cenaze daveti', 'kırık bir müzik kutusu',
+    'kurşun mühürlü şişe', 'solmuş bir aile portresi',
   ],
   'sci-fi': [
     'yedek oksijen tüpü', 'kuantum pil hücresi', 'holografik harita çipi', 'onarım nano-kiti',
     'sinyal yükseltici', 'uzaylı alaşımdan parça', 'taşınabilir güç kaynağı', 'kripto anahtar kartı',
     'plazma hücresi', 'bozulmuş robot kolu', 'yıldız haritası verisi', 'acil durum feneri',
+    'yedek basınç contası', 'donmuş biyolojik örnek', 'mini yerçekimi jeneratörü', 'iletişim bobini',
+    'kriyo uyku kapsülü anahtarı', 'tanımlanamayan bir alaşım külçesi',
   ],
 };
 

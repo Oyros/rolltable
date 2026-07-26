@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { NPC_CATEGORIES, generateNpcName } from '../utils/npcNames.js';
 
-export default function NpcNameGenerator() {
+export default function NpcNameGenerator({ theme }) {
   const [category, setCategory] = useState(NPC_CATEGORIES[0]?.id || 'turkce');
   const [names, setNames] = useState([]);
 
   function generate() {
-    const generatedName = generateNpcName(category);
+    const generatedName = generateNpcName(category, theme);
     setNames((prev) => [generatedName, ...prev].slice(0, 8));
   }
 

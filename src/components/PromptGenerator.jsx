@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { PROMPT_CATEGORIES } from '../utils/promptGenerators.js';
+import { LOCATION_CATEGORIES, generateLocationName, generateQuestHook } from '../utils/promptGenerators.js';
 
-export default function PromptGenerator() {
-  const [categoryId, setCategoryId] = useState(PROMPT_CATEGORIES[0]?.id || 'location');
+export default function PromptGenerator({ theme }) {
+  const [categoryId, setCategoryId] = useState('location');
+  const [langId, setLangId] = useState(LOCATION_CATEGORIES[0]?.id || 'turkce');
   const [results, setResults] = useState([]);
 
   function generate() {
-    const category = PROMPT_CATEGORIES.find((c) => c.id === categoryId);
-    if (!category) return;
-    setResults((prev) => [category.generate(), ...prev].slice(0, 6));
+    const value = categoryId === 'location' ? generateLocationName(langId, theme) : generateQuestHook(theme);
+    setResults((prev) => [value, ...prev].slice(0, 6));
   }
 
   return (
@@ -16,12 +16,18 @@ export default function PromptGenerator() {
       <h2 className="title-font">🗺️ Mekan / Görev İpucu</h2>
       <div className="inline-form">
         <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-          {PROMPT_CATEGORIES.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.label}
-            </option>
-          ))}
+          <option value="location">Mekan Adı</option>
+          <option value="quest">Görev İpucu</option>
         </select>
+        {categoryId === 'location' && (
+          <select value={langId} onChange={(e) => setLangId(e.target.value)}>
+            {LOCATION_CATEGORIES.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+        )}
         <button type="button" className="btn-primary small" onClick={generate}>
           🎲 Üret
         </button>

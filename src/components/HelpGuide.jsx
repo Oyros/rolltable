@@ -129,9 +129,10 @@ export default function HelpGuide({ onClose }) {
           <summary>📓 Notlar & Üreteçler</summary>
           <ul>
             <li><strong>Not Defterim</strong> (oyuncular) / <strong>GM Notları</strong> (GM) — sadece o kişinin gördüğü, otomatik kaydedilen kişisel not alanı.</li>
-            <li><strong>NPC İsim Üretici</strong> (GM) — Türkçe/Yabancı/Fantastik/Cyberpunk/Gotik kategorilerinden rastgele isim üretir.</li>
-            <li><strong>Mekan / Görev İpucu Üretici</strong> (GM) — rastgele mekan adı veya görev fikri üretir.</li>
-            <li><strong>Ganimet Üretici</strong> (GM) — temaya uygun rastgele eşya/para üretir; "📢 Partiye Duyur" ile herkese fısıltı olarak gönderilir.</li>
+            <li><strong>NPC İsim Üretici</strong> (GM) — Türkçe veya Yabancı isim üretir; isim tarzı odanın seçili temasına göre otomatik değişir.</li>
+            <li><strong>Mekan Adı Üretici</strong> (GM) — Türkçe veya Yabancı stilde, odanın temasına uygun rastgele mekan adı üretir.</li>
+            <li><strong>Görev İpucu Üretici</strong> (GM) — odanın seçili temasına uygun rastgele görev fikri üretir.</li>
+            <li><strong>Ganimet Üretici</strong> (GM) — odanın temasına uygun rastgele eşya/para üretir; "📢 Partiye Duyur" ile herkese fısıltı olarak gönderilir.</li>
           </ul>
         </details>
 
