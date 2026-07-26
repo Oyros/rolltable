@@ -15,7 +15,6 @@ import WhisperOverlay from '../components/WhisperOverlay.jsx';
 import GameSetup from './GameSetup.jsx';
 import ParticleEffect from '../components/ParticleEffect.jsx';
 import WeatherEffect from '../components/WeatherEffect.jsx';
-import DayNightEffect from '../components/DayNightEffect.jsx';
 import SessionTimer from '../components/SessionTimer.jsx';
 import NpcNameGenerator from '../components/NpcNameGenerator.jsx';
 import PromptGenerator from '../components/PromptGenerator.jsx';
@@ -263,8 +262,6 @@ export default function Room({ session, onLeave }) {
   }
 
   const me = players[playerId];
-  const calendarHour = settings?.calendar?.hour ?? 12;
-  const nightIntensity = (1 + Math.cos((calendarHour / 24) * 2 * Math.PI)) / 2;
 
   const header = (
     <header className="room-header">
@@ -361,7 +358,6 @@ export default function Room({ session, onLeave }) {
 
       <ParticleEffect theme={gameConfig?.theme || DEFAULT_THEME_ID} />
       <WeatherEffect weather={scene?.weather} />
-      <DayNightEffect nightIntensity={nightIntensity} />
 
       {role !== 'gm' && (
         <WhisperOverlay whispers={me?.whispers} roomCode={roomCode} playerId={playerId} />

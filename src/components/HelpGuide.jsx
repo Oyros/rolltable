@@ -49,7 +49,6 @@ export default function HelpGuide({ onClose }) {
             <li><strong>Müzik / Ambiyans</strong> — GM çalar/durdurur, herkes kendi ses seviyesini ayarlar.</li>
             <li><strong>Vinyet, Flaş/Sarsıntı, Hava Durumu</strong> — GM'in tetiklediği görsel atmosfer efektleri (sağ kenardaki "Görsel Efektler"de).</li>
             <li><strong>Tema parçacıkları</strong> — seçilen temaya göre (kül, neon, büyü tozu, sis, yıldız) otomatik arka plan efekti.</li>
-            <li><strong>Gün/Gece Işığı</strong> — gündüz ekrana hafif güneş ışınları vurur; gece genel ekran kararır ama birkaç noktada mum ışığı gibi sıcak parıltılar titreşerek yanar. Takvim saatine göre otomatik geçer.</li>
           </ul>
         </details>
 
@@ -58,9 +57,8 @@ export default function HelpGuide({ onClose }) {
           <p>
             Sol kenarın en üstünde oyun içi gün ve saat gösterilir. GM +1 Saat / +6 Saat / +1 Gün
             butonlarıyla ilerletebilir, ya da gün/saat/dakikayı elle ayarlayabilir (bu kutular hızlı
-            butonlarla birlikte otomatik güncellenir). Herkes aynı takvimi görür. Gündüz/gece
-            ayrımı hem takvim başlığındaki ☀️/🌙 simgesinden hem de ekrandaki güneş ışını / mum
-            ışığı efektinden anlaşılır — ekstra bir ayar gerekmez.
+            butonlarla birlikte otomatik güncellenir). Herkes aynı takvimi görür; gündüz/gece
+            ayrımı başlıktaki ☀️/🌙 simgesinden anlaşılır.
           </p>
         </details>
 
