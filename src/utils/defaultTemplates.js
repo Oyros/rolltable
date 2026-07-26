@@ -16,6 +16,8 @@ export const DEFAULT_TEMPLATES = [
     label: '⭐ Sessizlik',
     name: 'Sessizlik',
     theme: 'post-apocalyptic',
+    maxLevel: 10,
+    xpPerLevel: 100,
     stats: [
       stat('guc', 'Güç', 'Ham fiziksel kuvvet, yakın dövüş, kaldırma/kırma'),
       stat('dayaniklilik', 'Dayanıklılık', 'Acıya, yorgunluğa, zehre direnç'),
@@ -61,6 +63,8 @@ export const DEFAULT_TEMPLATES = [
     label: '⭐ D&D Tarzı (Klasik Fantazi)',
     name: 'Klasik Fantazi Kampanyası',
     theme: 'high-fantasy',
+    maxLevel: 20,
+    xpPerLevel: 100,
     stats: [
       stat('guc', 'Güç', 'Yakın dövüş, kaldırma, fiziksel zorlama'),
       stat('ceviklik', 'Çeviklik', 'Refleks, denge, uzaktan saldırı'),
@@ -118,6 +122,8 @@ export const DEFAULT_TEMPLATES = [
     label: '⭐ FATE Tarzı',
     name: 'FATE Kampanyası',
     theme: 'high-fantasy',
+    maxLevel: 10,
+    xpPerLevel: 100,
     stats: [
       stat('dikkatli', 'Dikkatli', 'Gözlem, hassasiyet, planlama'),
       stat('kurnaz', 'Kurnaz', 'Zeka, hile, manipülasyon'),
@@ -161,6 +167,8 @@ export const DEFAULT_TEMPLATES = [
     label: '⭐ Cyberpunk Görevi Tarzı',
     name: 'Cyberpunk Görevi',
     theme: 'cyberpunk',
+    maxLevel: 10,
+    xpPerLevel: 100,
     stats: [
       stat('beden', 'Beden', 'Fiziksel güç ve dayanıklılık'),
       stat('refleks', 'Refleks', 'Hız, çeviklik, silah kullanımı'),
@@ -211,6 +219,8 @@ export const DEFAULT_TEMPLATES = [
     label: '⭐ Vampir Klanları Tarzı',
     name: 'Vampir Klanları',
     theme: 'vampire',
+    maxLevel: 10,
+    xpPerLevel: 100,
     stats: [
       stat('guc', 'Güç', 'Fiziksel kuvvet ve doğaüstü dayanıklılık'),
       stat('cekicilik', 'Çekicilik', 'Karizma, ikna, sosyal manipülasyon'),
@@ -258,6 +268,8 @@ export const DEFAULT_TEMPLATES = [
     label: '⭐ Kozmik Dehşet Tarzı',
     name: 'Kozmik Dehşet',
     theme: 'cosmic-horror',
+    maxLevel: 10,
+    xpPerLevel: 100,
     stats: [
       stat('guc', 'Güç', 'Fiziksel kuvvet'),
       stat('beceri', 'Beceri', 'El becerisi, çeviklik, hassasiyet'),
@@ -303,6 +315,8 @@ export const DEFAULT_TEMPLATES = [
     label: '⭐ Vahşi Batı Tarzı',
     name: 'Vahşi Batı',
     theme: 'western',
+    maxLevel: 10,
+    xpPerLevel: 100,
     stats: [
       stat('nisancilik', 'Nişancılık', 'Ateşli silahlarla isabet'),
       stat('ceviklik', 'Çeviklik', 'Hız, refleks, at biniciliği'),

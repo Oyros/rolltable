@@ -34,7 +34,7 @@ export default function HelpGuide({ onClose }) {
           <p>Oda ilk kurulduğunda GM'den oyunun kurallarını tanımlaması istenir:</p>
           <ul>
             <li><strong>Kayıtlı Şablon Kullan</strong> — daha önce kaydettiğin bir kural setini tek tıkla uygula.</li>
-            <li><strong>Sıfırdan Oluştur</strong> — Senaryo Adı, Tasarım Teması (21 farklı tür arasından: fantazi, cyberpunk, western, korsan, vampir, uzay operası ve daha fazlası), Statlar, <strong>Kaynaklar</strong> (Can Puanı, Stres, Kaynak Puanı gibi dolgu çubukları), Irklar, Sınıflar, Alt Sınıflar, Traitler, Perkler ve Bulunabilecek Eşyalar listelerini kendin oluştur.</li>
+            <li><strong>Sıfırdan Oluştur</strong> — Senaryo Adı, Tasarım Teması (21 farklı tür arasından: fantazi, cyberpunk, western, korsan, vampir, uzay operası ve daha fazlası), <strong>Seviye Sistemi</strong> (maksimum seviye + seviye başına gereken XP), Statlar, <strong>Kaynaklar</strong> (Can Puanı, Stres, Kaynak Puanı gibi dolgu çubukları), Irklar, Sınıflar, Alt Sınıflar, Traitler, Perkler ve Bulunabilecek Eşyalar listelerini kendin oluştur.</li>
             <li>İstersen bu kural setini bir <strong>şablon olarak kaydedip</strong> başka odalarda tekrar kullanabilirsin.</li>
           </ul>
           <p>
@@ -128,10 +128,16 @@ export default function HelpGuide({ onClose }) {
             <li>Yetenek/Dal metnini serbestçe yaz.</li>
             <li>Envantere GM'in eşya kataloğundan seçerek veya kendi yazarak eşya ekle.</li>
             <li>
-              <strong>🎉 Seviye Atla</strong> — istediğin an açılan bir ekranda bir stata +1 verip
-              (varsa) henüz almadığın bir perk seçersin; onaylayınca seviyen artar ve kaynakların
-              (varsa) tamamen dolar. GM ayrıca sana Parti panelinden XP verebilir — bu sadece
-              görünür bir ilerleme göstergesidir, seviye atlamayı otomatik tetiklemez.
+              <strong>XP Çubuğu</strong> — GM'in "Kuralları Düzenle"de belirlediği "Maksimum
+              Seviye" ve "Seviye Başına Gereken XP" değerlerine göre doluyor. GM Parti panelinden
+              sana XP verir; çubuk bir sonraki seviyeye ne kadar kaldığını gösterir. XP seviye
+              atlarken sıfırlanmaz, birikmeye devam eder.
+            </li>
+            <li>
+              <strong>🎉 Seviye Atla</strong> — yeterli XP'ye ulaşınca buton parlayarak aktif olur;
+              açılan ekranda bir stata +1 verip (varsa) henüz almadığın bir perk seçersin,
+              onaylayınca seviyen artar ve kaynakların (varsa) tamamen dolar. Maksimum seviyeye
+              ulaşınca buton kaybolur. (GM her zaman, XP yetmese bile seviye atlatabilir.)
             </li>
             <li>
               <strong>🔒 Kilit</strong> — GM istediği zaman senin karakter kağıdını

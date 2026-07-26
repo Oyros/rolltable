@@ -18,6 +18,8 @@ const EMPTY_LISTS = {
 export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeChange, children }) {
   const [name, setName] = useState(initial?.name || '');
   const [theme, setTheme] = useState(initial?.theme || DEFAULT_THEME_ID);
+  const [maxLevel, setMaxLevel] = useState(initial?.maxLevel || 10);
+  const [xpPerLevel, setXpPerLevel] = useState(initial?.xpPerLevel || 100);
   const [lists, setLists] = useState({
     stats: initial?.stats || EMPTY_LISTS.stats,
     resources: initial?.resources || EMPTY_LISTS.resources,
@@ -53,7 +55,13 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
     setError('');
     setSaving(true);
     try {
-      await onSubmit({ name: name.trim(), theme, ...lists });
+      await onSubmit({
+        name: name.trim(),
+        theme,
+        maxLevel: Math.max(1, parseInt(maxLevel, 10) || 10),
+        xpPerLevel: Math.max(1, parseInt(xpPerLevel, 10) || 100),
+        ...lists,
+      });
     } catch (err) {
       setError(err.message);
     }
@@ -96,6 +104,35 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="level-system-field">
+        <span className="entry-list-label">Seviye Sistemi</span>
+        <div className="inline-form">
+          <label className="level-system-input">
+            Maksimum Seviye
+            <input
+              type="number"
+              min="1"
+              value={maxLevel}
+              onChange={(e) => setMaxLevel(e.target.value)}
+            />
+          </label>
+          <label className="level-system-input">
+            Seviye Başına Gereken XP
+            <input
+              type="number"
+              min="1"
+              value={xpPerLevel}
+              onChange={(e) => setXpPerLevel(e.target.value)}
+            />
+          </label>
+        </div>
+        <p className="muted small-hint">
+          Karakter, biriken toplam XP'si bu değerin katlarını geçtikçe seviye atlamaya hak
+          kazanır (XP seviye atlarken sıfırlanmaz). Maksimum seviyeye ulaşınca daha fazla
+          atlanamaz.
+        </p>
       </div>
 
       <EntryListEditor

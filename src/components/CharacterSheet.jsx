@@ -27,6 +27,14 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
   const locked = !!player.sheetLocked;
   const editable = isGM || !locked;
   const level = player.level || 1;
+  const xp = player.xp || 0;
+  const maxLevel = gameConfig.maxLevel || 10;
+  const xpPerLevel = gameConfig.xpPerLevel || 100;
+  const qualifiedLevel = Math.min(maxLevel, Math.floor(xp / xpPerLevel) + 1);
+  const atMaxLevel = level >= maxLevel;
+  const canLevelUp = !atMaxLevel && (isGM || qualifiedLevel > level);
+  const xpIntoLevel = xp - (level - 1) * xpPerLevel;
+  const xpBarPct = atMaxLevel ? 100 : Math.max(0, Math.min(100, (xpIntoLevel / xpPerLevel) * 100));
   const availablePerksToGain = perks.filter((p) => !(player.perks || []).includes(p.id));
 
   function patch(data) {
@@ -162,16 +170,31 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
         <div>
           <h2 className="title-font">{player.name}</h2>
           <span className="character-level">
-            Seviye {level} · XP {player.xp || 0}
+            Seviye {level}{atMaxLevel ? ' (Maks)' : ` / ${maxLevel}`}
           </span>
+          <div className="xp-bar-row">
+            <div className="resource-bar xp-bar">
+              <div className="resource-bar-fill" style={{ width: `${xpBarPct}%` }} />
+            </div>
+            <span className="xp-bar-label">
+              {atMaxLevel ? `${xp} XP` : `${xpIntoLevel} / ${xpPerLevel} XP`}
+            </span>
+          </div>
         </div>
         <div className="character-sheet-header-actions">
           {locked && <span className="sheet-locked-badge">🔒 Kilitli</span>}
-          {editable && (
-            <button type="button" className="btn-primary small" onClick={openLevelUp}>
+          {editable && !atMaxLevel && (
+            <button
+              type="button"
+              className={`btn-primary small${canLevelUp ? ' xp-ready' : ''}`}
+              onClick={openLevelUp}
+              disabled={!canLevelUp}
+              title={canLevelUp ? undefined : `Sonraki seviye için ${xpPerLevel - xpIntoLevel} XP daha gerekiyor`}
+            >
               🎉 Seviye Atla
             </button>
           )}
+          {editable && atMaxLevel && <span className="muted small-hint">Maksimum seviye</span>}
         </div>
       </div>
 
