@@ -2,7 +2,7 @@ export default function InitiativeBar({ initiative, players, isGM, onAdvance }) 
   const queue = initiative?.queue || [];
   if (queue.length === 0) return null;
 
-  const currentId = queue[initiative.currentIndex];
+  const currentId = queue[initiative.currentIndex ?? 0];
   const previousId = initiative.previousPlayerId;
   const currentName = players?.[currentId]?.name;
   const previousName = previousId && previousId !== currentId ? players?.[previousId]?.name : null;

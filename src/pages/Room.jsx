@@ -193,7 +193,7 @@ export default function Room({ session, onLeave }) {
     if (at !== turnSeenRef.current) {
       turnSeenRef.current = at;
       const queue = settings?.initiative?.queue || [];
-      const currentId = queue[settings?.initiative?.currentIndex];
+      const currentId = queue[settings?.initiative?.currentIndex ?? 0];
       if (currentId === playerId) {
         setTurnBannerActive(true);
         setTimeout(() => setTurnBannerActive(false), 3500);
@@ -384,7 +384,7 @@ export default function Room({ session, onLeave }) {
             isGM={role === 'gm'}
             onKick={kickPlayer}
             playerId={playerId}
-            activeTurnPlayerId={settings?.initiative?.queue?.[settings?.initiative?.currentIndex]}
+            activeTurnPlayerId={settings?.initiative?.queue?.[settings?.initiative?.currentIndex ?? 0]}
             roomCode={roomCode}
             sessionStarted={!!settings?.sessionStartedAt}
           />

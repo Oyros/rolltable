@@ -136,20 +136,25 @@ export default function GMPanel({
   const playerList = Object.entries(players || {}).filter(([, p]) => p.role !== 'gm');
   const savedScenes = Object.entries(settings?.savedScenes || {});
 
-  const initiative = settings?.initiative || { queue: [], currentIndex: 0, previousPlayerId: null };
+  const initiative = settings?.initiative || {};
   const queue = initiative.queue || [];
+  const currentIndex = initiative.currentIndex ?? 0;
   const notInQueue = playerList.filter(([id]) => !queue.includes(id));
 
   function addToQueue(id) {
     if (!id || queue.includes(id)) return;
-    update(ref(db, `rooms/${roomCode}/settings/initiative`), { queue: [...queue, id] });
+    const wasEmpty = queue.length === 0;
+    const newQueue = [...queue, id];
+    const payload = { queue: newQueue, currentIndex: wasEmpty ? 0 : currentIndex };
+    if (wasEmpty) payload.at = Date.now();
+    update(ref(db, `rooms/${roomCode}/settings/initiative`), payload);
   }
 
   function removeFromQueue(id) {
     const idx = queue.indexOf(id);
     if (idx === -1) return;
     const newQueue = queue.filter((qid) => qid !== id);
-    let newIndex = initiative.currentIndex;
+    let newIndex = currentIndex;
     if (idx < newIndex) newIndex -= 1;
     if (newIndex >= newQueue.length) newIndex = Math.max(0, newQueue.length - 1);
     update(ref(db, `rooms/${roomCode}/settings/initiative`), { queue: newQueue, currentIndex: newIndex });
@@ -161,15 +166,15 @@ export default function GMPanel({
     if (idx === -1 || swapIdx < 0 || swapIdx >= queue.length) return;
     const newQueue = [...queue];
     [newQueue[idx], newQueue[swapIdx]] = [newQueue[swapIdx], newQueue[idx]];
-    const currentId = queue[initiative.currentIndex];
+    const currentId = queue[currentIndex];
     const newIndex = newQueue.indexOf(currentId);
     update(ref(db, `rooms/${roomCode}/settings/initiative`), { queue: newQueue, currentIndex: newIndex });
   }
 
   function advanceTurn(direction) {
     if (queue.length === 0) return;
-    const prevId = queue[initiative.currentIndex] ?? null;
-    const newIndex = (initiative.currentIndex + direction + queue.length) % queue.length;
+    const prevId = queue[currentIndex] ?? null;
+    const newIndex = (currentIndex + direction + queue.length) % queue.length;
     update(ref(db, `rooms/${roomCode}/settings/initiative`), {
       currentIndex: newIndex,
       previousPlayerId: prevId,
@@ -340,7 +345,7 @@ export default function GMPanel({
             {queue.map((id, idx) => (
               <li
                 key={id}
-                className={`initiative-queue-item${idx === initiative.currentIndex ? ' current' : ''}`}
+                className={`initiative-queue-item${idx === currentIndex ? ' current' : ''}`}
               >
                 <span className="initiative-queue-index">{idx + 1}</span>
                 <span className="initiative-queue-name">{players?.[id]?.name || '?'}</span>
