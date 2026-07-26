@@ -3,6 +3,7 @@ import { ref, onValue, update, push, get } from 'firebase/database';
 import { db } from '../firebase.js';
 import GameRulesForm from '../components/GameRulesForm.jsx';
 import { applyTheme } from '../utils/themes.js';
+import { DEFAULT_TEMPLATES } from '../utils/defaultTemplates.js';
 
 export default function GameSetup({ roomCode }) {
   const [templates, setTemplates] = useState({});
@@ -28,11 +29,17 @@ export default function GameSetup({ roomCode }) {
     setApplying(true);
     setTemplateError('');
     try {
-      const snap = await get(ref(db, `gameTemplates/${selectedTemplateId}`));
-      const tmpl = snap.val();
-      if (tmpl) {
-        const { createdAt, ...rest } = tmpl;
+      const builtin = DEFAULT_TEMPLATES.find((t) => t.id === selectedTemplateId);
+      if (builtin) {
+        const { id, label, ...rest } = builtin;
         await update(ref(db, `rooms/${roomCode}/gameConfig`), { ...rest, createdAt: Date.now() });
+      } else {
+        const snap = await get(ref(db, `gameTemplates/${selectedTemplateId}`));
+        const tmpl = snap.val();
+        if (tmpl) {
+          const { createdAt, ...rest } = tmpl;
+          await update(ref(db, `rooms/${roomCode}/gameConfig`), { ...rest, createdAt: Date.now() });
+        }
       }
     } catch (err) {
       setTemplateError(`Şablon uygulanamadı: ${err.message}`);
@@ -59,33 +66,42 @@ export default function GameSetup({ roomCode }) {
         <h1 className="title-font">Oyunu Ayarla</h1>
         <p className="subtitle">Bu oda için önce oyunun kurallarını tanımlaman gerekiyor.</p>
 
-        {templateList.length > 0 && (
-          <div className="gm-section" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>
-            <h3 className="title-font gm-section-title">Kayıtlı Şablon Kullan</h3>
-            <div className="inline-form">
-              <select
-                value={selectedTemplateId}
-                onChange={(e) => setSelectedTemplateId(e.target.value)}
-              >
-                <option value="">Şablon seç...</option>
-                {templateList.map(([id, t]) => (
-                  <option key={id} value={id}>
-                    {t.name}
+        <div className="gm-section" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>
+          <h3 className="title-font gm-section-title">Kayıtlı Şablon Kullan</h3>
+          <div className="inline-form">
+            <select
+              value={selectedTemplateId}
+              onChange={(e) => setSelectedTemplateId(e.target.value)}
+            >
+              <option value="">Şablon seç...</option>
+              <optgroup label="Hazır Şablonlar">
+                {DEFAULT_TEMPLATES.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.label || t.name}
                   </option>
                 ))}
-              </select>
-              <button
-                type="button"
-                className="btn-primary small"
-                onClick={useTemplate}
-                disabled={!selectedTemplateId || applying}
-              >
-                {applying ? 'Uygulanıyor...' : 'Bu Şablonu Kullan'}
-              </button>
-            </div>
-            {templateError && <p className="sound-error">{templateError}</p>}
+              </optgroup>
+              {templateList.length > 0 && (
+                <optgroup label="Kayıtlı Şablonlarım">
+                  {templateList.map(([id, t]) => (
+                    <option key={id} value={id}>
+                      {t.name}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
+            <button
+              type="button"
+              className="btn-primary small"
+              onClick={useTemplate}
+              disabled={!selectedTemplateId || applying}
+            >
+              {applying ? 'Uygulanıyor...' : 'Bu Şablonu Kullan'}
+            </button>
           </div>
-        )}
+          {templateError && <p className="sound-error">{templateError}</p>}
+        </div>
 
         <div className="gm-section">
           <h3 className="title-font gm-section-title">Sıfırdan Oluştur</h3>

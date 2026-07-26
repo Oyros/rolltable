@@ -11,6 +11,7 @@ import GMNotes from '../components/GMNotes.jsx';
 import PlayerNotes from '../components/PlayerNotes.jsx';
 import PartyOverview from '../components/PartyOverview.jsx';
 import GmSlotCard from '../components/GmSlotCard.jsx';
+import Portal from '../components/Portal.jsx';
 import WhisperOverlay from '../components/WhisperOverlay.jsx';
 import GameSetup from './GameSetup.jsx';
 import ParticleEffect from '../components/ParticleEffect.jsx';
@@ -364,15 +365,17 @@ export default function Room({ session, onLeave }) {
       )}
 
       {turnBannerActive && (
-        <div className="whisper-overlay">
-          <div className="whisper-box panel turn-banner">
-            <span className="turn-banner-icon">🎙️</span>
-            <p>SIRA SENDE!</p>
-            <button type="button" className="btn-primary small" onClick={() => setTurnBannerActive(false)}>
-              Tamam
-            </button>
+        <Portal>
+          <div className="whisper-overlay">
+            <div className="whisper-box panel turn-banner">
+              <span className="turn-banner-icon">🎙️</span>
+              <p>SIRA SENDE!</p>
+              <button type="button" className="btn-primary small" onClick={() => setTurnBannerActive(false)}>
+                Tamam
+              </button>
+            </div>
           </div>
-        </div>
+        </Portal>
       )}
 
       {header}
@@ -434,6 +437,9 @@ export default function Room({ session, onLeave }) {
             pinColor={me?.color}
             ambianceVolume={ambianceVolume}
             onAmbianceVolumeChange={setAmbianceVolume}
+            savedLocations={settings?.savedLocations}
+            savedFocuses={settings?.savedFocuses}
+            savedMusic={settings?.savedMusic}
           />
 
           <div className="room-bottom">
@@ -448,6 +454,7 @@ export default function Room({ session, onLeave }) {
           </div>
 
           {showBottomPanel && (
+            <Portal>
             <div className="whisper-overlay" onClick={() => setShowBottomPanel(false)}>
               <div className="bottom-panel-modal" onClick={(e) => e.stopPropagation()}>
                 <button
@@ -480,6 +487,7 @@ export default function Room({ session, onLeave }) {
                 )}
               </div>
             </div>
+            </Portal>
           )}
         </div>
 

@@ -4,6 +4,7 @@ import { db } from '../firebase.js';
 import { STATUS_LABEL } from '../utils/stats.js';
 import WhisperLog from './WhisperLog.jsx';
 import CharacterSheet from './CharacterSheet.jsx';
+import Portal from './Portal.jsx';
 
 function nameOf(list, id) {
   return list.find((x) => x.id === id)?.name;
@@ -171,24 +172,26 @@ export default function PartyOverview({
       <WhisperLog players={players} playerId={playerId} isGM={isGM} />
 
       {isGM && editingId && players?.[editingId] && (
-        <div className="whisper-overlay">
-          <div className="game-setup-card panel rules-editor-card character-edit-card">
-            <div className="rules-editor-header">
-              <h1 className="title-font">✏️ {players[editingId].name} — Karakter Düzenle</h1>
-              <button type="button" className="btn-ghost" onClick={() => setEditingId(null)}>
-                ✕ Kapat
-              </button>
+        <Portal>
+          <div className="whisper-overlay">
+            <div className="game-setup-card panel rules-editor-card character-edit-card">
+              <div className="rules-editor-header">
+                <h1 className="title-font">✏️ {players[editingId].name} — Karakter Düzenle</h1>
+                <button type="button" className="btn-ghost" onClick={() => setEditingId(null)}>
+                  ✕ Kapat
+                </button>
+              </div>
+              <CharacterSheet
+                roomCode={roomCode}
+                playerId={editingId}
+                player={players[editingId]}
+                gameConfig={gameConfig}
+                isGM
+                sessionStarted={sessionStarted}
+              />
             </div>
-            <CharacterSheet
-              roomCode={roomCode}
-              playerId={editingId}
-              player={players[editingId]}
-              gameConfig={gameConfig}
-              isGM
-              sessionStarted={sessionStarted}
-            />
           </div>
-        </div>
+        </Portal>
       )}
     </>
   );

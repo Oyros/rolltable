@@ -1,5 +1,8 @@
+import Portal from './Portal.jsx';
+
 export default function HelpGuide({ onClose }) {
   return (
+    <Portal>
     <div className="whisper-overlay">
       <div className="game-setup-card panel rules-editor-card help-guide-card">
         <div className="rules-editor-header">
@@ -30,7 +33,7 @@ export default function HelpGuide({ onClose }) {
           <p>Oda ilk kurulduğunda GM'den oyunun kurallarını tanımlaması istenir:</p>
           <ul>
             <li><strong>Kayıtlı Şablon Kullan</strong> — daha önce kaydettiğin bir kural setini tek tıkla uygula.</li>
-            <li><strong>Sıfırdan Oluştur</strong> — Senaryo Adı, Tasarım Teması, Statlar, Irklar, Sınıflar, Alt Sınıflar, Traitler, Perkler ve Bulunabilecek Eşyalar listelerini kendin oluştur.</li>
+            <li><strong>Sıfırdan Oluştur</strong> — Senaryo Adı, Tasarım Teması (21 farklı tür arasından: fantazi, cyberpunk, western, korsan, vampir, uzay operası ve daha fazlası), Statlar, Irklar, Sınıflar, Alt Sınıflar, Traitler, Perkler ve Bulunabilecek Eşyalar listelerini kendin oluştur.</li>
             <li>İstersen bu kural setini bir <strong>şablon olarak kaydedip</strong> başka odalarda tekrar kullanabilirsin.</li>
           </ul>
           <p>
@@ -48,7 +51,7 @@ export default function HelpGuide({ onClose }) {
             <li><strong>Harita</strong> — "Haritayı Göster" ile açılır; üzerine tıklayarak pin bırakabilirsin (kendi renginde). Kendi pinini herkes, başkasının pinini sadece GM kaldırabilir.</li>
             <li><strong>Müzik / Ambiyans</strong> — GM çalar/durdurur, herkes kendi ses seviyesini ayarlar.</li>
             <li><strong>Vinyet, Flaş/Sarsıntı, Hava Durumu</strong> — GM'in tetiklediği görsel atmosfer efektleri (sağ kenardaki "Görsel Efektler"de).</li>
-            <li><strong>Tema parçacıkları</strong> — seçilen temaya göre (kül, neon, büyü tozu, sis, yıldız) otomatik arka plan efekti.</li>
+            <li><strong>Tema parçacıkları</strong> — seçilen temaya göre değişen otomatik arka plan efekti (kül, neon, kiraz çiçeği, kar, konfeti ve daha fazlası) — renk paleti, fontlar ve tüm üreteçler de temayla birlikte değişir.</li>
           </ul>
         </details>
 
@@ -150,10 +153,11 @@ export default function HelpGuide({ onClose }) {
             <li>
               <strong>Mekan / Odak / Müzik Kütüphaneleri</strong> — görsel/link ile bir isim
               girip "💾 Kaydet" dersin, canlı sahneyi <em>hemen değiştirmez</em>, sadece
-              kütüphaneye ekler. Sahneyi güncellemek için kütüphaneden ilgili ismin üstüne
-              tıklarsın (müzikte açılır menüden seçersin) — o an canlı sahneye uygulanır. Böylece
-              önceden bir sürü görsel/müzik hazırlayıp oturum sırasında tek tıkla geçiş
-              yapabilirsin.
+              kütüphaneye ekler. Seçim yapmak için paneli açmana gerek yok: orta bölümdeki mekan
+              ya da odak görseline (GM olarak) tıklayınca kayıtlı listeden seçebilirsin; müzik
+              için de "▶️ Devam Ettir" butonunun solundaki açılır menüden seçim yaparsın — hepsi
+              anında canlı sahneye uygulanır. Böylece önceden bir sürü görsel/müzik hazırlayıp
+              oturum sırasında tek tıkla geçiş yapabilirsin.
             </li>
             <li><strong>Harita</strong> — URL gir, "Yayınla" ile canlı haritayı günceller (harita değişirse eski pinler temizlenir).</li>
             <li><strong>İnisiyatif Sırası</strong> — sıraya oyuncu ekle/çıkar, yeniden sırala, sırayı ilerlet (bkz. yukarıdaki "İnisiyatif Sırası" başlığı).</li>
@@ -196,5 +200,6 @@ export default function HelpGuide({ onClose }) {
         </details>
       </div>
     </div>
+    </Portal>
   );
 }

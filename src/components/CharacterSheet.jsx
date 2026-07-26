@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ref, update, push } from 'firebase/database';
 import { db } from '../firebase.js';
 import { STATUS_LABEL } from '../utils/stats.js';
+import Portal from './Portal.jsx';
 
 export default function CharacterSheet({ roomCode, playerId, player, gameConfig, isGM = false, sessionStarted = false }) {
   const path = `rooms/${roomCode}/players/${playerId}`;
@@ -160,6 +161,7 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
       )}
 
       {showLevelUp && (
+        <Portal>
         <div className="whisper-overlay" onClick={() => setShowLevelUp(false)}>
           <div
             className="game-setup-card panel rules-editor-card level-up-card"
@@ -227,6 +229,7 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
             </button>
           </div>
         </div>
+        </Portal>
       )}
 
       <fieldset disabled={!editable} className="character-sheet-fields">

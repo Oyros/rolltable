@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Portal from './Portal.jsx';
 
 function seenKeyFor(roomCode, playerId) {
   return `rolltable_whisper_seen_${roomCode}_${playerId}`;
@@ -28,14 +29,16 @@ export default function WhisperOverlay({ whispers, roomCode, playerId }) {
   if (!popup) return null;
 
   return (
-    <div className="whisper-overlay">
-      <div className="whisper-box panel">
-        <span className="whisper-label">Fısıltı</span>
-        <p>{popup.text}</p>
-        <button type="button" className="btn-primary small" onClick={dismiss}>
-          Kapat
-        </button>
+    <Portal>
+      <div className="whisper-overlay">
+        <div className="whisper-box panel">
+          <span className="whisper-label">Fısıltı</span>
+          <p>{popup.text}</p>
+          <button type="button" className="btn-primary small" onClick={dismiss}>
+            Kapat
+          </button>
+        </div>
       </div>
-    </div>
+    </Portal>
   );
 }

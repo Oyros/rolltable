@@ -20,6 +20,9 @@ export default function SceneDisplay({
   pinColor,
   ambianceVolume,
   onAmbianceVolumeChange,
+  savedLocations,
+  savedFocuses,
+  savedMusic,
 }) {
   const audioRef = useRef(null);
   const ambianceRef = useRef(null);
@@ -32,6 +35,12 @@ export default function SceneDisplay({
   const [soundError, setSoundError] = useState('');
   const [ambianceError, setAmbianceError] = useState('');
   const [mapOpen, setMapOpen] = useState(false);
+  const [locationPickerOpen, setLocationPickerOpen] = useState(false);
+  const [focusPickerOpen, setFocusPickerOpen] = useState(false);
+
+  const savedLocationList = Object.entries(savedLocations || {});
+  const savedFocusList = Object.entries(savedFocuses || {});
+  const savedMusicList = Object.entries(savedMusic || {});
 
   const isPlaying = scene?.playing !== false;
   const isAmbiancePlaying = scene?.ambiancePlaying !== false;
@@ -189,6 +198,33 @@ export default function SceneDisplay({
     update(ref(db, `rooms/${roomCode}/scene`), { ambiancePlaying: !isAmbiancePlaying });
   }
 
+  function selectLocation(entry) {
+    update(ref(db, `rooms/${roomCode}/scene`), {
+      locationImageUrl: entry.imageUrl,
+      caption: entry.name,
+      playing: true,
+      updatedAt: Date.now(),
+    });
+    setLocationPickerOpen(false);
+  }
+
+  function selectFocus(entry) {
+    update(ref(db, `rooms/${roomCode}/scene`), {
+      focusImageUrl: entry.imageUrl,
+      focusCaption: entry.name,
+      playing: true,
+      updatedAt: Date.now(),
+    });
+    setFocusPickerOpen(false);
+  }
+
+  function selectMusic(e) {
+    const entry = savedMusicList.find(([id]) => id === e.target.value);
+    if (entry) {
+      update(ref(db, `rooms/${roomCode}/scene`), { musicUrl: entry[1].url });
+    }
+  }
+
   function handleMapClick(e) {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -220,25 +256,69 @@ export default function SceneDisplay({
   return (
     <div className="scene-display panel">
       <div className="scene-images">
-        <div className="scene-image-box scene-image-location">
+        <div
+          className={`scene-image-box scene-image-location${isGM ? ' scene-image-pickable' : ''}`}
+          onClick={isGM ? () => setLocationPickerOpen((v) => !v) : undefined}
+        >
           {scene.locationImageUrl ? (
             <img src={scene.locationImageUrl} alt="Mekan" />
           ) : (
             <span className="scene-placeholder">Mekan görseli yok</span>
           )}
           <TypewriterText className="scene-caption" text={scene.caption} />
+          {isGM && <span className="scene-image-edit-hint">🖼️ Kütüphaneden seç</span>}
+          {locationPickerOpen && (
+            <div className="scene-image-picker" onClick={(e) => e.stopPropagation()}>
+              {savedLocationList.length === 0 ? (
+                <p className="muted small-hint">Henüz kayıtlı mekan yok — GM panelinden ekle.</p>
+              ) : (
+                savedLocationList.map(([id, l]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`btn-ghost small${scene.locationImageUrl === l.imageUrl ? ' active' : ''}`}
+                    onClick={() => selectLocation(l)}
+                  >
+                    {l.name}
+                  </button>
+                ))
+              )}
+            </div>
+          )}
         </div>
-        <div className="scene-image-box scene-image-focus">
+        <div
+          className={`scene-image-box scene-image-focus${isGM ? ' scene-image-pickable' : ''}`}
+          onClick={isGM ? () => setFocusPickerOpen((v) => !v) : undefined}
+        >
           {scene.focusImageUrl ? (
             <img src={scene.focusImageUrl} alt="Karakter / Eşya" />
           ) : (
             <span className="scene-placeholder">Odak görseli yok</span>
           )}
           <TypewriterText className="scene-caption" text={scene.focusCaption} />
+          {isGM && <span className="scene-image-edit-hint">🎭 Kütüphaneden seç</span>}
+          {focusPickerOpen && (
+            <div className="scene-image-picker" onClick={(e) => e.stopPropagation()}>
+              {savedFocusList.length === 0 ? (
+                <p className="muted small-hint">Henüz kayıtlı odak yok — GM panelinden ekle.</p>
+              ) : (
+                savedFocusList.map(([id, f]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`btn-ghost small${scene.focusImageUrl === f.imageUrl ? ' active' : ''}`}
+                    onClick={() => selectFocus(f)}
+                  >
+                    {f.name}
+                  </button>
+                ))
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      {(scene.mapImageUrl || scene.musicUrl || scene.ambianceUrl) && (
+      {(scene.mapImageUrl || scene.musicUrl || scene.ambianceUrl || (isGM && savedMusicList.length > 0)) && (
         <div className="scene-toolbar">
           {scene.mapImageUrl && (
             <button
@@ -251,20 +331,38 @@ export default function SceneDisplay({
           )}
 
           <div className="scene-audio-controls">
-            {scene.musicUrl && (
+            {(scene.musicUrl || (isGM && savedMusicList.length > 0)) && (
               <div className="sound-controls">
                 {isGM && (
                   <div className="gm-sound-buttons">
-                    <button
-                      type="button"
-                      className="btn-ghost sound-toggle"
-                      onClick={togglePlaying}
-                    >
-                      {isPlaying ? '⏸ Durdur' : '▶️ Devam Ettir'}
-                    </button>
-                    <button type="button" className="btn-ghost sound-toggle" onClick={restartTrack}>
-                      ⏮ Baştan Başlat
-                    </button>
+                    {savedMusicList.length > 0 && (
+                      <select
+                        className="music-quick-select"
+                        value={savedMusicList.find(([, m]) => m.url === scene.musicUrl)?.[0] || ''}
+                        onChange={selectMusic}
+                      >
+                        <option value="">Müzik seç...</option>
+                        {savedMusicList.map(([id, m]) => (
+                          <option key={id} value={id}>
+                            {m.name}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    {scene.musicUrl && (
+                      <>
+                        <button
+                          type="button"
+                          className="btn-ghost sound-toggle"
+                          onClick={togglePlaying}
+                        >
+                          {isPlaying ? '⏸ Durdur' : '▶️ Devam Ettir'}
+                        </button>
+                        <button type="button" className="btn-ghost sound-toggle" onClick={restartTrack}>
+                          ⏮ Baştan Başlat
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
                 <label className="volume-control">
