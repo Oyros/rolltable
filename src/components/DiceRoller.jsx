@@ -202,7 +202,7 @@ export default function DiceRoller({ roomCode, name, isGM }) {
         {!rollState && <p className="muted">Henüz zar atılmadı.</p>}
 
         {rollState && !rollState.mode && (
-          <div className="die-result">
+          <div className={rollState.stage === 'spinning' ? 'die-spin' : 'die-result'}>
             <span className={`die-face${rollState.stage === 'spinning' ? ' spinning' : ''}`}>
               {rollState.stage === 'spinning' ? `d${rollState.dice}` : mask(rollState.result, rollState.hidden)}
             </span>

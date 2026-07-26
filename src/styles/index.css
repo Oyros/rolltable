@@ -869,7 +869,7 @@ button:hover {
   animation: dieSpin 0.9s linear infinite;
 }
 
-.die-result .die-face {
+.die-result .die-face:not(.spinning) {
   animation: popIn 0.3s ease;
 }
 
@@ -1588,5 +1588,30 @@ button:hover {
 .roll-mode-btn.active {
   background: var(--amber-dim);
   border-color: var(--amber);
+  color: var(--amber-light);
+}
+
+/* GM slot */
+.gm-slot-panel {
+  padding: 14px 16px;
+}
+
+.gm-slot-label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+
+.gm-slot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gm-slot-name {
+  font-weight: 600;
   color: var(--amber-light);
 }
