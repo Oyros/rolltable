@@ -3,7 +3,25 @@
     "users": {
       "$uid": {
         ".read": "auth != null",
-        ".write": "auth != null && auth.uid === $uid"
+        ".write": "auth != null && auth.uid === $uid",
+
+        "friendRequestsIncoming": {
+          "$fromUid": {
+            ".write": "auth != null && auth.uid === $fromUid"
+          }
+        },
+
+        "friendRequestsOutgoing": {
+          "$toUid": {
+            ".write": "auth != null && auth.uid === $toUid"
+          }
+        },
+
+        "friends": {
+          "$friendUid": {
+            ".write": "auth != null && (auth.uid === $uid || auth.uid === $friendUid)"
+          }
+        }
       }
     },
 
