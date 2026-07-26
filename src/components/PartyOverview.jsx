@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { ref, update } from 'firebase/database';
 import { db } from '../firebase.js';
 import { STATUS_LABEL } from '../utils/stats.js';
-import WhisperLog from './WhisperLog.jsx';
 import CharacterSheet from './CharacterSheet.jsx';
 import Portal from './Portal.jsx';
 
@@ -208,8 +207,6 @@ export default function PartyOverview({
           );
         })}
       </ul>
-
-      <WhisperLog players={players} playerId={playerId} isGM={isGM} />
 
       {isGM && editingId && players?.[editingId] && (
         <Portal>

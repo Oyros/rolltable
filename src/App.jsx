@@ -22,21 +22,33 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
+    const fallbackTimer = setTimeout(() => {
+      // Auth never resolved (network issue, corrupted browser storage,
+      // extension interference...) — don't leave the user stuck on
+      // "Bağlanıyor..." forever.
+      if (!cancelled) setPlayerId((current) => current || getOrCreateLocalId());
+    }, 8000);
+
     const unsub = onAuthStateChanged(auth, (user) => {
       if (cancelled) return;
       if (user) {
+        clearTimeout(fallbackTimer);
         setPlayerId(user.uid);
       } else {
         signInAnonymously(auth).catch(() => {
           // Anonymous Auth not enabled yet in the Firebase console for this
           // project — fall back to the old locally-generated id so the app
           // keeps working (just without server-enforced identity rules).
-          if (!cancelled) setPlayerId(getOrCreateLocalId());
+          if (!cancelled) {
+            clearTimeout(fallbackTimer);
+            setPlayerId(getOrCreateLocalId());
+          }
         });
       }
     });
     return () => {
       cancelled = true;
+      clearTimeout(fallbackTimer);
       unsub();
     };
   }, []);

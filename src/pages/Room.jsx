@@ -439,6 +439,15 @@ export default function Room({ session, onLeave }) {
             </div>
           </details>
 
+          <details className="panel side-accordion" open>
+            <summary>
+              💬 Sohbet<span className="side-accordion-chevron">▾</span>
+            </summary>
+            <div className="side-accordion-body">
+              <ChatPanel roomCode={roomCode} name={name} playerId={playerId} isGM={role === 'gm'} players={players} />
+            </div>
+          </details>
+
           <details className="panel side-accordion">
             <summary>
               📜 Görev Panosu<span className="side-accordion-chevron">▾</span>
@@ -526,15 +535,6 @@ export default function Room({ session, onLeave }) {
             </summary>
             <div className="side-accordion-body">
               <DiceRoller roomCode={roomCode} name={name} isGM={role === 'gm'} />
-            </div>
-          </details>
-
-          <details className="panel side-accordion">
-            <summary>
-              💬 Sohbet<span className="side-accordion-chevron">▾</span>
-            </summary>
-            <div className="side-accordion-body">
-              <ChatPanel roomCode={roomCode} name={name} playerId={playerId} isGM={role === 'gm'} />
             </div>
           </details>
 

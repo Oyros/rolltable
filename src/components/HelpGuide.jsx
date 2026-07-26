@@ -91,9 +91,10 @@ export default function HelpGuide({ onClose }) {
             oyuncu listesi vardır — bir oyuncuya tıklayınca statları, ırk/sınıf/alt sınıfı,
             trait/perkleri, yeteneklerini ve envanterini görürsün. GM buradan oyuncuyu odadan
             atabilir; oyuncunun karakter kağıdını kilitleyebilir ve "✏️ Karakteri Düzenle" ile
-            doğrudan düzenleyebilir. En altta, sana özel gelen <strong>Fısıltı Geçmişi</strong>{' '}
-            listelenir (GM için tüm oyunculardan gelen sistem kayıtları da burada, kimde olduğu
-            belirtilerek görünür).
+            doğrudan düzenleyebilir. Fısıltılar ve otomatik sistem kayıtları artık ayrı bir liste
+            değil — hemen altındaki <strong>💬 Sohbet</strong> panelinde, sohbet mesajlarıyla
+            birlikte farklı bir görünümle (🔒 fısıltı, açık renkli sistem kaydı) karışık akışta
+            görünür.
           </p>
         </details>
 
@@ -138,7 +139,7 @@ export default function HelpGuide({ onClose }) {
               değiştiremezsin; GM ise kilitliyken bile "✏️ Karakteri Düzenle" ile her zaman
               değişiklik yapabilir. Oturum başladıktan (GM "▶️ Oturumu Başlat" dedikten) sonraki
               stat/envanter/trait/perk/ırk/sınıf değişiklikleri, hangi oyuncuda olduğu belirtilerek
-              Fısıltı Geçmişi'nde otomatik kaydedilir.
+              💬 Sohbet panelinde sistem kaydı olarak otomatik görünür.
             </li>
           </ul>
         </details>
@@ -201,16 +202,34 @@ export default function HelpGuide({ onClose }) {
         </details>
 
         <details>
-          <summary>💬 Sohbet & Oturum Kaydı (sağ kenar)</summary>
+          <summary>💬 Sohbet (sol kenar)</summary>
+          <p>
+            Herkesin birlikte kullandığı ortak yazışma kanalı; GM'in "👥 Parti" panelinin hemen
+            altında. Üç tür mesaj aynı akışta, farklı görünümle karışık sırayla listelenir:
+          </p>
           <ul>
-            <li><strong>Sohbet</strong> — GM ve tüm oyuncuların birlikte kullandığı ortak yazışma kanalı; son 50 mesaj görünür.</li>
+            <li>Normal sohbet mesajları — herkesin yazdığı, herkesin gördüğü.</li>
             <li>
-              <strong>Oturum Kaydı</strong> — "📥 Oturumu Dışa Aktar" butonu zar atışlarını, sohbeti,
-              görevleri ve karakter kağıdı değişikliklerini (statik/kaynak değişimi, seviye atlama
-              vb.) tek bir <code>.txt</code> dosyası olarak indirir. Oyuncular sadece kendi
-              kayıtlarını ve gizli olmayan zarları görür; GM her şeyi görür.
+              <strong>🔒 Fısıltılar</strong> — GM Kontrol Paneli'ndeki "Gizli Fısıltı" ile gönderilen
+              özel mesajlar; kesikli amber çerçeveyle vurgulanır. Oyuncu sadece kendine gelenleri
+              görür, GM tüm oyunculara giden fısıltıları (kime gittiği belirtilerek) görür.
+            </li>
+            <li>
+              <strong>Sistem kayıtları</strong> — oturum başladıktan sonra karakter kağıdında olan
+              stat/kaynak/trait/perk/ırk/sınıf/envanter değişiklikleri ve seviye atlamalar otomatik
+              olarak buraya, soluk/italik bir görünümle düşer.
             </li>
           </ul>
+        </details>
+
+        <details>
+          <summary>📋 Oturum Kaydı (sağ kenar)</summary>
+          <p>
+            "📥 Oturumu Dışa Aktar" butonu zar atışlarını, sohbeti (fısıltı ve sistem kayıtları
+            dahil), görevleri ve karakter kağıdı değişikliklerini tek bir <code>.txt</code> dosyası
+            olarak indirir. Oyuncular sadece kendi kayıtlarını ve gizli olmayan zarları görür; GM
+            her şeyi görür.
+          </p>
         </details>
 
         <details>

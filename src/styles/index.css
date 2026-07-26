@@ -938,6 +938,33 @@ button:hover {
   border-color: var(--amber-dim);
 }
 
+.chat-message.whisper {
+  background: rgba(207, 154, 63, 0.1);
+  border-color: var(--amber);
+  border-style: dashed;
+}
+
+.chat-message.whisper .chat-message-author {
+  color: var(--amber);
+}
+
+.chat-message.system {
+  background: transparent;
+  border-style: dotted;
+  opacity: 0.8;
+}
+
+.chat-message.system .chat-message-author {
+  color: var(--text-muted);
+  font-family: inherit;
+  font-style: italic;
+}
+
+.chat-message.system .chat-message-text {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
 .chat-message-author {
   display: block;
   font-size: 0.72rem;
@@ -1725,43 +1752,6 @@ button:hover {
 .btn-ghost.danger:hover {
   background: var(--danger);
   color: #fff;
-}
-
-/* Whisper log */
-.whisper-log {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-
-.whisper-log ul {
-  list-style: none;
-  padding: 0;
-  margin: 8px 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-height: 220px;
-  overflow-y: auto;
-}
-
-.whisper-log li {
-  background: var(--bg-panel-alt);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 0.82rem;
-  color: var(--text);
-}
-
-.whisper-log-to {
-  color: var(--amber-light);
-  font-weight: 600;
-}
-
-.whisper-log-system {
-  opacity: 0.75;
-  font-style: italic;
 }
 
 /* Character sheet lock + GM edit overlay */
