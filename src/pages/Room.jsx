@@ -289,6 +289,7 @@ export default function Room({ session, onLeave }) {
           <InitiativeBar
             initiative={settings?.initiative}
             players={players}
+            npcs={settings?.savedFocuses}
             isGM={role === 'gm'}
             onAdvance={advanceInitiative}
           />

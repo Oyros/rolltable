@@ -3,18 +3,28 @@ function buildSlots(queue, currentIndex) {
   const slots = [];
   for (let offset = -2; offset <= 2; offset += 1) {
     const idx = ((currentIndex + offset) % n + n) % n;
-    slots.push({ offset, playerId: queue[idx] });
+    slots.push({ offset, entityId: queue[idx] });
   }
   return slots;
 }
 
-export default function InitiativeBar({ initiative, players, isGM, onAdvance }) {
+function resolveEntity(id, players, npcs) {
+  const p = players?.[id];
+  if (p) return { name: p.name, imageUrl: p.portraitUrl, color: p.color, isNpc: false };
+  const npc = npcs?.[id];
+  if (npc && (npc.category || 'karakter') === 'karakter') {
+    return { name: npc.name, imageUrl: npc.imageUrl, isNpc: true };
+  }
+  return null;
+}
+
+export default function InitiativeBar({ initiative, players, npcs, isGM, onAdvance }) {
   const queue = initiative?.queue || [];
   if (queue.length === 0) return null;
 
   const currentIndex = initiative.currentIndex ?? 0;
   const currentId = queue[currentIndex];
-  if (!players?.[currentId]) return null;
+  if (!resolveEntity(currentId, players, npcs)) return null;
 
   const slots = buildSlots(queue, currentIndex);
 
@@ -26,20 +36,29 @@ export default function InitiativeBar({ initiative, players, isGM, onAdvance }) 
             ⏮
           </button>
         )}
-        {slots.map(({ offset, playerId }) => {
-          const p = players?.[playerId];
-          if (!p) return null;
+        {slots.map(({ offset, entityId }) => {
+          const entity = resolveEntity(entityId, players, npcs);
+          if (!entity) return null;
           return (
-            <div key={`${offset}-${playerId}`} className="initiative-slot" data-offset={offset}>
-              <span className="initiative-avatar" style={p.color ? { borderColor: p.color } : undefined}>
-                {p.portraitUrl ? (
-                  <img src={p.portraitUrl} alt={p.name} />
+            <div
+              key={`${offset}-${entityId}`}
+              className={`initiative-slot${entity.isNpc ? ' enemy' : ''}`}
+              data-offset={offset}
+            >
+              <span
+                className={`initiative-avatar${entity.isNpc ? ' enemy' : ''}`}
+                style={entity.color ? { borderColor: entity.color } : undefined}
+              >
+                {entity.imageUrl ? (
+                  <img src={entity.imageUrl} alt={entity.name} />
                 ) : (
-                  <span className="initiative-avatar-fallback">{(p.name || '?').charAt(0).toUpperCase()}</span>
+                  <span className="initiative-avatar-fallback">
+                    {entity.isNpc ? '⚔️' : (entity.name || '?').charAt(0).toUpperCase()}
+                  </span>
                 )}
-                {offset === 0 && <span className="initiative-avatar-ring" />}
+                {offset === 0 && <span className={`initiative-avatar-ring${entity.isNpc ? ' enemy' : ''}`} />}
               </span>
-              <span className="initiative-slot-name">{p.name}</span>
+              <span className={`initiative-slot-name${entity.isNpc ? ' enemy' : ''}`}>{entity.name}</span>
             </div>
           );
         })}

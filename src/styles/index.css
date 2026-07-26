@@ -2540,6 +2540,27 @@ button:hover {
   max-width: 120px;
 }
 
+.initiative-avatar.enemy {
+  border-color: var(--danger);
+}
+
+.initiative-slot[data-offset='0'] .initiative-avatar.enemy {
+  border-color: var(--danger);
+}
+
+.initiative-avatar-ring.enemy {
+  border-color: var(--danger);
+  box-shadow: 0 0 16px rgba(191, 60, 47, 0.8);
+}
+
+.initiative-slot-name.enemy {
+  color: var(--danger);
+}
+
+.initiative-slot[data-offset='0'] .initiative-slot-name.enemy {
+  color: var(--danger);
+}
+
 /* Initiative queue builder (GM panel) */
 .initiative-queue-list {
   display: flex;
@@ -2562,6 +2583,29 @@ button:hover {
 .initiative-queue-item.current {
   border-color: var(--amber);
   box-shadow: 0 0 0 1px var(--amber-dim);
+}
+
+.initiative-queue-item.enemy {
+  border-color: var(--danger);
+  background: rgba(191, 60, 47, 0.1);
+}
+
+.initiative-queue-item.enemy.current {
+  box-shadow: 0 0 0 1px var(--danger);
+}
+
+.initiative-queue-enemy-tag {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: 999px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+.initiative-queue-item.enemy .initiative-queue-name {
+  color: var(--danger);
 }
 
 .initiative-queue-index {

@@ -21,6 +21,7 @@ export default function GMPanel({
   const [locationDraftName, setLocationDraftName] = useState('');
   const [focusDraftUrl, setFocusDraftUrl] = useState('');
   const [focusDraftName, setFocusDraftName] = useState('');
+  const [focusDraftCategory, setFocusDraftCategory] = useState('karakter');
   const [musicDraftUrl, setMusicDraftUrl] = useState('');
   const [musicDraftName, setMusicDraftName] = useState('');
   const [selectedMusicId, setSelectedMusicId] = useState('');
@@ -109,6 +110,7 @@ export default function GMPanel({
     push(ref(db, `rooms/${roomCode}/settings/savedFocuses`), {
       name: focusDraftName.trim(),
       imageUrl: focusDraftUrl.trim(),
+      category: focusDraftCategory,
     });
     setFocusDraftUrl('');
     setFocusDraftName('');
@@ -173,6 +175,15 @@ export default function GMPanel({
   const queue = initiative.queue || [];
   const currentIndex = initiative.currentIndex ?? 0;
   const notInQueue = playerList.filter(([id]) => !queue.includes(id));
+  const npcFocusList = savedFocuses.filter(([, f]) => (f.category || 'karakter') === 'karakter');
+  const notInQueueNpcs = npcFocusList.filter(([id]) => !queue.includes(id));
+
+  function resolveQueueEntity(id) {
+    if (players?.[id]) return { name: players[id].name, imageUrl: players[id].portraitUrl, color: players[id].color, isNpc: false };
+    const npc = settings?.savedFocuses?.[id];
+    if (npc) return { name: npc.name, imageUrl: npc.imageUrl, isNpc: true };
+    return { name: '?', imageUrl: null, isNpc: false };
+  }
 
   function addToQueue(id) {
     if (!id || queue.includes(id)) return;
@@ -352,7 +363,10 @@ export default function GMPanel({
 
       <div className="gm-section">
         <h3 className="title-font gm-section-title">Odak Kütüphanesi</h3>
-        <p className="muted small-hint">Konuşan karakter/eşya görseli + adını kaydet, listeden seçince canlı sahneye uygular.</p>
+        <p className="muted small-hint">
+          Konuşan karakter/eşya görseli + adını kaydet, listeden seçince canlı sahneye uygular.
+          "Karakter/NPC" olarak kaydettiklerin İnisiyatif Sırası'na düşman olarak eklenebilir.
+        </p>
         <div className="inline-form">
           <input
             value={focusDraftUrl}
@@ -370,6 +384,10 @@ export default function GMPanel({
             onChange={(e) => setFocusDraftName(e.target.value)}
             placeholder="Karakter / eşya adı"
           />
+          <select value={focusDraftCategory} onChange={(e) => setFocusDraftCategory(e.target.value)}>
+            <option value="karakter">🎭 Karakter / NPC</option>
+            <option value="obje">📦 Obje / Eşya</option>
+          </select>
           <button type="button" className="btn-primary small" onClick={saveFocus}>
             💾 Kaydet
           </button>
@@ -383,7 +401,7 @@ export default function GMPanel({
                   className={`btn-dice${scene?.focusImageUrl === f.imageUrl ? ' active' : ''}`}
                   onClick={() => publishFocus(f)}
                 >
-                  🎭 {f.name}
+                  {(f.category || 'karakter') === 'karakter' ? '🎭' : '📦'} {f.name}
                 </button>
                 <button type="button" className="btn-ghost small" onClick={() => removeFocus(id)}>
                   Sil
@@ -469,13 +487,16 @@ export default function GMPanel({
           <p className="muted">Kuyruk boş — aşağıdan oyuncu ekle.</p>
         ) : (
           <ul className="initiative-queue-list">
-            {queue.map((id, idx) => (
+            {queue.map((id, idx) => {
+              const entity = resolveQueueEntity(id);
+              return (
               <li
                 key={id}
-                className={`initiative-queue-item${idx === currentIndex ? ' current' : ''}`}
+                className={`initiative-queue-item${idx === currentIndex ? ' current' : ''}${entity.isNpc ? ' enemy' : ''}`}
               >
                 <span className="initiative-queue-index">{idx + 1}</span>
-                <span className="initiative-queue-name">{players?.[id]?.name || '?'}</span>
+                {entity.isNpc && <span className="initiative-queue-enemy-tag">⚔️ DÜŞMAN</span>}
+                <span className="initiative-queue-name">{entity.name}</span>
                 <div className="initiative-queue-actions">
                   <button type="button" className="btn-ghost small" onClick={() => moveInQueue(id, -1)} disabled={idx === 0}>
                     ▲
@@ -493,7 +514,8 @@ export default function GMPanel({
                   </button>
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
 
@@ -508,6 +530,24 @@ export default function GMPanel({
               ))}
             </select>
           </div>
+        )}
+
+        {notInQueueNpcs.length > 0 && (
+          <div className="inline-form">
+            <select value="" onChange={(e) => addToQueue(e.target.value)}>
+              <option value="">⚔️ Kuyruğa NPC/düşman ekle...</option>
+              {notInQueueNpcs.map(([id, f]) => (
+                <option key={id} value={id}>
+                  {f.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        {npcFocusList.length === 0 && (
+          <p className="muted small-hint">
+            Kuyruğa düşman eklemek için Odak Kütüphanesi'ne "🎭 Karakter/NPC" olarak bir görsel kaydet.
+          </p>
         )}
 
         {queue.length > 0 && (

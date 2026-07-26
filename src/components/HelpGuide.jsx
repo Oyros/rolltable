@@ -75,6 +75,13 @@ export default function HelpGuide({ onClose }) {
             hızlı oklardan da yapabilir. Sıra kime geldiyse o oyuncunun adının yanında Parti
             panelinde 🎙️ rozeti belirir ve o oyuncunun ekranında "SIRA SENDE!" uyarısı çıkar.
           </p>
+          <p>
+            <strong>NPC / Düşman ekleme</strong> — Odak Kütüphanesi'ne "🎭 Karakter/NPC" olarak
+            kaydettiğin görseller de sıraya eklenebilir (ayrı bir "⚔️ Kuyruğa NPC/düşman ekle"
+            menüsünden). Sırada ve header'daki turda düşmanlar kırmızı çerçeve, "⚔️ DÜŞMAN" etiketi
+            ve kırmızı isimle partiden net şekilde ayrılır. "📦 Obje/Eşya" olarak kaydedilenler bu
+            listede görünmez — sadece görsel gösterimi içindir.
+          </p>
         </details>
 
         <details>
