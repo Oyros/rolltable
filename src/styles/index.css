@@ -261,17 +261,26 @@ button:hover {
 
 .room-header-banner {
   position: absolute;
-  inset: 0;
-  width: 100%;
+  left: 0;
+  top: 0;
   height: 100%;
-  object-fit: contain;
+  width: 38%;
+  object-fit: cover;
+  object-position: left center;
   z-index: 0;
+  -webkit-mask-image: linear-gradient(to right, black 55%, transparent 100%);
+  mask-image: linear-gradient(to right, black 55%, transparent 100%);
 }
 
 .room-header-banner-overlay {
   position: absolute;
-  inset: 0;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 38%;
   background: linear-gradient(rgba(10, 7, 4, 0.3), rgba(10, 7, 4, 0.6));
+  -webkit-mask-image: linear-gradient(to right, black 55%, transparent 100%);
+  mask-image: linear-gradient(to right, black 55%, transparent 100%);
   z-index: 1;
 }
 
@@ -279,16 +288,38 @@ button:hover {
   position: relative;
   z-index: 2;
   width: 100%;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  flex-wrap: wrap;
   gap: 10px;
+}
+
+.header-left {
+  min-width: 0;
+}
+
+.header-center {
+  display: flex;
+  justify-content: center;
+}
+
+.header-right {
+  justify-self: end;
 }
 
 @media (max-width: 700px) {
   .room-header {
     min-height: 120px;
+  }
+
+  .room-header-content {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .header-right {
+    justify-self: center;
   }
 }
 
@@ -957,6 +988,51 @@ button:hover {
   }
 }
 
+.die-result.crit-success .die-face,
+.die-dual.crit-success .die-face-winner {
+  animation: critPulse 0.6s ease;
+  color: #ffd700 !important;
+  text-shadow: 0 0 24px rgba(255, 215, 0, 0.9) !important;
+}
+
+.die-result.crit-fail .die-face,
+.die-dual.crit-fail .die-face-winner {
+  animation: critShake 0.5s ease;
+  color: var(--danger) !important;
+  text-shadow: 0 0 18px rgba(229, 57, 53, 0.8) !important;
+}
+
+@keyframes critPulse {
+  0% {
+    transform: scale(0.6);
+  }
+  50% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes critShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px) rotate(-4deg);
+  }
+  40% {
+    transform: translateX(6px) rotate(4deg);
+  }
+  60% {
+    transform: translateX(-4px) rotate(-2deg);
+  }
+  80% {
+    transform: translateX(4px) rotate(2deg);
+  }
+}
+
 .roll-history {
   list-style: none;
   padding: 0;
@@ -1384,6 +1460,44 @@ button:hover {
   font-weight: 600;
 }
 
+.whisper-log-system {
+  opacity: 0.75;
+  font-style: italic;
+}
+
+/* Character sheet lock + GM edit overlay */
+.character-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.sheet-locked-notice {
+  margin-top: -4px;
+}
+
+.character-sheet-fields {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.character-sheet-fields[disabled] {
+  opacity: 0.55;
+}
+
+.party-detail-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.character-edit-card {
+  max-width: 640px;
+}
+
 /* GM notes */
 .gm-notes-hint {
   margin: 0 0 10px;
@@ -1709,6 +1823,28 @@ button:hover {
   opacity: 0.75;
 }
 
+.quest-item.failed {
+  border-left-color: var(--danger);
+  opacity: 0.75;
+}
+
+.quest-item.urgent {
+  border-left-color: var(--danger);
+}
+
+.quest-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.quest-priority-badge {
+  font-size: 0.72rem;
+  color: var(--danger);
+  font-weight: 600;
+}
+
 .quest-title {
   font-weight: 600;
   color: var(--amber-light);
@@ -1719,6 +1855,23 @@ button:hover {
   color: var(--text-muted);
   font-size: 0.8rem;
   margin: 4px 0 0;
+}
+
+.quest-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.quest-assigned,
+.quest-deadline {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.quest-deadline.failed {
+  color: var(--danger);
 }
 
 .quest-item-actions {
@@ -1742,6 +1895,24 @@ button:hover {
   margin-top: 10px;
 }
 
+.quest-form-row {
+  display: flex;
+  gap: 6px;
+}
+
+.quest-form-row select {
+  flex: 1;
+}
+
+.quest-deadline-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  gap: 2px;
+}
+
 /* Loot generator */
 .loot-list {
   display: flex;
@@ -1756,14 +1927,24 @@ button:hover {
   border-radius: 8px;
   padding: 8px 12px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 6px;
   font-size: 0.85rem;
 }
 
-.loot-item button {
+.loot-item-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.loot-item-actions button {
   flex-shrink: 0;
+}
+
+.loot-target-select {
+  width: 100%;
+  margin: 10px 0 0;
 }
 
 /* Calendar */
@@ -1832,4 +2013,88 @@ button:hover {
   font-size: 1.3rem;
   letter-spacing: 0.05em;
   margin: 0 0 16px;
+}
+
+/* Initiative bar (header) */
+.initiative-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 0.82rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.initiative-bar-prev {
+  color: var(--text-muted);
+}
+
+.initiative-bar-current {
+  color: var(--amber-light);
+  font-weight: 600;
+}
+
+.initiative-bar-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.initiative-bar-controls button {
+  padding: 2px 8px;
+}
+
+/* Initiative queue builder (GM panel) */
+.initiative-queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+
+.initiative-queue-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+.initiative-queue-item.current {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 1px var(--amber-dim);
+}
+
+.initiative-queue-index {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.initiative-queue-name {
+  flex: 1;
+  color: var(--amber-light);
+}
+
+.initiative-queue-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.initiative-queue-actions button {
+  padding: 2px 7px;
+}
+
+.initiative-controls {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
 }

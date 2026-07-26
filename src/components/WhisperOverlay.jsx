@@ -8,9 +8,9 @@ export default function WhisperOverlay({ whispers, roomCode, playerId }) {
   const [popup, setPopup] = useState(null);
 
   useEffect(() => {
-    const entries = Object.entries(whispers || {}).sort(
-      (a, b) => (a[1].at || 0) - (b[1].at || 0)
-    );
+    const entries = Object.entries(whispers || {})
+      .filter(([, w]) => !w.system)
+      .sort((a, b) => (a[1].at || 0) - (b[1].at || 0));
     const latest = entries[entries.length - 1];
     if (!latest) return;
 

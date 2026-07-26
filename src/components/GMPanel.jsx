@@ -136,12 +136,54 @@ export default function GMPanel({
   const playerList = Object.entries(players || {}).filter(([, p]) => p.role !== 'gm');
   const savedScenes = Object.entries(settings?.savedScenes || {});
 
-  function setActiveTurn(targetId) {
-    if (!targetId) {
-      update(ref(db, `rooms/${roomCode}/settings`), { activeTurn: null });
-      return;
-    }
-    update(ref(db, `rooms/${roomCode}/settings`), { activeTurn: { playerId: targetId, at: Date.now() } });
+  const initiative = settings?.initiative || { queue: [], currentIndex: 0, previousPlayerId: null };
+  const queue = initiative.queue || [];
+  const notInQueue = playerList.filter(([id]) => !queue.includes(id));
+
+  function addToQueue(id) {
+    if (!id || queue.includes(id)) return;
+    update(ref(db, `rooms/${roomCode}/settings/initiative`), { queue: [...queue, id] });
+  }
+
+  function removeFromQueue(id) {
+    const idx = queue.indexOf(id);
+    if (idx === -1) return;
+    const newQueue = queue.filter((qid) => qid !== id);
+    let newIndex = initiative.currentIndex;
+    if (idx < newIndex) newIndex -= 1;
+    if (newIndex >= newQueue.length) newIndex = Math.max(0, newQueue.length - 1);
+    update(ref(db, `rooms/${roomCode}/settings/initiative`), { queue: newQueue, currentIndex: newIndex });
+  }
+
+  function moveInQueue(id, direction) {
+    const idx = queue.indexOf(id);
+    const swapIdx = idx + direction;
+    if (idx === -1 || swapIdx < 0 || swapIdx >= queue.length) return;
+    const newQueue = [...queue];
+    [newQueue[idx], newQueue[swapIdx]] = [newQueue[swapIdx], newQueue[idx]];
+    const currentId = queue[initiative.currentIndex];
+    const newIndex = newQueue.indexOf(currentId);
+    update(ref(db, `rooms/${roomCode}/settings/initiative`), { queue: newQueue, currentIndex: newIndex });
+  }
+
+  function advanceTurn(direction) {
+    if (queue.length === 0) return;
+    const prevId = queue[initiative.currentIndex] ?? null;
+    const newIndex = (initiative.currentIndex + direction + queue.length) % queue.length;
+    update(ref(db, `rooms/${roomCode}/settings/initiative`), {
+      currentIndex: newIndex,
+      previousPlayerId: prevId,
+      at: Date.now(),
+    });
+  }
+
+  function clearQueue() {
+    update(ref(db, `rooms/${roomCode}/settings/initiative`), {
+      queue: [],
+      currentIndex: 0,
+      previousPlayerId: null,
+      at: Date.now(),
+    });
   }
 
   return (
@@ -290,20 +332,65 @@ export default function GMPanel({
       </div>
 
       <div className="gm-section">
-        <h3 className="title-font gm-section-title">Sıra Kimde?</h3>
-        <div className="inline-form">
-          <select
-            value={settings?.activeTurn?.playerId || ''}
-            onChange={(e) => setActiveTurn(e.target.value || null)}
-          >
-            <option value="">Kimse</option>
-            {playerList.map(([id, p]) => (
-              <option key={id} value={id}>
-                {p.name}
-              </option>
+        <h3 className="title-font gm-section-title">İnisiyatif Sırası</h3>
+        {queue.length === 0 ? (
+          <p className="muted">Kuyruk boş — aşağıdan oyuncu ekle.</p>
+        ) : (
+          <ul className="initiative-queue-list">
+            {queue.map((id, idx) => (
+              <li
+                key={id}
+                className={`initiative-queue-item${idx === initiative.currentIndex ? ' current' : ''}`}
+              >
+                <span className="initiative-queue-index">{idx + 1}</span>
+                <span className="initiative-queue-name">{players?.[id]?.name || '?'}</span>
+                <div className="initiative-queue-actions">
+                  <button type="button" className="btn-ghost small" onClick={() => moveInQueue(id, -1)} disabled={idx === 0}>
+                    ▲
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-ghost small"
+                    onClick={() => moveInQueue(id, 1)}
+                    disabled={idx === queue.length - 1}
+                  >
+                    ▼
+                  </button>
+                  <button type="button" className="btn-ghost small danger" onClick={() => removeFromQueue(id)}>
+                    ✕
+                  </button>
+                </div>
+              </li>
             ))}
-          </select>
-        </div>
+          </ul>
+        )}
+
+        {notInQueue.length > 0 && (
+          <div className="inline-form">
+            <select value="" onChange={(e) => addToQueue(e.target.value)}>
+              <option value="">Kuyruğa oyuncu ekle...</option>
+              {notInQueue.map(([id, p]) => (
+                <option key={id} value={id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {queue.length > 0 && (
+          <div className="initiative-controls">
+            <button type="button" className="btn-ghost small" onClick={() => advanceTurn(-1)}>
+              ⏮ Önceki
+            </button>
+            <button type="button" className="btn-primary small" onClick={() => advanceTurn(1)}>
+              ⏭ Sonraki
+            </button>
+            <button type="button" className="btn-ghost small danger" onClick={clearQueue}>
+              🗑 Temizle
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="gm-section">

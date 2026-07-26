@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ref, push, query, limitToLast, onValue } from 'firebase/database';
 import { db } from '../firebase.js';
-import { playDiceRattle } from '../utils/diceSound.js';
+import { playDiceRattle, playCritSuccess, playCritFail } from '../utils/diceSound.js';
 
 const DICE = [4, 6, 8, 10, 12, 20];
 const SPIN_MS = 1100;
@@ -46,6 +46,13 @@ export default function DiceRoller({ roomCode, name, isGM }) {
           setHiddenKey(key);
           playDiceRattle(SPIN_MS, diceVolumeRef.current);
 
+          const canSeeResult = !data.hidden || isGM;
+          const playCritSound = () => {
+            if (!canSeeResult) return;
+            if (data.result === data.dice) playCritSuccess(diceVolumeRef.current);
+            else if (data.result === 1) playCritFail(diceVolumeRef.current);
+          };
+
           if (data.mode && data.subRolls) {
             setRollState({ key, ...data, stage: 'spinning' });
             setTimeout(() => {
@@ -54,12 +61,14 @@ export default function DiceRoller({ roomCode, name, isGM }) {
             setTimeout(() => {
               setRollState((prev) => (prev?.key === key ? { ...prev, stage: 'reveal2' } : prev));
               setHiddenKey(null);
+              playCritSound();
             }, SPIN_MS + REVEAL_GAP_MS);
           } else {
             setRollState({ key, ...data, stage: 'spinning' });
             setTimeout(() => {
               setRollState((prev) => (prev?.key === key ? { ...prev, stage: 'done' } : prev));
               setHiddenKey(null);
+              playCritSound();
             }, SPIN_MS);
           }
         } else {
@@ -139,6 +148,14 @@ export default function DiceRoller({ roomCode, name, isGM }) {
       rollState.mode === 'advantage' ? (r1 >= r2 ? 0 : 1) : r1 <= r2 ? 0 : 1;
   }
 
+  const isRevealed =
+    rollState &&
+    ((!rollState.mode && rollState.stage === 'done') || (rollState.mode && rollState.stage === 'reveal2'));
+  const canSeeResult = rollState && (!rollState.hidden || isGM);
+  const isCritSuccess = isRevealed && canSeeResult && rollState.result === rollState.dice;
+  const isCritFail = isRevealed && canSeeResult && rollState.result === 1;
+  const critClass = isCritSuccess ? ' crit-success' : isCritFail ? ' crit-fail' : '';
+
   return (
     <div className="panel dice-panel">
       <h2 className="title-font">Zar</h2>
@@ -202,7 +219,7 @@ export default function DiceRoller({ roomCode, name, isGM }) {
         {!rollState && <p className="muted">Henüz zar atılmadı.</p>}
 
         {rollState && !rollState.mode && (
-          <div className={rollState.stage === 'spinning' ? 'die-spin' : 'die-result'}>
+          <div className={(rollState.stage === 'spinning' ? 'die-spin' : 'die-result') + critClass}>
             <span className={`die-face${rollState.stage === 'spinning' ? ' spinning' : ''}`}>
               {rollState.stage === 'spinning' ? `d${rollState.dice}` : mask(rollState.result, rollState.hidden)}
             </span>
@@ -215,7 +232,7 @@ export default function DiceRoller({ roomCode, name, isGM }) {
         )}
 
         {rollState && rollState.mode && (
-          <div className="die-dual">
+          <div className={`die-dual${critClass}`}>
             <div className="die-dual-pair">
               <span
                 className={`die-face die-face-small${rollState.stage === 'spinning' ? ' spinning' : ''}${

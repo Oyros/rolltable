@@ -19,6 +19,7 @@ import HelpGuide from '../components/HelpGuide.jsx';
 import QuestBoard from '../components/QuestBoard.jsx';
 import LootGenerator from '../components/LootGenerator.jsx';
 import GameCalendar from '../components/GameCalendar.jsx';
+import InitiativeBar from '../components/InitiativeBar.jsx';
 import { applyTheme, DEFAULT_THEME_ID } from '../utils/themes.js';
 
 const AMBIANCE_VOLUME_KEY = 'sessizlik_ambiance_volume';
@@ -183,7 +184,7 @@ export default function Room({ session, onLeave }) {
 
   useEffect(() => {
     if (role === 'gm') return;
-    const at = settings?.activeTurn?.at;
+    const at = settings?.initiative?.at;
     if (at === undefined) return;
     if (turnSeenRef.current === undefined) {
       turnSeenRef.current = at;
@@ -191,20 +192,25 @@ export default function Room({ session, onLeave }) {
     }
     if (at !== turnSeenRef.current) {
       turnSeenRef.current = at;
-      if (settings?.activeTurn?.playerId === playerId) {
+      const queue = settings?.initiative?.queue || [];
+      const currentId = queue[settings?.initiative?.currentIndex];
+      if (currentId === playerId) {
         setTurnBannerActive(true);
         setTimeout(() => setTurnBannerActive(false), 3500);
       }
     }
-  }, [settings?.activeTurn, role, playerId]);
+  }, [settings?.initiative, role, playerId]);
 
   useEffect(() => {
     const v = scene?.vignette ?? 0;
-    const opacity = 0.35 + (v / 100) * 0.55;
-    const inner = 40 - (v / 100) * 25;
+    const hour = settings?.calendar?.hour ?? 12;
+    const nightIntensity = (1 + Math.cos((hour / 24) * 2 * Math.PI)) / 2;
+    const nightBonus = nightIntensity * 0.22;
+    const opacity = Math.min(1, 0.35 + (v / 100) * 0.55 + nightBonus);
+    const inner = Math.max(10, 40 - (v / 100) * 25 - nightIntensity * 12);
     document.documentElement.style.setProperty('--vignette-opacity', opacity.toFixed(2));
     document.documentElement.style.setProperty('--vignette-inner', `${inner.toFixed(0)}%`);
-  }, [scene?.vignette]);
+  }, [scene?.vignette, settings?.calendar?.hour]);
 
   useEffect(() => {
     return () => {
@@ -224,6 +230,19 @@ export default function Room({ session, onLeave }) {
   function kickPlayer(targetId) {
     update(ref(db, `rooms/${roomCode}/kickSignal`), { [targetId]: Date.now() });
     remove(ref(db, `rooms/${roomCode}/players/${targetId}`));
+  }
+
+  function advanceInitiative(direction) {
+    const queue = settings?.initiative?.queue || [];
+    if (queue.length === 0) return;
+    const currentIndex = settings?.initiative?.currentIndex ?? 0;
+    const prevId = queue[currentIndex] ?? null;
+    const newIndex = (currentIndex + direction + queue.length) % queue.length;
+    update(ref(db, `rooms/${roomCode}/settings/initiative`), {
+      currentIndex: newIndex,
+      previousPlayerId: prevId,
+      at: Date.now(),
+    });
   }
 
   const isOwner = ownerId ? ownerId === playerId : true;
@@ -252,9 +271,17 @@ export default function Room({ session, onLeave }) {
         </>
       )}
       <div className="room-header-content">
-        <div>
+        <div className="header-left">
           <h1 className="title-font">{gameConfig?.name || 'RollTable'}</h1>
           <span className="room-code">Oda: {roomCode}</span>
+        </div>
+        <div className="header-center">
+          <InitiativeBar
+            initiative={settings?.initiative}
+            players={players}
+            isGM={role === 'gm'}
+            onAdvance={advanceInitiative}
+          />
         </div>
         <div className="header-right">
           <SessionTimer startedAt={settings?.sessionStartedAt} />
@@ -357,9 +384,17 @@ export default function Room({ session, onLeave }) {
             isGM={role === 'gm'}
             onKick={kickPlayer}
             playerId={playerId}
-            activeTurnPlayerId={settings?.activeTurn?.playerId}
+            activeTurnPlayerId={settings?.initiative?.queue?.[settings?.initiative?.currentIndex]}
+            roomCode={roomCode}
+            sessionStarted={!!settings?.sessionStartedAt}
           />
-          <QuestBoard roomCode={roomCode} quests={quests} isGM={role === 'gm'} />
+          <QuestBoard
+            roomCode={roomCode}
+            quests={quests}
+            isGM={role === 'gm'}
+            players={players}
+            calendar={settings?.calendar}
+          />
         </aside>
 
         <div className="room-content">
@@ -392,6 +427,7 @@ export default function Room({ session, onLeave }) {
                   playerId={playerId}
                   player={me}
                   gameConfig={gameConfig}
+                  sessionStarted={!!settings?.sessionStartedAt}
                 />
               )
             )}

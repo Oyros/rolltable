@@ -1,13 +1,30 @@
 import { useState } from 'react';
+import { ref, update } from 'firebase/database';
+import { db } from '../firebase.js';
 import { STATUS_LABEL } from '../utils/stats.js';
 import WhisperLog from './WhisperLog.jsx';
+import CharacterSheet from './CharacterSheet.jsx';
 
 function nameOf(list, id) {
   return list.find((x) => x.id === id)?.name;
 }
 
-export default function PartyOverview({ players, gameConfig, isGM, onKick, playerId, activeTurnPlayerId }) {
+export default function PartyOverview({
+  players,
+  gameConfig,
+  isGM,
+  onKick,
+  playerId,
+  activeTurnPlayerId,
+  roomCode,
+  sessionStarted,
+}) {
   const [expandedId, setExpandedId] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+
+  function toggleSheetLock(id, locked) {
+    update(ref(db, `rooms/${roomCode}/players/${id}`), { sheetLocked: !locked });
+  }
   const list = Object.entries(players || {}).filter(([, p]) => p.role !== 'gm');
   const gmEntry = Object.entries(players || {}).find(([, p]) => p.role === 'gm');
 
@@ -149,17 +166,33 @@ export default function PartyOverview({ players, gameConfig, isGM, onKick, playe
                   </div>
 
                   {isGM && (
-                    <button
-                      type="button"
-                      className="btn-ghost small danger"
-                      onClick={() => {
-                        if (window.confirm(`${p.name} adlı oyuncuyu odadan atmak istediğine emin misin?`)) {
-                          onKick(id);
-                        }
-                      }}
-                    >
-                      Odadan At
-                    </button>
+                    <div className="party-detail-actions">
+                      <button
+                        type="button"
+                        className="btn-ghost small"
+                        onClick={() => setEditingId(id)}
+                      >
+                        ✏️ Karakteri Düzenle
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-ghost small"
+                        onClick={() => toggleSheetLock(id, p.sheetLocked)}
+                      >
+                        {p.sheetLocked ? '🔓 Kilidi Aç' : '🔒 Kilitle'}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-ghost small danger"
+                        onClick={() => {
+                          if (window.confirm(`${p.name} adlı oyuncuyu odadan atmak istediğine emin misin?`)) {
+                            onKick(id);
+                          }
+                        }}
+                      >
+                        Odadan At
+                      </button>
+                    </div>
                   )}
                 </div>
               )}
@@ -170,6 +203,27 @@ export default function PartyOverview({ players, gameConfig, isGM, onKick, playe
 
       <WhisperLog players={players} playerId={playerId} isGM={isGM} />
       </div>
+
+      {isGM && editingId && players?.[editingId] && (
+        <div className="whisper-overlay">
+          <div className="game-setup-card panel rules-editor-card character-edit-card">
+            <div className="rules-editor-header">
+              <h1 className="title-font">✏️ {players[editingId].name} — Karakter Düzenle</h1>
+              <button type="button" className="btn-ghost" onClick={() => setEditingId(null)}>
+                ✕ Kapat
+              </button>
+            </div>
+            <CharacterSheet
+              roomCode={roomCode}
+              playerId={editingId}
+              player={players[editingId]}
+              gameConfig={gameConfig}
+              isGM
+              sessionStarted={sessionStarted}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 }

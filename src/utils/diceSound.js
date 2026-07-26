@@ -67,6 +67,53 @@ function playKnock(ctx, time, gainValue) {
   noiseSource.stop(time + clickDuration);
 }
 
+export function playCritSuccess(volume = 0.35) {
+  try {
+    const ctx = getContext();
+    const now = ctx.currentTime;
+    [0, 0.09, 0.18].forEach((delay, i) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'triangle';
+      const freq = 660 * 1.5 ** i;
+      osc.frequency.setValueAtTime(freq, now + delay);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(volume * 0.5, now + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.15);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + delay);
+      osc.stop(now + delay + 0.16);
+    });
+  } catch {
+    // Web Audio unavailable or blocked — fail silently
+  }
+}
+
+export function playCritFail(volume = 0.35) {
+  try {
+    const ctx = getContext();
+    const now = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(50, now + 0.35);
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(volume * 0.4, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.42);
+  } catch {
+    // Web Audio unavailable or blocked — fail silently
+  }
+}
+
 export function playDiceRattle(durationMs = 1000, volume = 0.35) {
   try {
     const ctx = getContext();

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { ref, update } from 'firebase/database';
+import { ref, update, push } from 'firebase/database';
 import { db } from '../firebase.js';
+import { STATUS_LABEL } from '../utils/stats.js';
 
-export default function CharacterSheet({ roomCode, playerId, player, gameConfig }) {
+export default function CharacterSheet({ roomCode, playerId, player, gameConfig, isGM = false, sessionStarted = false }) {
   const path = `rooms/${roomCode}/players/${playerId}`;
   const [newItem, setNewItem] = useState('');
   const [catalogItemId, setCatalogItemId] = useState('');
@@ -17,8 +18,20 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig 
   const perks = gameConfig.perks || [];
   const items = gameConfig.items || [];
 
+  const locked = !!player.sheetLocked;
+  const editable = isGM || !locked;
+
   function patch(data) {
     update(ref(db, path), data);
+  }
+
+  function logChange(text) {
+    if (!sessionStarted) return;
+    push(ref(db, `${path}/whispers`), { text: `📝 ${text}`, at: Date.now(), system: true });
+  }
+
+  function toggleLock() {
+    patch({ sheetLocked: !locked });
   }
 
   function commitPortrait() {
@@ -28,11 +41,16 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig 
   function changeStat(statId, delta) {
     const current = player.stats?.[statId] ?? 2;
     const next = Math.min(10, Math.max(0, current + delta));
+    if (next === current) return;
     patch({ [`stats/${statId}`]: next });
+    const statName = stats.find((s) => s.id === statId)?.name || statId;
+    logChange(`${statName} statı ${current} → ${next} oldu`);
   }
 
   function changeStatus(e) {
-    patch({ status: e.target.value });
+    const next = e.target.value;
+    patch({ status: next });
+    logChange(`Durum değişti: ${STATUS_LABEL[next] || next}`);
   }
 
   function commitSkills() {
@@ -42,6 +60,7 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig 
   function addItem() {
     if (!newItem.trim()) return;
     patch({ inventory: [...(player.inventory || []), newItem.trim()] });
+    logChange(`Envantere eklendi: ${newItem.trim()}`);
     setNewItem('');
   }
 
@@ -50,17 +69,32 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig 
     const item = items.find((i) => i.id === catalogItemId);
     if (!item) return;
     patch({ inventory: [...(player.inventory || []), item.name] });
+    logChange(`Envantere eklendi: ${item.name}`);
     setCatalogItemId('');
   }
 
   function removeItem(index) {
+    const removed = (player.inventory || [])[index];
     patch({ inventory: (player.inventory || []).filter((_, i) => i !== index) });
+    if (removed) logChange(`Envanterden çıkarıldı: ${removed}`);
   }
 
-  function toggleInList(field, id) {
+  function toggleInList(field, id, catalog) {
     const current = player[field] || [];
-    const next = current.includes(id) ? current.filter((x) => x !== id) : [...current, id];
+    const adding = !current.includes(id);
+    const next = adding ? [...current, id] : current.filter((x) => x !== id);
     patch({ [field]: next });
+    const label = field === 'traits' ? 'Trait' : 'Perk';
+    const itemName = catalog.find((c) => c.id === id)?.name || id;
+    logChange(`${label} ${adding ? 'eklendi' : 'çıkarıldı'}: ${itemName}`);
+  }
+
+  function changeRaceClassSubclass(field, id, catalog, label) {
+    patch({ [field]: id });
+    if (id) {
+      const name = catalog.find((c) => c.id === id)?.name || id;
+      logChange(`${label} değişti: ${name}`);
+    }
   }
 
   const selectedRace = races.find((r) => r.id === player.raceId);
@@ -73,8 +107,22 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig 
 
   return (
     <div className="panel character-sheet">
-      <h2 className="title-font">{player.name}</h2>
+      <div className="character-sheet-header">
+        <h2 className="title-font">{player.name}</h2>
+        {!isGM && (
+          <button type="button" className="btn-ghost small" onClick={toggleLock}>
+            {locked ? '🔓 Kilidi Aç' : '🔒 Kilitle'}
+          </button>
+        )}
+      </div>
 
+      {locked && !isGM && (
+        <p className="muted sheet-locked-notice">
+          🔒 Karakter kağıdın kilitli. Değişiklik yapmak için kilidi aç.
+        </p>
+      )}
+
+      <fieldset disabled={!editable} className="character-sheet-fields">
       <div className="portrait-field">
         {portraitDraft && (
           <img className="portrait-preview" src={portraitDraft} alt={player.name} />
@@ -103,7 +151,10 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig 
           {races.length > 0 && (
             <label>
               Irk
-              <select value={player.raceId || ''} onChange={(e) => patch({ raceId: e.target.value })}>
+              <select
+                value={player.raceId || ''}
+                onChange={(e) => changeRaceClassSubclass('raceId', e.target.value, races, 'Irk')}
+              >
                 <option value="">Seç...</option>
                 {races.map((r) => (
                   <option key={r.id} value={r.id}>
@@ -118,7 +169,7 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig 
               Sınıf
               <select
                 value={player.classId || ''}
-                onChange={(e) => patch({ classId: e.target.value })}
+                onChange={(e) => changeRaceClassSubclass('classId', e.target.value, classes, 'Sınıf')}
               >
                 <option value="">Seç...</option>
                 {classes.map((c) => (
@@ -134,7 +185,7 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig 
               Alt Sınıf
               <select
                 value={player.subclassId || ''}
-                onChange={(e) => patch({ subclassId: e.target.value })}
+                onChange={(e) => changeRaceClassSubclass('subclassId', e.target.value, subclasses, 'Alt sınıf')}
               >
                 <option value="">Seç...</option>
                 {subclasses.map((s) => (
@@ -206,7 +257,7 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig 
                 <input
                   type="checkbox"
                   checked={(player.traits || []).includes(t.id)}
-                  onChange={() => toggleInList('traits', t.id)}
+                  onChange={() => toggleInList('traits', t.id, traits)}
                 />
                 {t.name}
               </label>
@@ -236,7 +287,7 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig 
                 <input
                   type="checkbox"
                   checked={(player.perks || []).includes(p.id)}
-                  onChange={() => toggleInList('perks', p.id)}
+                  onChange={() => toggleInList('perks', p.id, perks)}
                 />
                 {p.name}
               </label>
@@ -323,6 +374,7 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig 
           </button>
         </div>
       </div>
+      </fieldset>
     </div>
   );
 }

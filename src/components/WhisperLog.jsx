@@ -5,7 +5,7 @@ export default function WhisperLog({ players, playerId, isGM }) {
     Object.entries(players || {}).forEach(([pid, p]) => {
       if (p.role === 'gm') return;
       Object.entries(p.whispers || {}).forEach(([key, w]) => {
-        entries.push({ key: `${pid}-${key}`, to: p.name, text: w.text, at: w.at });
+        entries.push({ key: `${pid}-${key}`, to: p.name, text: w.text, at: w.at, system: w.system });
       });
     });
   } else {
@@ -14,6 +14,7 @@ export default function WhisperLog({ players, playerId, isGM }) {
       key,
       text: w.text,
       at: w.at,
+      system: w.system,
     }));
   }
 
@@ -26,7 +27,7 @@ export default function WhisperLog({ players, playerId, isGM }) {
       <span className="party-detail-heading">Fısıltı Geçmişi</span>
       <ul>
         {entries.slice(0, 15).map((e) => (
-          <li key={e.key}>
+          <li key={e.key} className={e.system ? 'whisper-log-system' : undefined}>
             {isGM && <span className="whisper-log-to">{e.to}:</span>} {e.text}
           </li>
         ))}
