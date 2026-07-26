@@ -538,6 +538,11 @@ button:hover {
   color: var(--ok);
 }
 
+.room-card button {
+  width: auto;
+  flex-shrink: 0;
+}
+
 .friends-subheading {
   font-family: var(--font-heading);
   color: var(--text-muted);
