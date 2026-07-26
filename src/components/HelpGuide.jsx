@@ -101,6 +101,10 @@ export default function HelpGuide({ onClose }) {
 
         <details>
           <summary>📜 Karakter Kağıdı (oyuncular)</summary>
+          <p>
+            Orta bölümün altındaki <strong>"📜 Karakter Kağıdımı Aç"</strong> kartına tıklayınca
+            tam ekran açılır (kapatmak için "✕ Kapat" ya da dışına tıkla).
+          </p>
           <ul>
             <li>Karakter görseli ve <strong>profil rengi</strong> seç — bu renk Parti panelinde ve harita pinlerinde senin rengin olur.</li>
             <li>Irk / Sınıf / Alt Sınıf seç (varsa açıklamaları altında görünür).</li>
@@ -132,6 +136,10 @@ export default function HelpGuide({ onClose }) {
 
         <details>
           <summary>🛠️ GM Kontrol Paneli (orta bölüm, sadece GM)</summary>
+          <p>
+            Orta bölümün altındaki <strong>"🛠️ GM Kontrol Panelini Aç"</strong> kartına tıklayınca
+            tam ekran açılır (kapatmak için "✕ Kapat" ya da dışına tıkla).
+          </p>
           <ul>
             <li><strong>Oda Yönetimi</strong> — odayı kilitle/aç (yeni katılımı engelle), oturum zamanlayıcısını başlat/sıfırla, odayı sil (sadece oda sahibi görür).</li>
             <li><strong>Üst Menü Afişi</strong> — sayfanın en üstündeki banner görseli.</li>

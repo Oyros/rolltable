@@ -43,6 +43,7 @@ export default function Room({ session, onLeave }) {
   const [kicked, setKicked] = useState(false);
   const [ownerId, setOwnerId] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [showBottomPanel, setShowBottomPanel] = useState(false);
   const [turnBannerActive, setTurnBannerActive] = useState(false);
   const flashSeenRef = useRef(undefined);
   const kickSeenRef = useRef(undefined);
@@ -410,28 +411,50 @@ export default function Room({ session, onLeave }) {
           />
 
           <div className="room-bottom">
-            {role === 'gm' ? (
-              <GMPanel
-                roomCode={roomCode}
-                scene={scene}
-                players={players}
-                settings={settings}
-                gameConfig={gameConfig}
-                onDeleteRoom={deleteRoom}
-                isOwner={isOwner}
-              />
-            ) : (
-              me && (
-                <CharacterSheet
-                  roomCode={roomCode}
-                  playerId={playerId}
-                  player={me}
-                  gameConfig={gameConfig}
-                  sessionStarted={!!settings?.sessionStartedAt}
-                />
-              )
-            )}
+            <button
+              type="button"
+              className="panel bottom-panel-trigger"
+              onClick={() => setShowBottomPanel(true)}
+            >
+              <span className="bottom-panel-trigger-icon">{role === 'gm' ? '🛠️' : '📜'}</span>
+              <span>{role === 'gm' ? 'GM Kontrol Panelini Aç' : 'Karakter Kağıdımı Aç'}</span>
+            </button>
           </div>
+
+          {showBottomPanel && (
+            <div className="whisper-overlay" onClick={() => setShowBottomPanel(false)}>
+              <div className="bottom-panel-modal" onClick={(e) => e.stopPropagation()}>
+                <button
+                  type="button"
+                  className="btn-ghost bottom-panel-close"
+                  onClick={() => setShowBottomPanel(false)}
+                >
+                  ✕ Kapat
+                </button>
+                {role === 'gm' ? (
+                  <GMPanel
+                    roomCode={roomCode}
+                    scene={scene}
+                    players={players}
+                    settings={settings}
+                    gameConfig={gameConfig}
+                    onDeleteRoom={deleteRoom}
+                    isOwner={isOwner}
+                  />
+                ) : (
+                  me && (
+                    <CharacterSheet
+                      roomCode={roomCode}
+                      playerId={playerId}
+                      player={me}
+                      gameConfig={gameConfig}
+                      sessionStarted={!!settings?.sessionStartedAt}
+                    />
+                  )
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <aside className="room-sidebar">
