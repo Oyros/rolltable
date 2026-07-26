@@ -395,6 +395,149 @@ button:hover {
   gap: 10px;
 }
 
+/* Profile screen */
+.profile-screen {
+  min-height: 100vh;
+  padding: 40px 20px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.profile-shell {
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.profile-header-user {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.profile-header-user h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.profile-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.profile-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, var(--amber) 0%, var(--amber-dim) 100%);
+  color: #1a1206;
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+}
+
+.profile-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.toggle-field {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.toggle-field input {
+  width: auto;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.profile-actions .btn-primary,
+.profile-actions .btn-ghost {
+  flex: 1;
+}
+
+.profile-section h2 {
+  font-family: var(--font-heading);
+  color: var(--amber-light);
+  font-size: 1.05rem;
+  margin: 0 0 14px;
+}
+
+.room-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.room-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+}
+
+.room-card-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.room-card-info {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.room-card-name {
+  font-weight: 600;
+}
+
+.room-card-code {
+  font-size: 0.78rem;
+}
+
+.room-card-status {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.room-card-status.active {
+  color: var(--ok);
+}
+
 /* Room layout */
 .room {
   height: 100vh;

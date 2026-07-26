@@ -3,7 +3,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { ref, onValue } from 'firebase/database';
 import { auth, db } from './firebase.js';
 import Auth from './pages/Auth.jsx';
-import Home from './pages/Home.jsx';
+import Profile from './pages/Profile.jsx';
 import Room from './pages/Room.jsx';
 
 const SESSION_KEY = 'sessizlik_session';
@@ -113,7 +113,7 @@ export default function App() {
   }
 
   if (!session) {
-    return <Home onJoin={handleJoin} playerId={authUser.uid} />;
+    return <Profile authUser={authUser} profile={profile} playerId={authUser.uid} onJoin={handleJoin} />;
   }
 
   return <Room session={session} onLeave={handleLeave} />;

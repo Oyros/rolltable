@@ -1,25 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ref, get, update } from 'firebase/database';
-import { signOut } from 'firebase/auth';
-import { db, auth } from '../firebase.js';
-import { applyTheme, DEFAULT_THEME_ID } from '../utils/themes.js';
+import { db } from '../firebase.js';
+import { DEFAULT_THEME_ID } from '../utils/themes.js';
 import ParticleEffect from '../components/ParticleEffect.jsx';
-import HelpGuide from '../components/HelpGuide.jsx';
 
-export default function Home({ onJoin, playerId }) {
-  const params = new URLSearchParams(window.location.search);
-  const [mode, setMode] = useState(params.get('room') ? 'join' : null);
-  const [roomCode, setRoomCode] = useState(params.get('room') || '');
-  const [name, setName] = useState('');
+export default function Home({ onJoin, playerId, mode, initialRoomCode, defaultName, onExit }) {
+  const [roomCode, setRoomCode] = useState(initialRoomCode || '');
+  const [name, setName] = useState(defaultName || '');
   const [password, setPassword] = useState('');
   const [needsPassword, setNeedsPassword] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
-
-  useEffect(() => {
-    applyTheme(DEFAULT_THEME_ID);
-  }, []);
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -85,50 +76,6 @@ export default function Home({ onJoin, playerId }) {
     }
   }
 
-  function goBack() {
-    setMode(null);
-    setError('');
-  }
-
-  if (!mode) {
-    return (
-      <div className="home-screen">
-        <ParticleEffect theme={DEFAULT_THEME_ID} />
-        <div className="home-card panel">
-          <h1 className="title-font">RollTable</h1>
-          <p className="subtitle">Sanal Masaya Katıl</p>
-          <div className="home-choice-buttons">
-            <button type="button" className="btn-primary" onClick={() => setMode('create')}>
-              🎲 Oda Kur
-            </button>
-            <button
-              type="button"
-              className="btn-ghost sound-toggle home-join-btn"
-              onClick={() => setMode('join')}
-            >
-              🚪 Odaya Katıl
-            </button>
-          </div>
-          <button
-            type="button"
-            className="btn-ghost home-back-btn"
-            onClick={() => setShowHelp(true)}
-          >
-            ❓ Nasıl Çalışır?
-          </button>
-          <button
-            type="button"
-            className="btn-ghost home-back-btn"
-            onClick={() => signOut(auth)}
-          >
-            🚪 Çıkış Yap
-          </button>
-        </div>
-        {showHelp && <HelpGuide onClose={() => setShowHelp(false)} />}
-      </div>
-    );
-  }
-
   return (
     <div className="home-screen">
       <ParticleEffect theme={DEFAULT_THEME_ID} />
@@ -180,12 +127,11 @@ export default function Home({ onJoin, playerId }) {
           <button type="submit" className="btn-primary" disabled={busy}>
             {busy ? 'Bekleniyor...' : mode === 'create' ? 'Odayı Kur ve Gir' : 'Masaya Otur'}
           </button>
-          <button type="button" className="btn-ghost home-back-btn" onClick={goBack}>
-            ← Geri
+          <button type="button" className="btn-ghost home-back-btn" onClick={onExit}>
+            ← Profilime Dön
           </button>
         </form>
       </div>
-      {showHelp && <HelpGuide onClose={() => setShowHelp(false)} />}
     </div>
   );
 }
