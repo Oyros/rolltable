@@ -26,9 +26,15 @@ export default function PartyOverview({
   function toggleSheetLock(id, locked) {
     update(ref(db, `rooms/${roomCode}/players/${id}`), { sheetLocked: !locked });
   }
+
+  function changeXp(id, currentXp, delta) {
+    const next = Math.max(0, (currentXp || 0) + delta);
+    update(ref(db, `rooms/${roomCode}/players/${id}`), { xp: next });
+  }
   const list = Object.entries(players || {}).filter(([, p]) => p.role !== 'gm');
 
   const stats = gameConfig?.stats || [];
+  const resources = gameConfig?.resources || [];
   const races = gameConfig?.races || [];
   const classes = gameConfig?.classes || [];
   const subclasses = gameConfig?.subclasses || [];
@@ -96,6 +102,40 @@ export default function PartyOverview({
                           <span className="stat-value">{p.stats?.[s.id] ?? 2}</span>
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {resources.length > 0 && (
+                    <div className="party-detail-section">
+                      <span className="party-detail-heading">Kaynaklar</span>
+                      {resources.map((r) => {
+                        const current = p.resources?.[r.id] ?? r.max;
+                        const pct = Math.round((current / r.max) * 100);
+                        return (
+                          <div className="resource-mini" key={r.id}>
+                            <span>{r.name}</span>
+                            <div className="resource-bar">
+                              <div className="resource-bar-fill" style={{ width: `${pct}%` }} />
+                            </div>
+                            <span>{current}/{r.max}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {isGM && (
+                    <div className="party-detail-section">
+                      <span className="party-detail-heading">XP</span>
+                      <div className="xp-control">
+                        <button type="button" className="btn-ghost small" onClick={() => changeXp(id, p.xp, -10)}>
+                          -10
+                        </button>
+                        <span className="stat-value">{p.xp || 0}</span>
+                        <button type="button" className="btn-ghost small" onClick={() => changeXp(id, p.xp, 10)}>
+                          +10
+                        </button>
+                      </div>
                     </div>
                   )}
 

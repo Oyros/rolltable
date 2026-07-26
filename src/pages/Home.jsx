@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
 import { ref, get, update } from 'firebase/database';
 import { db } from '../firebase.js';
-import { getOrCreatePlayerId } from '../utils/id.js';
 import { applyTheme, DEFAULT_THEME_ID } from '../utils/themes.js';
 import ParticleEffect from '../components/ParticleEffect.jsx';
 import HelpGuide from '../components/HelpGuide.jsx';
 
-export default function Home({ onJoin }) {
+export default function Home({ onJoin, playerId }) {
   const params = new URLSearchParams(window.location.search);
   const [mode, setMode] = useState(params.get('room') ? 'join' : null);
   const [roomCode, setRoomCode] = useState(params.get('room') || '');
   const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [needsPassword, setNeedsPassword] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -32,7 +33,6 @@ export default function Home({ onJoin }) {
         setBusy(false);
         return;
       }
-      const playerId = getOrCreatePlayerId();
       await update(ref(db, `rooms/${code}`), { ownerId: playerId, ownerName: name.trim() });
       onJoin({ roomCode: code, name: name.trim(), role: 'gm', playerId });
     } catch (err) {
@@ -54,9 +54,23 @@ export default function Home({ onJoin }) {
         setBusy(false);
         return;
       }
-      const playerId = getOrCreatePlayerId();
-      const ownerId = snap.val()?.ownerId;
-      const role = ownerId && ownerId === playerId ? 'gm' : 'oyuncu';
+      const roomVal = snap.val();
+      const ownerId = roomVal?.ownerId;
+      const isOwner = ownerId && ownerId === playerId;
+      const roomPassword = roomVal?.settings?.password;
+
+      if (!isOwner && roomPassword && !needsPassword) {
+        setNeedsPassword(true);
+        setBusy(false);
+        return;
+      }
+      if (!isOwner && roomPassword && password !== roomPassword) {
+        setError('Şifre yanlış.');
+        setBusy(false);
+        return;
+      }
+
+      const role = isOwner ? 'gm' : 'oyuncu';
       onJoin({ roomCode: code, name: name.trim(), role, playerId });
     } catch (err) {
       setError(`Katılınamadı: ${err.message}`);
@@ -132,6 +146,19 @@ export default function Home({ onJoin }) {
               Bu kodla yeni bir oda kurulacak ve otomatik olarak GM olarak atanacaksın. Sadece sen
               bu odayı silebilirsin.
             </p>
+          )}
+
+          {mode === 'join' && needsPassword && (
+            <label>
+              Oda Şifresi
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="GM'den aldığın şifre"
+                autoFocus
+              />
+            </label>
           )}
 
           {error && <p className="sound-error">{error}</p>}

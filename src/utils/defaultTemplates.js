@@ -6,6 +6,10 @@ function entry(id, name, description = '') {
   return { id, name, description };
 }
 
+function resource(id, name, max) {
+  return { id, name, max };
+}
+
 export const DEFAULT_TEMPLATES = [
   {
     id: 'builtin-sessizlik',
@@ -21,6 +25,7 @@ export const DEFAULT_TEMPLATES = [
       stat('karizma', 'Karizma', 'İkna, liderlik, pazarlık'),
       stat('empati', 'Empati', 'İnsanları okuma, güven kurma, teselli etme'),
     ],
+    resources: [resource('saglik', 'Sağlık', 5)],
     races: [],
     classes: [],
     subclasses: [
@@ -64,6 +69,7 @@ export const DEFAULT_TEMPLATES = [
       stat('bilgelik', 'Bilgelik', 'Sezgi, algı, irade gücü'),
       stat('karizma', 'Karizma', 'İkna, liderlik, büyüsel etki'),
     ],
+    resources: [resource('can', 'Can Puanı', 20)],
     races: [
       entry('insan', 'İnsan', 'Uyumlu ve hırslı, her yolda kendine yer bulur.'),
       entry('elf', 'Elf', 'Zarif ve uzun ömürlü, doğa ve büyüyle bağlantılı.'),
@@ -120,6 +126,11 @@ export const DEFAULT_TEMPLATES = [
       stat('zorlu', 'Zorlu', 'Fiziksel dayanıklılık, sertlik'),
       stat('sinsi', 'Sinsi', 'Gizlilik, sabır, arka plandan hareket'),
     ],
+    resources: [
+      resource('fiziksel-stres', 'Fiziksel Stres', 2),
+      resource('zihinsel-stres', 'Zihinsel Stres', 2),
+      resource('fate-puani', 'Fate Puanı', 3),
+    ],
     races: [],
     classes: [],
     subclasses: [],
@@ -156,6 +167,10 @@ export const DEFAULT_TEMPLATES = [
       stat('teknik', 'Teknik', 'Hackleme, tamirat, mühendislik'),
       stat('zeka', 'Zeka', 'Analiz, strateji, bilgi'),
       stat('sogukkanlilik', 'Soğukkanlılık', 'Stres altında karar verme, irade'),
+    ],
+    resources: [
+      resource('can', 'Can Puanı', 10),
+      resource('isi', 'Isı', 10),
     ],
     races: [],
     classes: [
@@ -203,6 +218,10 @@ export const DEFAULT_TEMPLATES = [
       stat('irade', 'İrade', 'Açlığa ve dürtülere karşı direnç'),
       stat('disiplin', 'Disiplin', 'Doğaüstü güçleri kontrol etme becerisi'),
     ],
+    resources: [
+      resource('kan-puani', 'Kan Puanı', 10),
+      resource('insanlik', 'İnsanlık', 10),
+    ],
     races: [],
     classes: [
       entry('ventrue', 'Ventrue', 'Asil ve komuta eden, gücü elinde tutan klan.'),
@@ -246,6 +265,7 @@ export const DEFAULT_TEMPLATES = [
       stat('akil-sagligi', 'Akıl Sağlığı', 'Dehşete ve bilinmeyene karşı direnç'),
       stat('sans', 'Şans', 'Beklenmedik anlarda iyi ya da kötü talih'),
     ],
+    resources: [resource('can', 'Can Puanı', 10)],
     races: [],
     classes: [
       entry('akademisyen', 'Akademisyen', 'Kadim bilgiye meraklı araştırmacı.'),
@@ -290,6 +310,7 @@ export const DEFAULT_TEMPLATES = [
       stat('karizma', 'Karizma', 'İkna, blöf, liderlik'),
       stat('kurnazlik', 'Kurnazlık', 'Hile, gözlem, strateji'),
     ],
+    resources: [resource('can', 'Can Puanı', 10)],
     races: [],
     classes: [
       entry('serif', 'Şerif', 'Kasabanın kanununu koruyan otorite.'),

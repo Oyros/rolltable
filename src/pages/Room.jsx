@@ -11,6 +11,8 @@ import GMNotes from '../components/GMNotes.jsx';
 import PlayerNotes from '../components/PlayerNotes.jsx';
 import PartyOverview from '../components/PartyOverview.jsx';
 import GmSlotCard from '../components/GmSlotCard.jsx';
+import ChatPanel from '../components/ChatPanel.jsx';
+import SessionLogExport from '../components/SessionLogExport.jsx';
 import Portal from '../components/Portal.jsx';
 import WhisperOverlay from '../components/WhisperOverlay.jsx';
 import GameSetup from './GameSetup.jsx';
@@ -78,11 +80,17 @@ export default function Room({ session, onLeave }) {
         (gameConfig.stats || []).forEach((stat) => {
           defaultStats[stat.id] = 2;
         });
+        const defaultResources = {};
+        (gameConfig.resources || []).forEach((res) => {
+          defaultResources[res.id] = res.max;
+        });
         update(playerRef, {
           name,
           role,
           status: 'iyi',
           stats: defaultStats,
+          resources: defaultResources,
+          xp: 0,
           skills: '',
           inventory: [],
           raceId: '',
@@ -498,6 +506,24 @@ export default function Room({ session, onLeave }) {
             </summary>
             <div className="side-accordion-body">
               <DiceRoller roomCode={roomCode} name={name} isGM={role === 'gm'} />
+            </div>
+          </details>
+
+          <details className="panel side-accordion">
+            <summary>
+              💬 Sohbet<span className="side-accordion-chevron">▾</span>
+            </summary>
+            <div className="side-accordion-body">
+              <ChatPanel roomCode={roomCode} name={name} playerId={playerId} isGM={role === 'gm'} />
+            </div>
+          </details>
+
+          <details className="panel side-accordion">
+            <summary>
+              📋 Oturum Kaydı<span className="side-accordion-chevron">▾</span>
+            </summary>
+            <div className="side-accordion-body">
+              <SessionLogExport roomCode={roomCode} playerId={playerId} isGM={role === 'gm'} />
             </div>
           </details>
 

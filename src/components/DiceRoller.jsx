@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ref, push, query, limitToLast, onValue } from 'firebase/database';
 import { db } from '../firebase.js';
 import { playDiceRattle, playCritSuccess, playCritFail } from '../utils/diceSound.js';
+import { parseFormula, rollFormula, rollFudge } from '../utils/diceFormula.js';
 
 const DICE = [4, 6, 8, 10, 12, 20];
 const SPIN_MS = 1100;
@@ -23,6 +24,8 @@ export default function DiceRoller({ roomCode, name, isGM }) {
   const [allRolls, setAllRolls] = useState([]);
   const [diceVolume, setDiceVolume] = useState(loadDiceVolume);
   const [rollMode, setRollMode] = useState('normal');
+  const [formulaInput, setFormulaInput] = useState('');
+  const [formulaError, setFormulaError] = useState('');
   const lastKeyRef = useRef(null);
   const isFirstSnapshot = useRef(true);
   const diceVolumeRef = useRef(diceVolume);
@@ -114,6 +117,38 @@ export default function DiceRoller({ roomCode, name, isGM }) {
     });
   }
 
+  function submitFormulaRoll() {
+    const parsed = parseFormula(formulaInput);
+    if (!parsed) {
+      setFormulaError('Geçersiz formül. Örnek: 2d6+3');
+      return;
+    }
+    setFormulaError('');
+    const { subRolls, result } = rollFormula(parsed);
+    push(ref(db, `rooms/${roomCode}/rolls`), {
+      roller: name,
+      kind: 'formula',
+      formula: formulaInput.trim(),
+      subRolls,
+      modifier: parsed.modifier,
+      result,
+      at: Date.now(),
+      hidden: isGM && secretMode,
+    });
+  }
+
+  function submitFudgeRoll() {
+    const { subRolls, result } = rollFudge();
+    push(ref(db, `rooms/${roomCode}/rolls`), {
+      roller: name,
+      kind: 'fudge',
+      subRolls,
+      result,
+      at: Date.now(),
+      hidden: isGM && secretMode,
+    });
+  }
+
   function mask(value, hidden) {
     if (hidden && !isGM) return '??';
     return value;
@@ -199,7 +234,28 @@ export default function DiceRoller({ roomCode, name, isGM }) {
             d{sides}
           </button>
         ))}
+        <button type="button" className="btn-dice" onClick={submitFudgeRoll}>
+          🎴 4dF
+        </button>
       </div>
+
+      <div className="dice-formula-form">
+        <input
+          value={formulaInput}
+          onChange={(e) => setFormulaInput(e.target.value)}
+          placeholder="Zar formülü, örn. 2d6+3"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              submitFormulaRoll();
+            }
+          }}
+        />
+        <button type="button" className="btn-ghost small" onClick={submitFormulaRoll}>
+          At
+        </button>
+      </div>
+      {formulaError && <p className="sound-error">{formulaError}</p>}
 
       <label className="volume-control dice-volume-control">
         🎲 Zar Sesi
@@ -219,13 +275,31 @@ export default function DiceRoller({ roomCode, name, isGM }) {
         {rollState && !rollState.mode && (
           <div className={(rollState.stage === 'spinning' ? 'die-spin' : 'die-result') + critClass}>
             <span className={`die-face${rollState.stage === 'spinning' ? ' spinning' : ''}`}>
-              {rollState.stage === 'spinning' ? `d${rollState.dice}` : mask(rollState.result, rollState.hidden)}
+              {rollState.stage === 'spinning'
+                ? rollState.kind === 'formula'
+                  ? rollState.formula
+                  : rollState.kind === 'fudge'
+                    ? '4dF'
+                    : `d${rollState.dice}`
+                : mask(rollState.result, rollState.hidden)}
             </span>
             <span className="die-roller">
               {rollState.stage === 'spinning'
                 ? `${rollState.roller} atıyor...`
-                : `${rollState.roller} · d${rollState.dice}`}
+                : rollState.kind === 'formula'
+                  ? `${rollState.roller} · ${rollState.formula}`
+                  : rollState.kind === 'fudge'
+                    ? `${rollState.roller} · 4dF`
+                    : `${rollState.roller} · d${rollState.dice}`}
             </span>
+            {rollState.stage !== 'spinning' && rollState.kind && !(rollState.hidden && !isGM) && (
+              <span className="die-subrolls">
+                {rollState.kind === 'fudge'
+                  ? rollState.subRolls.map((v) => (v === 1 ? '➕' : v === -1 ? '➖' : '⬜')).join(' ')
+                  : rollState.subRolls.join(' + ') +
+                    (rollState.modifier ? ` ${rollState.modifier >= 0 ? '+' : ''}${rollState.modifier}` : '')}
+              </span>
+            )}
           </div>
         )}
 
@@ -260,7 +334,7 @@ export default function DiceRoller({ roomCode, name, isGM }) {
           <li key={key}>
             <span>{r.roller}</span>
             <span>
-              d{r.dice}
+              {r.kind === 'formula' ? r.formula : r.kind === 'fudge' ? '4dF' : `d${r.dice}`}
               {r.mode === 'advantage' ? ' ⬆' : r.mode === 'disadvantage' ? ' ⬇' : ''}
             </span>
             <span className="roll-result">{key === hiddenKey ? '…' : displayResult(r)}</span>

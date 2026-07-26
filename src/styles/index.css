@@ -826,6 +826,146 @@ button:hover {
   min-width: 160px;
 }
 
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.resource-box {
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.resource-box-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.resource-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.resource-value {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  color: var(--amber-light);
+  white-space: nowrap;
+}
+
+.resource-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.resource-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--amber-dim), var(--amber));
+  transition: width 0.25s ease;
+}
+
+.resource-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.resource-control button {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 50%;
+  line-height: 1;
+}
+
+.resource-mini {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.resource-mini .resource-bar {
+  flex: 1;
+  min-width: 40px;
+}
+
+.password-field input {
+  max-width: 220px;
+}
+
+.xp-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chat-message-list {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chat-message {
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+.chat-message.gm {
+  border-color: var(--amber-dim);
+}
+
+.chat-message-author {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--amber-light);
+  font-family: var(--font-heading);
+  margin-bottom: 2px;
+}
+
+.chat-message-text {
+  color: var(--text);
+  word-break: break-word;
+}
+
+.chat-form {
+  display: flex;
+  gap: 8px;
+}
+
+.chat-form input {
+  flex: 1;
+}
+
+.file-upload-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .inventory ul {
   list-style: none;
   padding: 0;
@@ -1073,6 +1213,22 @@ button:hover {
 .die-roller {
   color: var(--text-muted);
   font-size: 0.85rem;
+}
+
+.die-subrolls {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+}
+
+.dice-formula-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.dice-formula-form input {
+  flex: 1;
 }
 
 .die-dual {

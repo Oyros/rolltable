@@ -23,8 +23,9 @@ export default function HelpGuide({ onClose }) {
           </p>
           <p>
             <strong>Odaya Katıl</strong>: sadece daha önce kurulmuş bir oda koduna girilebilir. Eğer
-            odayı kuran kişiysen (aynı tarayıcı) otomatik GM olarak tanınırsın, değilsen otomatik
-            Oyuncu olursun. Rol seçmen gerekmez.
+            odayı kuran kişiysen otomatik GM olarak tanınırsın, değilsen otomatik Oyuncu olursun.
+            Rol seçmen gerekmez. GM oda için bir <strong>şifre</strong> belirlediyse, katılırken bu
+            şifre de istenir (GM kendisi şifresiz girer).
           </p>
         </details>
 
@@ -33,7 +34,7 @@ export default function HelpGuide({ onClose }) {
           <p>Oda ilk kurulduğunda GM'den oyunun kurallarını tanımlaması istenir:</p>
           <ul>
             <li><strong>Kayıtlı Şablon Kullan</strong> — daha önce kaydettiğin bir kural setini tek tıkla uygula.</li>
-            <li><strong>Sıfırdan Oluştur</strong> — Senaryo Adı, Tasarım Teması (21 farklı tür arasından: fantazi, cyberpunk, western, korsan, vampir, uzay operası ve daha fazlası), Statlar, Irklar, Sınıflar, Alt Sınıflar, Traitler, Perkler ve Bulunabilecek Eşyalar listelerini kendin oluştur.</li>
+            <li><strong>Sıfırdan Oluştur</strong> — Senaryo Adı, Tasarım Teması (21 farklı tür arasından: fantazi, cyberpunk, western, korsan, vampir, uzay operası ve daha fazlası), Statlar, <strong>Kaynaklar</strong> (Can Puanı, Stres, Kaynak Puanı gibi dolgu çubukları), Irklar, Sınıflar, Alt Sınıflar, Traitler, Perkler ve Bulunabilecek Eşyalar listelerini kendin oluştur.</li>
             <li>İstersen bu kural setini bir <strong>şablon olarak kaydedip</strong> başka odalarda tekrar kullanabilirsin.</li>
           </ul>
           <p>
@@ -111,13 +112,18 @@ export default function HelpGuide({ onClose }) {
             <li>Karakter görseli ve <strong>profil rengi</strong> seç — bu renk Parti panelinde ve harita pinlerinde senin rengin olur.</li>
             <li>Irk / Sınıf / Alt Sınıf seç (varsa açıklamaları altında görünür).</li>
             <li>Statlarını +/- ile ayarla, Durumunu (İyi/Yaralı/Bitkin/Ölü) seç.</li>
+            <li>
+              <strong>Kaynaklar</strong> (varsa — Can Puanı, Stres, Fate Puanı gibi) dolgu
+              çubuğu olarak görünür, +/- ile değiştirirsin; üst sınırı GM'in tanımladığı değerdir.
+            </li>
             <li>Traitler ve Perkler arasından işaretle — seçtiklerinin açıklaması altta çıkar.</li>
             <li>Yetenek/Dal metnini serbestçe yaz.</li>
             <li>Envantere GM'in eşya kataloğundan seçerek veya kendi yazarak eşya ekle.</li>
             <li>
               <strong>🎉 Seviye Atla</strong> — istediğin an açılan bir ekranda bir stata +1 verip
-              (varsa) henüz almadığın bir perk seçersin; onaylayınca seviyen artar. Parti
-              panelinde herkesin seviyesi görünür.
+              (varsa) henüz almadığın bir perk seçersin; onaylayınca seviyen artar ve kaynakların
+              (varsa) tamamen dolar. GM ayrıca sana Parti panelinden XP verebilir — bu sadece
+              görünür bir ilerleme göstergesidir, seviye atlamayı otomatik tetiklemez.
             </li>
             <li>
               <strong>🔒 Kilit</strong> — GM istediği zaman senin karakter kağıdını
@@ -136,7 +142,9 @@ export default function HelpGuide({ onClose }) {
             <li><strong>Normal / Avantaj / Dezavantaj</strong> modunu seç — avantaj/dezavantajda iki zar atılır, sırayla açılır, büyük/küçük olan seçilir.</li>
             <li>GM için <strong>Gizli Zar</strong> — işaretliyken GM'in attığı zarlar oyunculara <code>??</code> görünür.</li>
             <li>d4'ten d20'ye zar butonları, dönme animasyonu ve sesi (ses düzeyini kaydırıcıdan ayarlayabilirsin).</li>
-            <li><strong>Kritik vurgu</strong> — zarın en yüksek yüzü gelirse altın parlama ve yükselen bir ton, 1 gelirse kırmızı sarsılma ve boğuk bir ses eşlik eder.</li>
+            <li><strong>Zar Formülü</strong> — kutuya <code>2d6+3</code> gibi bir ifade yazıp "At" dersin; her zarın sonucu ve toplam gösterilir.</li>
+            <li><strong>🎴 4dF (Fate zarı)</strong> — FATE/Fudge sistemleri için 4 zar atar, her biri -1/0/+1, toplamı gösterir.</li>
+            <li><strong>Kritik vurgu</strong> — zarın en yüksek yüzü gelirse altın parlama ve yükselen bir ton, 1 gelirse kırmızı sarsılma ve boğuk bir ses eşlik eder (sadece tek zar atışlarında).</li>
             <li>Son atışların geçmişi ve <strong>İstatistikler</strong> (kim kaç attı, ortalaması, en şanslı/şanssız) altta.</li>
           </ul>
         </details>
@@ -148,7 +156,7 @@ export default function HelpGuide({ onClose }) {
             tam ekran açılır (kapatmak için "✕ Kapat" ya da dışına tıkla).
           </p>
           <ul>
-            <li><strong>Oda Yönetimi</strong> — odayı kilitle/aç (yeni katılımı engelle), oturum zamanlayıcısını başlat/sıfırla, odayı sil (sadece oda sahibi görür).</li>
+            <li><strong>Oda Yönetimi</strong> — odayı kilitle/aç (yeni katılımı engelle), isteğe bağlı <strong>oda şifresi</strong> belirle, oturum zamanlayıcısını başlat/sıfırla, odayı sil (sadece oda sahibi görür).</li>
             <li><strong>Üst Menü Afişi</strong> — sayfanın en üstündeki banner görseli.</li>
             <li>
               <strong>Mekan / Odak / Müzik Kütüphaneleri</strong> — görsel/link ile bir isim
@@ -158,6 +166,13 @@ export default function HelpGuide({ onClose }) {
               için de "▶️ Devam Ettir" butonunun solundaki açılır menüden seçim yaparsın — hepsi
               anında canlı sahneye uygulanır. Böylece önceden bir sürü görsel/müzik hazırlayıp
               oturum sırasında tek tıkla geçiş yapabilirsin.
+            </li>
+            <li>
+              Her görsel/ses alanının yanındaki <strong>"📤 Yükle"</strong> butonuyla bir link
+              yapıştırmak yerine bilgisayarından dosya seçip doğrudan yükleyebilirsin (görsel için
+              8MB, ses için 15MB üst sınır). Bu, Firebase Storage'ın etkinleştirilmiş olmasını
+              gerektirir — değilse yükleme birkaç saniye içinde net bir hata verir, URL alanı her
+              zaman alternatif olarak çalışmaya devam eder.
             </li>
             <li><strong>Harita</strong> — URL gir, "Yayınla" ile canlı haritayı günceller (harita değişirse eski pinler temizlenir).</li>
             <li><strong>İnisiyatif Sırası</strong> — sıraya oyuncu ekle/çıkar, yeniden sırala, sırayı ilerlet (bkz. yukarıdaki "İnisiyatif Sırası" başlığı).</li>
@@ -179,6 +194,19 @@ export default function HelpGuide({ onClose }) {
         </details>
 
         <details>
+          <summary>💬 Sohbet & Oturum Kaydı (sağ kenar)</summary>
+          <ul>
+            <li><strong>Sohbet</strong> — GM ve tüm oyuncuların birlikte kullandığı ortak yazışma kanalı; son 50 mesaj görünür.</li>
+            <li>
+              <strong>Oturum Kaydı</strong> — "📥 Oturumu Dışa Aktar" butonu zar atışlarını, sohbeti,
+              görevleri ve karakter kağıdı değişikliklerini (statik/kaynak değişimi, seviye atlama
+              vb.) tek bir <code>.txt</code> dosyası olarak indirir. Oyuncular sadece kendi
+              kayıtlarını ve gizli olmayan zarları görür; GM her şeyi görür.
+            </li>
+          </ul>
+        </details>
+
+        <details>
           <summary>📓 Notlar & Üreteçler</summary>
           <ul>
             <li><strong>Not Defterim</strong> (oyuncular) / <strong>GM Notları</strong> (GM) — sadece o kişinin gördüğü, otomatik kaydedilen kişisel not alanı.</li>
@@ -192,10 +220,12 @@ export default function HelpGuide({ onClose }) {
         <details>
           <summary>🔒 Güvenlik Notu</summary>
           <p>
-            Bu uygulamada hesap/şifre sistemi yok — oda koduna sahip olan herkes o odaya
-            katılabilir. Oda kodunu tahmin edilmesi zor seç ve sadece güvendiğin arkadaşlarınla
-            paylaş. Fısıltı ve notlar sadece arayüzde gizlenir, teknik olarak tamamen şifreli
-            değildir.
+            Her tarayıcı oturumu Firebase üzerinden gerçek, sahtesi üretilemeyen bir kimlikle
+            (anonim hesap) tanımlanır; oda sahibi (GM) rolü ve her oyuncunun kendi karakteri bu
+            kimliğe bağlıdır — bu, sunucu tarafında da uygulanır (sadece arayüzde gizlemek değil).
+            Buna ek olarak GM isteğe bağlı bir <strong>oda şifresi</strong> belirleyebilir. Oda
+            kodunu yine de tahmin edilmesi zor seç ve sadece güvendiğin kişilerle paylaş —
+            gerçek hesap/şifre girişi olan bir sistem değildir.
           </p>
         </details>
       </div>

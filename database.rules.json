@@ -1,0 +1,29 @@
+{
+  "rules": {
+    "rooms": {
+      "$roomCode": {
+        ".read": "auth != null",
+        ".write": "auth != null && (!data.exists() || data.child('ownerId').val() === auth.uid)",
+
+        "players": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid"
+          }
+        },
+
+        "chat": {
+          "$msgId": {
+            ".write": "auth != null && !data.exists() && newData.child('byId').val() === auth.uid",
+            ".validate": "newData.hasChildren(['text', 'by', 'byId', 'at']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 1000"
+          }
+        },
+
+        "rolls": {
+          "$rollId": {
+            ".write": "auth != null && !data.exists()"
+          }
+        }
+      }
+    }
+  }
+}

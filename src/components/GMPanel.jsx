@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ref, update, push, remove } from 'firebase/database';
 import { db } from '../firebase.js';
 import RulesEditor from './RulesEditor.jsx';
+import FileUploadButton from './FileUploadButton.jsx';
 
 export default function GMPanel({
   roomCode,
@@ -30,6 +31,9 @@ export default function GMPanel({
   const [bannerDraft, setBannerDraft] = useState('');
   const bannerSynced = useRef(false);
 
+  const [passwordDraft, setPasswordDraft] = useState('');
+  const passwordSynced = useRef(false);
+
   useEffect(() => {
     if (!mapSynced.current && scene) {
       setMapImageUrl(scene.mapImageUrl || '');
@@ -44,8 +48,19 @@ export default function GMPanel({
     }
   }, [settings]);
 
+  useEffect(() => {
+    if (!passwordSynced.current && settings) {
+      setPasswordDraft(settings.password || '');
+      passwordSynced.current = true;
+    }
+  }, [settings]);
+
   function commitBanner() {
     update(ref(db, `rooms/${roomCode}/settings`), { bannerUrl: bannerDraft.trim() });
+  }
+
+  function commitPassword() {
+    update(ref(db, `rooms/${roomCode}/settings`), { password: passwordDraft.trim() });
   }
 
   function toggleLock() {
@@ -253,6 +268,21 @@ export default function GMPanel({
         {settings?.locked && (
           <p className="muted">Oda kilitli — yeni oyuncular katılamaz, mevcut oyuncular girebilir.</p>
         )}
+        <label className="password-field">
+          Oda Şifresi (opsiyonel)
+          <input
+            type="text"
+            value={passwordDraft}
+            onChange={(e) => setPasswordDraft(e.target.value)}
+            onBlur={commitPassword}
+            placeholder="Boş bırakırsan şifre istenmez"
+          />
+        </label>
+        {settings?.password && (
+          <p className="muted small-hint">
+            Yeni oyuncular katılırken bu şifreyi girecek. Sen (GM) her zaman şifresiz girersin.
+          </p>
+        )}
       </div>
 
       <div className="banner-field">
@@ -265,6 +295,15 @@ export default function GMPanel({
             placeholder="https://..."
           />
         </label>
+        <FileUploadButton
+          roomCode={roomCode}
+          folder="banner"
+          accept="image/*"
+          onUploaded={(url) => {
+            setBannerDraft(url);
+            update(ref(db, `rooms/${roomCode}/settings`), { bannerUrl: url });
+          }}
+        />
       </div>
 
       <div className="gm-section" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>
@@ -275,6 +314,12 @@ export default function GMPanel({
             value={locationDraftUrl}
             onChange={(e) => setLocationDraftUrl(e.target.value)}
             placeholder="Mekan görseli URL (16:9)"
+          />
+          <FileUploadButton
+            roomCode={roomCode}
+            folder="location"
+            accept="image/*"
+            onUploaded={setLocationDraftUrl}
           />
           <input
             value={locationDraftName}
@@ -314,6 +359,12 @@ export default function GMPanel({
             onChange={(e) => setFocusDraftUrl(e.target.value)}
             placeholder="Odak görseli URL (16:9)"
           />
+          <FileUploadButton
+            roomCode={roomCode}
+            folder="focus"
+            accept="image/*"
+            onUploaded={setFocusDraftUrl}
+          />
           <input
             value={focusDraftName}
             onChange={(e) => setFocusDraftName(e.target.value)}
@@ -351,6 +402,12 @@ export default function GMPanel({
             value={musicDraftUrl}
             onChange={(e) => setMusicDraftUrl(e.target.value)}
             placeholder="Müzik URL (mp3)"
+          />
+          <FileUploadButton
+            roomCode={roomCode}
+            folder="music"
+            accept="audio/*"
+            onUploaded={setMusicDraftUrl}
           />
           <input
             value={musicDraftName}
@@ -393,6 +450,12 @@ export default function GMPanel({
             value={mapImageUrl}
             onChange={(e) => setMapImageUrl(e.target.value)}
             placeholder="Harita görseli URL"
+          />
+          <FileUploadButton
+            roomCode={roomCode}
+            folder="map"
+            accept="image/*"
+            onUploaded={setMapImageUrl}
           />
           <button type="button" className="btn-primary small" onClick={publishMap}>
             Yayınla

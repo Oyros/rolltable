@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
+import { auth } from './firebase.js';
+import { getOrCreateLocalId } from './utils/id.js';
 import Home from './pages/Home.jsx';
 import Room from './pages/Room.jsx';
 
@@ -15,6 +18,28 @@ function loadSession() {
 
 export default function App() {
   const [session, setSession] = useState(loadSession);
+  const [playerId, setPlayerId] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (cancelled) return;
+      if (user) {
+        setPlayerId(user.uid);
+      } else {
+        signInAnonymously(auth).catch(() => {
+          // Anonymous Auth not enabled yet in the Firebase console for this
+          // project — fall back to the old locally-generated id so the app
+          // keeps working (just without server-enforced identity rules).
+          if (!cancelled) setPlayerId(getOrCreateLocalId());
+        });
+      }
+    });
+    return () => {
+      cancelled = true;
+      unsub();
+    };
+  }, []);
 
   function handleJoin(newSession) {
     localStorage.setItem(SESSION_KEY, JSON.stringify(newSession));
@@ -26,8 +51,19 @@ export default function App() {
     setSession(null);
   }
 
+  if (!playerId) {
+    return (
+      <div className="home-screen">
+        <div className="home-card panel">
+          <h1 className="title-font">RollTable</h1>
+          <p className="subtitle">Bağlanıyor...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!session) {
-    return <Home onJoin={handleJoin} />;
+    return <Home onJoin={handleJoin} playerId={playerId} />;
   }
 
   return <Room session={session} onLeave={handleLeave} />;

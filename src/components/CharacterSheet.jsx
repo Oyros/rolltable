@@ -3,6 +3,7 @@ import { ref, update, push } from 'firebase/database';
 import { db } from '../firebase.js';
 import { STATUS_LABEL } from '../utils/stats.js';
 import Portal from './Portal.jsx';
+import FileUploadButton from './FileUploadButton.jsx';
 
 export default function CharacterSheet({ roomCode, playerId, player, gameConfig, isGM = false, sessionStarted = false }) {
   const path = `rooms/${roomCode}/players/${playerId}`;
@@ -15,6 +16,7 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
   const [levelUpPerkId, setLevelUpPerkId] = useState('');
 
   const stats = gameConfig.stats || [];
+  const resources = gameConfig.resources || [];
   const races = gameConfig.races || [];
   const classes = gameConfig.classes || [];
   const subclasses = gameConfig.subclasses || [];
@@ -47,6 +49,16 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
     patch({ [`stats/${statId}`]: next });
     const statName = stats.find((s) => s.id === statId)?.name || statId;
     logChange(`${statName} statı ${current} → ${next} oldu`);
+  }
+
+  function changeResource(resourceId, delta) {
+    const max = resources.find((r) => r.id === resourceId)?.max ?? 10;
+    const current = player.resources?.[resourceId] ?? max;
+    const next = Math.min(max, Math.max(0, current + delta));
+    if (next === current) return;
+    patch({ [`resources/${resourceId}`]: next });
+    const resName = resources.find((r) => r.id === resourceId)?.name || resourceId;
+    logChange(`${resName} ${current} → ${next} oldu`);
   }
 
   function changeStatus(e) {
@@ -124,6 +136,13 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
       logs.push(`yeni perk: ${perkName}`);
     }
 
+    if (resources.length > 0) {
+      resources.forEach((res) => {
+        updates[`resources/${res.id}`] = res.max;
+      });
+      logs.push('kaynaklar dolduruldu');
+    }
+
     patch(updates);
     logChange(logs.join(' · '));
     setShowLevelUp(false);
@@ -142,7 +161,9 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
       <div className="character-sheet-header">
         <div>
           <h2 className="title-font">{player.name}</h2>
-          <span className="character-level">Seviye {level}</span>
+          <span className="character-level">
+            Seviye {level} · XP {player.xp || 0}
+          </span>
         </div>
         <div className="character-sheet-header-actions">
           {locked && <span className="sheet-locked-badge">🔒 Kilitli</span>}
@@ -246,6 +267,15 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
             placeholder="https://..."
           />
         </label>
+        <FileUploadButton
+          roomCode={roomCode}
+          folder="portrait"
+          accept="image/*"
+          onUploaded={(url) => {
+            setPortraitDraft(url);
+            patch({ portraitUrl: url });
+          }}
+        />
         <label className="color-field">
           Profil Rengi
           <input
@@ -345,6 +375,34 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {resources.length > 0 && (
+        <div className="resources-grid">
+          {resources.map((res) => {
+            const current = player.resources?.[res.id] ?? res.max;
+            const pct = Math.round((current / res.max) * 100);
+            return (
+              <div className="resource-box" key={res.id}>
+                <div className="resource-box-header">
+                  <span className="resource-label">{res.name}</span>
+                  <span className="resource-value">{current} / {res.max}</span>
+                </div>
+                <div className="resource-bar">
+                  <div className="resource-bar-fill" style={{ width: `${pct}%` }} />
+                </div>
+                <div className="resource-control">
+                  <button type="button" onClick={() => changeResource(res.id, -1)}>
+                    -
+                  </button>
+                  <button type="button" onClick={() => changeResource(res.id, 1)}>
+                    +
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 

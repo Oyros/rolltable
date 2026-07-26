@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import EntryListEditor from './EntryListEditor.jsx';
+import ResourceListEditor from './ResourceListEditor.jsx';
 import ParticleEffect from './ParticleEffect.jsx';
 import { THEMES, DEFAULT_THEME_ID } from '../utils/themes.js';
 
 const EMPTY_LISTS = {
   stats: [],
+  resources: [],
   races: [],
   classes: [],
   subclasses: [],
@@ -18,6 +20,7 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
   const [theme, setTheme] = useState(initial?.theme || DEFAULT_THEME_ID);
   const [lists, setLists] = useState({
     stats: initial?.stats || EMPTY_LISTS.stats,
+    resources: initial?.resources || EMPTY_LISTS.resources,
     races: initial?.races || EMPTY_LISTS.races,
     classes: initial?.classes || EMPTY_LISTS.classes,
     subclasses: initial?.subclasses || EMPTY_LISTS.subclasses,
@@ -101,6 +104,7 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
         onChange={(v) => updateList('stats', v)}
         hideDescription
       />
+      <ResourceListEditor items={lists.resources} onChange={(v) => updateList('resources', v)} />
       <EntryListEditor label="Irklar" items={lists.races} onChange={(v) => updateList('races', v)} />
       <EntryListEditor
         label="Sınıflar"
