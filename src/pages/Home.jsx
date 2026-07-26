@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ref, get, update } from 'firebase/database';
-import { db } from '../firebase.js';
+import { signOut } from 'firebase/auth';
+import { db, auth } from '../firebase.js';
 import { applyTheme, DEFAULT_THEME_ID } from '../utils/themes.js';
 import ParticleEffect from '../components/ParticleEffect.jsx';
 import HelpGuide from '../components/HelpGuide.jsx';
@@ -108,6 +109,13 @@ export default function Home({ onJoin, playerId }) {
             onClick={() => setShowHelp(true)}
           >
             ❓ Nasıl Çalışır?
+          </button>
+          <button
+            type="button"
+            className="btn-ghost home-back-btn"
+            onClick={() => signOut(auth)}
+          >
+            🚪 Çıkış Yap
           </button>
         </div>
         {showHelp && <HelpGuide onClose={() => setShowHelp(false)} />}

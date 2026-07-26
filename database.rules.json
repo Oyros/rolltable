@@ -1,5 +1,19 @@
 {
   "rules": {
+    "users": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "nicknames": {
+      "$nick": {
+        ".read": true,
+        ".write": "auth != null && (!data.exists() || data.val() === auth.uid)"
+      }
+    },
+
     "rooms": {
       "$roomCode": {
         ".read": "auth != null",
