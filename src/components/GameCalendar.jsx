@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ref, update } from 'firebase/database';
 import { db } from '../firebase.js';
 
@@ -28,16 +28,12 @@ export default function GameCalendar({ roomCode, calendar, isGM }) {
   const [dayDraft, setDayDraft] = useState(day);
   const [hourDraft, setHourDraft] = useState(hour);
   const [minuteDraft, setMinuteDraft] = useState(minute);
-  const synced = useRef(false);
 
   useEffect(() => {
-    if (!synced.current && calendar) {
-      setDayDraft(calendar.day ?? 1);
-      setHourDraft(calendar.hour ?? 8);
-      setMinuteDraft(calendar.minute ?? 0);
-      synced.current = true;
-    }
-  }, [calendar]);
+    setDayDraft(day);
+    setHourDraft(hour);
+    setMinuteDraft(minute);
+  }, [day, hour, minute]);
 
   function commit(next) {
     update(ref(db, `rooms/${roomCode}/settings/calendar`), next);
