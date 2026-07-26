@@ -35,6 +35,7 @@ export default function Home({ onJoin, playerId }) {
         return;
       }
       await update(ref(db, `rooms/${code}`), { ownerId: playerId, ownerName: name.trim() });
+      await update(ref(db, `users/${playerId}/roomsAsGM`), { [code]: true });
       onJoin({ roomCode: code, name: name.trim(), role: 'gm', playerId });
     } catch (err) {
       setError(`Oda kurulamadı: ${err.message}`);
@@ -72,6 +73,11 @@ export default function Home({ onJoin, playerId }) {
       }
 
       const role = isOwner ? 'gm' : 'oyuncu';
+      if (isOwner) {
+        await update(ref(db, `users/${playerId}/roomsAsGM`), { [code]: true });
+      } else {
+        await update(ref(db, `users/${playerId}/roomsAsPlayer`), { [code]: true });
+      }
       onJoin({ roomCode: code, name: name.trim(), role, playerId });
     } catch (err) {
       setError(`Katılınamadı: ${err.message}`);

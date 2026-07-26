@@ -282,6 +282,12 @@ export default function Room({ session, onLeave }) {
     deletingRoomRef.current = true;
     deleteRoomUploads(roomCode).catch(() => {});
     remove(ref(db, `rooms/${roomCode}`));
+    // Best-effort: drop the room from the owner's own "GM olduğun odalar"
+    // index. Other players' indexes can't be written from here (each
+    // account only owns its own users/{uid} subtree) — their Profilim
+    // list live-checks room existence when rendering, so a stale entry
+    // there just quietly disappears instead of erroring.
+    update(ref(db, `users/${playerId}/roomsAsGM`), { [roomCode]: null }).catch(() => {});
     // Best-effort, silent: while we're here, also clean up storage left
     // behind by any other room that no longer exists in the database
     // (e.g. one deleted before this cleanup existed).
