@@ -9,6 +9,9 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
   const [catalogItemId, setCatalogItemId] = useState('');
   const [skillsDraft, setSkillsDraft] = useState(player.skills || '');
   const [portraitDraft, setPortraitDraft] = useState(player.portraitUrl || '');
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [levelUpStatId, setLevelUpStatId] = useState('');
+  const [levelUpPerkId, setLevelUpPerkId] = useState('');
 
   const stats = gameConfig.stats || [];
   const races = gameConfig.races || [];
@@ -20,6 +23,8 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
 
   const locked = !!player.sheetLocked;
   const editable = isGM || !locked;
+  const level = player.level || 1;
+  const availablePerksToGain = perks.filter((p) => !(player.perks || []).includes(p.id));
 
   function patch(data) {
     update(ref(db, path), data);
@@ -93,6 +98,36 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
     }
   }
 
+  function openLevelUp() {
+    setLevelUpStatId(stats[0]?.id || '');
+    setLevelUpPerkId('');
+    setShowLevelUp(true);
+  }
+
+  function confirmLevelUp() {
+    const newLevel = level + 1;
+    const updates = { level: newLevel };
+    const logs = [`Seviye ${newLevel} oldu`];
+
+    if (levelUpStatId) {
+      const current = player.stats?.[levelUpStatId] ?? 2;
+      const next = Math.min(10, current + 1);
+      updates[`stats/${levelUpStatId}`] = next;
+      const statName = stats.find((s) => s.id === levelUpStatId)?.name || levelUpStatId;
+      logs.push(`${statName} statı ${current} → ${next}`);
+    }
+
+    if (levelUpPerkId) {
+      updates.perks = [...(player.perks || []), levelUpPerkId];
+      const perkName = perks.find((p) => p.id === levelUpPerkId)?.name || levelUpPerkId;
+      logs.push(`yeni perk: ${perkName}`);
+    }
+
+    patch(updates);
+    logChange(logs.join(' · '));
+    setShowLevelUp(false);
+  }
+
   const selectedRace = races.find((r) => r.id === player.raceId);
   const selectedClass = classes.find((c) => c.id === player.classId);
   const selectedSubclass = subclasses.find((s) => s.id === player.subclassId);
@@ -104,14 +139,94 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
   return (
     <div className="panel character-sheet">
       <div className="character-sheet-header">
-        <h2 className="title-font">{player.name}</h2>
-        {locked && <span className="sheet-locked-badge">🔒 Kilitli</span>}
+        <div>
+          <h2 className="title-font">{player.name}</h2>
+          <span className="character-level">Seviye {level}</span>
+        </div>
+        <div className="character-sheet-header-actions">
+          {locked && <span className="sheet-locked-badge">🔒 Kilitli</span>}
+          {editable && (
+            <button type="button" className="btn-primary small" onClick={openLevelUp}>
+              🎉 Seviye Atla
+            </button>
+          )}
+        </div>
       </div>
 
       {locked && !isGM && (
         <p className="muted sheet-locked-notice">
           🔒 Karakter kağıdın GM tarafından kilitlendi. Değişiklik yapamazsın.
         </p>
+      )}
+
+      {showLevelUp && (
+        <div className="whisper-overlay" onClick={() => setShowLevelUp(false)}>
+          <div
+            className="game-setup-card panel rules-editor-card level-up-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="rules-editor-header">
+              <h1 className="title-font">🎉 Seviye {level} → {level + 1}</h1>
+              <button type="button" className="btn-ghost" onClick={() => setShowLevelUp(false)}>
+                ✕ Kapat
+              </button>
+            </div>
+
+            {stats.length > 0 && (
+              <div className="level-up-section">
+                <span className="pick-list-label">Hangi stat +1 alsın?</span>
+                <div className="pick-list-options">
+                  {stats.map((s) => {
+                    const current = player.stats?.[s.id] ?? 2;
+                    return (
+                      <label key={s.id} className="pick-list-option">
+                        <input
+                          type="radio"
+                          name="levelup-stat"
+                          checked={levelUpStatId === s.id}
+                          onChange={() => setLevelUpStatId(s.id)}
+                        />
+                        {s.name} ({current} → {Math.min(10, current + 1)})
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {availablePerksToGain.length > 0 && (
+              <div className="level-up-section">
+                <span className="pick-list-label">Yeni bir perk almak ister misin?</span>
+                <div className="pick-list-options">
+                  <label className="pick-list-option">
+                    <input
+                      type="radio"
+                      name="levelup-perk"
+                      checked={levelUpPerkId === ''}
+                      onChange={() => setLevelUpPerkId('')}
+                    />
+                    Almıyorum
+                  </label>
+                  {availablePerksToGain.map((p) => (
+                    <label key={p.id} className="pick-list-option">
+                      <input
+                        type="radio"
+                        name="levelup-perk"
+                        checked={levelUpPerkId === p.id}
+                        onChange={() => setLevelUpPerkId(p.id)}
+                      />
+                      {p.name}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <button type="button" className="btn-primary" onClick={confirmLevelUp}>
+              Seviyeyi Onayla
+            </button>
+          </div>
+        </div>
       )}
 
       <fieldset disabled={!editable} className="character-sheet-fields">

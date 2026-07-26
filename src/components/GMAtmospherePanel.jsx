@@ -44,6 +44,10 @@ export default function GMAtmospherePanel({
     update(ref(db, `rooms/${roomCode}/scene`), { flashAt: Date.now() });
   }
 
+  function setWeather(value) {
+    update(ref(db, `rooms/${roomCode}/scene`), { weather: value });
+  }
+
   function handleVignetteChange(e) {
     const value = Number(e.target.value);
     setVignetteLocal(value);
@@ -124,6 +128,30 @@ export default function GMAtmospherePanel({
 
       <div className="gm-section">
         <h3 className="title-font gm-section-title">Görsel Efektler</h3>
+
+        <div className="weather-toggle">
+          <button
+            type="button"
+            className={`roll-mode-btn${(scene?.weather || 'none') === 'none' ? ' active' : ''}`}
+            onClick={() => setWeather('none')}
+          >
+            Yok
+          </button>
+          <button
+            type="button"
+            className={`roll-mode-btn${scene?.weather === 'rain' ? ' active' : ''}`}
+            onClick={() => setWeather('rain')}
+          >
+            🌧️ Yağmur
+          </button>
+          <button
+            type="button"
+            className={`roll-mode-btn${scene?.weather === 'snow' ? ' active' : ''}`}
+            onClick={() => setWeather('snow')}
+          >
+            ❄️ Kar
+          </button>
+        </div>
 
         <label className="vignette-field">
           Vinyet Yoğunluğu ({vignette}%)

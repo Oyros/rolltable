@@ -16,6 +16,7 @@
   --radius: 10px;
   --vignette-opacity: 0.55;
   --vignette-inner: 40%;
+  --vignette-color: 10, 7, 4;
 }
 
 * {
@@ -56,9 +57,9 @@ body::after {
   background: radial-gradient(
     ellipse at center,
     transparent var(--vignette-inner),
-    rgba(0, 0, 0, var(--vignette-opacity)) 100%
+    rgba(var(--vignette-color), var(--vignette-opacity)) 100%
   );
-  transition: background 0.4s ease;
+  transition: background 0.6s ease;
 }
 
 .title-font {
@@ -1519,6 +1520,33 @@ button:hover {
   flex-shrink: 0;
 }
 
+.character-level {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.character-sheet-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.level-up-card {
+  max-width: 460px;
+}
+
+.level-up-section {
+  margin-bottom: 18px;
+}
+
+.level-up-section .pick-list-label {
+  display: block;
+  margin-bottom: 8px;
+}
+
 .character-sheet-fields {
   border: none;
   margin: 0;
@@ -1654,6 +1682,54 @@ button:hover {
   color: var(--amber-light);
 }
 
+/* Weather effects */
+.weather-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.rain-drop {
+  position: absolute;
+  top: -30px;
+  background: linear-gradient(180deg, rgba(180, 210, 255, 0), rgba(180, 210, 255, 0.7));
+  border-radius: 2px;
+  animation: rain-fall linear infinite;
+  will-change: transform;
+}
+
+.snow-flake {
+  position: absolute;
+  top: -20px;
+  background: #fff;
+  border-radius: 50%;
+  animation: snow-fall linear infinite;
+  will-change: transform;
+}
+
+@keyframes rain-fall {
+  from {
+    transform: translateY(0) translateX(0);
+  }
+  to {
+    transform: translateY(110vh) translateX(var(--drift-x));
+  }
+}
+
+@keyframes snow-fall {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(55vh) translateX(var(--drift-x));
+  }
+  100% {
+    transform: translateY(110vh) translateX(0);
+  }
+}
+
 /* Particle effects */
 .particle-layer {
   position: fixed;
@@ -1748,7 +1824,8 @@ button:hover {
 }
 
 /* Roll mode toggle */
-.roll-mode-toggle {
+.roll-mode-toggle,
+.weather-toggle {
   display: flex;
   gap: 6px;
   margin-bottom: 14px;

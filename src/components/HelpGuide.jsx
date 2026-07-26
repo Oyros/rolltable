@@ -58,8 +58,9 @@ export default function HelpGuide({ onClose }) {
             Sol kenarın en üstünde oyun içi gün ve saat gösterilir. GM +1 Saat / +6 Saat / +1 Gün
             butonlarıyla ilerletebilir, ya da gün/saat/dakikayı elle ayarlayabilir (bu kutular hızlı
             butonlarla birlikte otomatik güncellenir). Herkes aynı takvimi görür. Gece saatlerinde
-            sahnenin vinyet (koyulaşma) efekti otomatik olarak hafifçe artar — ekstra bir ayar
-            gerekmez.
+            sahnenin vinyet (koyulaşma) efekti otomatik artar ve rengi soğuk bir maviye kayar;
+            gündüz/gece ayrımı takvim başlığındaki ☀️/🌙 simgesinden de anlaşılır — ekstra bir
+            ayar gerekmez.
           </p>
         </details>
 
@@ -113,6 +114,11 @@ export default function HelpGuide({ onClose }) {
             <li>Yetenek/Dal metnini serbestçe yaz.</li>
             <li>Envantere GM'in eşya kataloğundan seçerek veya kendi yazarak eşya ekle.</li>
             <li>
+              <strong>🎉 Seviye Atla</strong> — istediğin an açılan bir ekranda bir stata +1 verip
+              (varsa) henüz almadığın bir perk seçersin; onaylayınca seviyen artar. Parti
+              panelinde herkesin seviyesi görünür.
+            </li>
+            <li>
               <strong>🔒 Kilit</strong> — GM istediği zaman senin karakter kağıdını
               kilitleyebilir/açabilir (sen kendin kilitleyemezsin). Kilitliyken hiçbir alanı
               değiştiremezsin; GM ise kilitliyken bile "✏️ Karakteri Düzenle" ile her zaman
@@ -156,7 +162,8 @@ export default function HelpGuide({ onClose }) {
             Kısa, tek seferlik ses efektlerini (kapı gıcırtısı, kılıç sesi vb.) butona basarak
             anlık çalabilirsin. Sürekli çalan ambiyans parçaları (yağmur, rüzgar vb.) ise
             çal/durdur butonuyla açılıp kapanır ve kendi ses düzeyi kaydırıcısına sahiptir. Altta
-            Vinyet yoğunluğu kaydırıcısı ve Flaş/Sarsıntı tetikleyici butonu bulunur.
+            <strong> Hava Durumu</strong> (Yok/🌧️ Yağmur/❄️ Kar — herkesin ekranında animasyonlu
+            görünür), Vinyet yoğunluğu kaydırıcısı ve Flaş/Sarsıntı tetikleyici butonu bulunur.
           </p>
         </details>
 

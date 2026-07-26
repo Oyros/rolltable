@@ -12,6 +12,7 @@ import PartyOverview from '../components/PartyOverview.jsx';
 import WhisperOverlay from '../components/WhisperOverlay.jsx';
 import GameSetup from './GameSetup.jsx';
 import ParticleEffect from '../components/ParticleEffect.jsx';
+import WeatherEffect from '../components/WeatherEffect.jsx';
 import SessionTimer from '../components/SessionTimer.jsx';
 import NpcNameGenerator from '../components/NpcNameGenerator.jsx';
 import PromptGenerator from '../components/PromptGenerator.jsx';
@@ -206,17 +207,24 @@ export default function Room({ session, onLeave }) {
     const v = scene?.vignette ?? 0;
     const hour = settings?.calendar?.hour ?? 12;
     const nightIntensity = (1 + Math.cos((hour / 24) * 2 * Math.PI)) / 2;
-    const nightBonus = nightIntensity * 0.22;
-    const opacity = Math.min(1, 0.35 + (v / 100) * 0.55 + nightBonus);
-    const inner = Math.max(10, 40 - (v / 100) * 25 - nightIntensity * 12);
+    const nightBonus = nightIntensity * 0.4;
+    const opacity = Math.min(1, 0.32 + (v / 100) * 0.55 + nightBonus);
+    const inner = Math.max(8, 40 - (v / 100) * 25 - nightIntensity * 22);
+
+    const dayColor = [20, 14, 8];
+    const nightColor = [4, 8, 24];
+    const rgb = dayColor.map((c, i) => Math.round(c + (nightColor[i] - c) * nightIntensity));
+
     document.documentElement.style.setProperty('--vignette-opacity', opacity.toFixed(2));
     document.documentElement.style.setProperty('--vignette-inner', `${inner.toFixed(0)}%`);
+    document.documentElement.style.setProperty('--vignette-color', rgb.join(', '));
   }, [scene?.vignette, settings?.calendar?.hour]);
 
   useEffect(() => {
     return () => {
       document.documentElement.style.removeProperty('--vignette-opacity');
       document.documentElement.style.removeProperty('--vignette-inner');
+      document.documentElement.style.removeProperty('--vignette-color');
     };
   }, []);
 
@@ -357,6 +365,7 @@ export default function Room({ session, onLeave }) {
       <div className={`flash-overlay${flashActive ? ' active' : ''}`} />
 
       <ParticleEffect theme={gameConfig?.theme || DEFAULT_THEME_ID} />
+      <WeatherEffect weather={scene?.weather} />
 
       {role !== 'gm' && (
         <WhisperOverlay whispers={me?.whispers} roomCode={roomCode} playerId={playerId} />

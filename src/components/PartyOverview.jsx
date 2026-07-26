@@ -114,11 +114,11 @@ export default function PartyOverview({
                     <img className="party-detail-image" src={p.portraitUrl} alt={p.name} />
                   )}
 
-                  {(raceName || className || subclassName) && (
-                    <p className="party-detail-rcs">
-                      {[raceName, className, subclassName].filter(Boolean).join(' · ')}
-                    </p>
-                  )}
+                  <p className="party-detail-rcs">
+                    {['Seviye ' + (p.level || 1), raceName, className, subclassName]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
 
                   {stats.length > 0 && (
                     <div className="party-detail-stats">
