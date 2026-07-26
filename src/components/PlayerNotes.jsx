@@ -18,8 +18,7 @@ export default function PlayerNotes({ roomCode, playerId, player }) {
   }
 
   return (
-    <div className="panel">
-      <h2 className="title-font">📓 Not Defterim</h2>
+    <>
       <p className="muted gm-notes-hint">Sadece sen görürsün.</p>
       <textarea
         className="gm-notes-textarea"
@@ -29,6 +28,6 @@ export default function PlayerNotes({ roomCode, playerId, player }) {
         rows={8}
         placeholder="Kendi notların..."
       />
-    </div>
+    </>
   );
 }

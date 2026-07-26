@@ -31,8 +31,8 @@ export default function LootGenerator({ roomCode, players, theme }) {
   }
 
   return (
-    <div className="panel">
-      <h2 className="title-font">🎁 Ganimet Üretici</h2>
+    <div className="side-accordion-group">
+      <h3 className="side-accordion-group-title">🎁 Ganimet Üretici</h3>
       <button type="button" className="btn-primary small" onClick={generate}>
         🎲 Üret
       </button>

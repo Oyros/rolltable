@@ -18,8 +18,7 @@ export default function GMNotes({ roomCode, settings }) {
   }
 
   return (
-    <div className="panel">
-      <h2 className="title-font">📝 GM Notları</h2>
+    <>
       <p className="muted gm-notes-hint">Sadece sen görürsün.</p>
       <textarea
         className="gm-notes-textarea"
@@ -29,6 +28,6 @@ export default function GMNotes({ roomCode, settings }) {
         rows={10}
         placeholder="Senaryo notların, sırlar, planların..."
       />
-    </div>
+    </>
   );
 }

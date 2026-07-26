@@ -157,9 +157,7 @@ export default function DiceRoller({ roomCode, name, isGM }) {
   const critClass = isCritSuccess ? ' crit-success' : isCritFail ? ' crit-fail' : '';
 
   return (
-    <div className="panel dice-panel">
-      <h2 className="title-font">Zar</h2>
-
+    <>
       <div className="roll-mode-toggle">
         <button
           type="button"
@@ -307,6 +305,6 @@ export default function DiceRoller({ roomCode, name, isGM }) {
           )}
         </div>
       )}
-    </div>
+    </>
   );
 }

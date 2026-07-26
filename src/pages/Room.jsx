@@ -5,14 +5,17 @@ import SceneDisplay from '../components/SceneDisplay.jsx';
 import DiceRoller from '../components/DiceRoller.jsx';
 import CharacterSheet from '../components/CharacterSheet.jsx';
 import GMPanel from '../components/GMPanel.jsx';
-import GMAtmospherePanel from '../components/GMAtmospherePanel.jsx';
+import SoundEffectsPanel from '../components/SoundEffectsPanel.jsx';
+import VisualEffectsPanel from '../components/VisualEffectsPanel.jsx';
 import GMNotes from '../components/GMNotes.jsx';
 import PlayerNotes from '../components/PlayerNotes.jsx';
 import PartyOverview from '../components/PartyOverview.jsx';
+import GmSlotCard from '../components/GmSlotCard.jsx';
 import WhisperOverlay from '../components/WhisperOverlay.jsx';
 import GameSetup from './GameSetup.jsx';
 import ParticleEffect from '../components/ParticleEffect.jsx';
 import WeatherEffect from '../components/WeatherEffect.jsx';
+import DayNightEffect from '../components/DayNightEffect.jsx';
 import SessionTimer from '../components/SessionTimer.jsx';
 import NpcNameGenerator from '../components/NpcNameGenerator.jsx';
 import PromptGenerator from '../components/PromptGenerator.jsx';
@@ -205,26 +208,16 @@ export default function Room({ session, onLeave }) {
 
   useEffect(() => {
     const v = scene?.vignette ?? 0;
-    const hour = settings?.calendar?.hour ?? 12;
-    const nightIntensity = (1 + Math.cos((hour / 24) * 2 * Math.PI)) / 2;
-    const nightBonus = nightIntensity * 0.4;
-    const opacity = Math.min(1, 0.32 + (v / 100) * 0.55 + nightBonus);
-    const inner = Math.max(8, 40 - (v / 100) * 25 - nightIntensity * 22);
-
-    const dayColor = [20, 14, 8];
-    const nightColor = [4, 8, 24];
-    const rgb = dayColor.map((c, i) => Math.round(c + (nightColor[i] - c) * nightIntensity));
-
+    const opacity = 0.35 + (v / 100) * 0.55;
+    const inner = 40 - (v / 100) * 25;
     document.documentElement.style.setProperty('--vignette-opacity', opacity.toFixed(2));
     document.documentElement.style.setProperty('--vignette-inner', `${inner.toFixed(0)}%`);
-    document.documentElement.style.setProperty('--vignette-color', rgb.join(', '));
-  }, [scene?.vignette, settings?.calendar?.hour]);
+  }, [scene?.vignette]);
 
   useEffect(() => {
     return () => {
       document.documentElement.style.removeProperty('--vignette-opacity');
       document.documentElement.style.removeProperty('--vignette-inner');
-      document.documentElement.style.removeProperty('--vignette-color');
     };
   }, []);
 
@@ -270,6 +263,8 @@ export default function Room({ session, onLeave }) {
   }
 
   const me = players[playerId];
+  const calendarHour = settings?.calendar?.hour ?? 12;
+  const nightIntensity = (1 + Math.cos((calendarHour / 24) * 2 * Math.PI)) / 2;
 
   const header = (
     <header className="room-header">
@@ -366,6 +361,7 @@ export default function Room({ session, onLeave }) {
 
       <ParticleEffect theme={gameConfig?.theme || DEFAULT_THEME_ID} />
       <WeatherEffect weather={scene?.weather} />
+      <DayNightEffect nightIntensity={nightIntensity} />
 
       {role !== 'gm' && (
         <WhisperOverlay whispers={me?.whispers} roomCode={roomCode} playerId={playerId} />
@@ -387,24 +383,49 @@ export default function Room({ session, onLeave }) {
 
       <div className="room-body">
         <aside className="room-sidebar">
-          <GameCalendar roomCode={roomCode} calendar={settings?.calendar} isGM={role === 'gm'} />
-          <PartyOverview
-            players={players}
-            gameConfig={gameConfig}
-            isGM={role === 'gm'}
-            onKick={kickPlayer}
-            playerId={playerId}
-            activeTurnPlayerId={settings?.initiative?.queue?.[settings?.initiative?.currentIndex ?? 0]}
-            roomCode={roomCode}
-            sessionStarted={!!settings?.sessionStartedAt}
-          />
-          <QuestBoard
-            roomCode={roomCode}
-            quests={quests}
-            isGM={role === 'gm'}
-            players={players}
-            calendar={settings?.calendar}
-          />
+          <GmSlotCard players={players} />
+
+          <details className="panel side-accordion" open>
+            <summary>
+              🗓️ Takvim<span className="side-accordion-chevron">▾</span>
+            </summary>
+            <div className="side-accordion-body">
+              <GameCalendar roomCode={roomCode} calendar={settings?.calendar} isGM={role === 'gm'} />
+            </div>
+          </details>
+
+          <details className="panel side-accordion" open>
+            <summary>
+              👥 Parti<span className="side-accordion-chevron">▾</span>
+            </summary>
+            <div className="side-accordion-body">
+              <PartyOverview
+                players={players}
+                gameConfig={gameConfig}
+                isGM={role === 'gm'}
+                onKick={kickPlayer}
+                playerId={playerId}
+                activeTurnPlayerId={settings?.initiative?.queue?.[settings?.initiative?.currentIndex ?? 0]}
+                roomCode={roomCode}
+                sessionStarted={!!settings?.sessionStartedAt}
+              />
+            </div>
+          </details>
+
+          <details className="panel side-accordion">
+            <summary>
+              📜 Görev Panosu<span className="side-accordion-chevron">▾</span>
+            </summary>
+            <div className="side-accordion-body">
+              <QuestBoard
+                roomCode={roomCode}
+                quests={quests}
+                isGM={role === 'gm'}
+                players={players}
+                calendar={settings?.calendar}
+              />
+            </div>
+          </details>
         </aside>
 
         <div className="room-content">
@@ -467,21 +488,75 @@ export default function Room({ session, onLeave }) {
         </div>
 
         <aside className="room-sidebar">
-          <DiceRoller roomCode={roomCode} name={name} isGM={role === 'gm'} />
-          {role !== 'gm' && <PlayerNotes roomCode={roomCode} playerId={playerId} player={me} />}
-          {role === 'gm' && (
-            <GMAtmospherePanel
-              roomCode={roomCode}
-              scene={scene}
-              ambianceVolume={ambianceVolume}
-              onAmbianceVolumeChange={setAmbianceVolume}
-            />
+          <details className="panel side-accordion" open>
+            <summary>
+              🎲 Zar<span className="side-accordion-chevron">▾</span>
+            </summary>
+            <div className="side-accordion-body">
+              <DiceRoller roomCode={roomCode} name={name} isGM={role === 'gm'} />
+            </div>
+          </details>
+
+          {role !== 'gm' && (
+            <details className="panel side-accordion">
+              <summary>
+                📓 Not Defterim<span className="side-accordion-chevron">▾</span>
+              </summary>
+              <div className="side-accordion-body">
+                <PlayerNotes roomCode={roomCode} playerId={playerId} player={me} />
+              </div>
+            </details>
           )}
-          {role === 'gm' && <GMNotes roomCode={roomCode} settings={settings} />}
-          {role === 'gm' && <NpcNameGenerator theme={gameConfig?.theme} />}
-          {role === 'gm' && <PromptGenerator theme={gameConfig?.theme} />}
+
           {role === 'gm' && (
-            <LootGenerator roomCode={roomCode} players={players} theme={gameConfig?.theme} />
+            <details className="panel side-accordion">
+              <summary>
+                🌫️ Görsel Efektler<span className="side-accordion-chevron">▾</span>
+              </summary>
+              <div className="side-accordion-body">
+                <VisualEffectsPanel roomCode={roomCode} scene={scene} />
+              </div>
+            </details>
+          )}
+
+          {role === 'gm' && (
+            <details className="panel side-accordion">
+              <summary>
+                🔊 Ses Efektleri<span className="side-accordion-chevron">▾</span>
+              </summary>
+              <div className="side-accordion-body">
+                <SoundEffectsPanel
+                  roomCode={roomCode}
+                  scene={scene}
+                  ambianceVolume={ambianceVolume}
+                  onAmbianceVolumeChange={setAmbianceVolume}
+                />
+              </div>
+            </details>
+          )}
+
+          {role === 'gm' && (
+            <details className="panel side-accordion">
+              <summary>
+                📝 GM Notları<span className="side-accordion-chevron">▾</span>
+              </summary>
+              <div className="side-accordion-body">
+                <GMNotes roomCode={roomCode} settings={settings} />
+              </div>
+            </details>
+          )}
+
+          {role === 'gm' && (
+            <details className="panel side-accordion">
+              <summary>
+                🎭 Üreteçler<span className="side-accordion-chevron">▾</span>
+              </summary>
+              <div className="side-accordion-body">
+                <NpcNameGenerator theme={gameConfig?.theme} />
+                <PromptGenerator theme={gameConfig?.theme} />
+                <LootGenerator roomCode={roomCode} players={players} theme={gameConfig?.theme} />
+              </div>
+            </details>
           )}
         </aside>
       </div>

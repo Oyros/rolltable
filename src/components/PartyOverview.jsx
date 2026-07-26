@@ -26,7 +26,6 @@ export default function PartyOverview({
     update(ref(db, `rooms/${roomCode}/players/${id}`), { sheetLocked: !locked });
   }
   const list = Object.entries(players || {}).filter(([, p]) => p.role !== 'gm');
-  const gmEntry = Object.entries(players || {}).find(([, p]) => p.role === 'gm');
 
   const stats = gameConfig?.stats || [];
   const races = gameConfig?.races || [];
@@ -37,38 +36,6 @@ export default function PartyOverview({
 
   return (
     <>
-      {gmEntry && (
-        <div className="panel gm-slot-panel">
-          <span className="gm-slot-label">Oyun Yöneticisi</span>
-          <div className="gm-slot">
-            <span
-              className="party-avatar"
-              style={gmEntry[1].color ? { borderColor: gmEntry[1].color } : undefined}
-            >
-              {gmEntry[1].portraitUrl ? (
-                <img src={gmEntry[1].portraitUrl} alt={gmEntry[1].name} />
-              ) : (
-                <span className="party-avatar-fallback">
-                  {(gmEntry[1].name || '?').charAt(0).toUpperCase()}
-                </span>
-              )}
-              <span
-                className={`presence-dot ${gmEntry[1].online ? 'online' : 'offline'}`}
-                title={gmEntry[1].online ? 'Çevrimiçi' : 'Çevrimdışı'}
-              />
-            </span>
-            <span
-              className="gm-slot-name"
-              style={gmEntry[1].color ? { color: gmEntry[1].color } : undefined}
-            >
-              {gmEntry[1].name}
-            </span>
-          </div>
-        </div>
-      )}
-
-      <div className="panel party-overview">
-        <h2 className="title-font">Parti</h2>
       {list.length === 0 && <p className="muted">Henüz oyuncu yok.</p>}
       <ul className="party-list">
         {list.map(([id, p]) => {
@@ -202,7 +169,6 @@ export default function PartyOverview({
       </ul>
 
       <WhisperLog players={players} playerId={playerId} isGM={isGM} />
-      </div>
 
       {isGM && editingId && players?.[editingId] && (
         <div className="whisper-overlay">

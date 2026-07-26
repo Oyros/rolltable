@@ -12,8 +12,8 @@ export default function PromptGenerator({ theme }) {
   }
 
   return (
-    <div className="panel">
-      <h2 className="title-font">🗺️ Mekan / Görev İpucu</h2>
+    <div className="side-accordion-group">
+      <h3 className="side-accordion-group-title">🗺️ Mekan / Görev İpucu</h3>
       <div className="inline-form">
         <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
           <option value="location">Mekan Adı</option>

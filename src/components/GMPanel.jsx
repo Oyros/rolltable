@@ -13,13 +13,16 @@ export default function GMPanel({
   isOwner,
 }) {
   const [showRulesEditor, setShowRulesEditor] = useState(false);
-  const [locationImageUrl, setLocationImageUrl] = useState('');
-  const [focusImageUrl, setFocusImageUrl] = useState('');
   const [mapImageUrl, setMapImageUrl] = useState('');
-  const [caption, setCaption] = useState('');
-  const [focusCaption, setFocusCaption] = useState('');
-  const [musicUrl, setMusicUrl] = useState('');
-  const synced = useRef(false);
+  const mapSynced = useRef(false);
+
+  const [locationDraftUrl, setLocationDraftUrl] = useState('');
+  const [locationDraftName, setLocationDraftName] = useState('');
+  const [focusDraftUrl, setFocusDraftUrl] = useState('');
+  const [focusDraftName, setFocusDraftName] = useState('');
+  const [musicDraftUrl, setMusicDraftUrl] = useState('');
+  const [musicDraftName, setMusicDraftName] = useState('');
+  const [selectedMusicId, setSelectedMusicId] = useState('');
 
   const [whisperTarget, setWhisperTarget] = useState('');
   const [whisperText, setWhisperText] = useState('');
@@ -27,17 +30,10 @@ export default function GMPanel({
   const [bannerDraft, setBannerDraft] = useState('');
   const bannerSynced = useRef(false);
 
-  const [saveSceneName, setSaveSceneName] = useState('');
-
   useEffect(() => {
-    if (!synced.current && scene) {
-      setLocationImageUrl(scene.locationImageUrl || '');
-      setFocusImageUrl(scene.focusImageUrl || '');
+    if (!mapSynced.current && scene) {
       setMapImageUrl(scene.mapImageUrl || '');
-      setCaption(scene.caption || '');
-      setFocusCaption(scene.focusCaption || '');
-      setMusicUrl(scene.musicUrl || '');
-      synced.current = true;
+      mapSynced.current = true;
     }
   }, [scene]);
 
@@ -63,59 +59,79 @@ export default function GMPanel({
     update(ref(db, `rooms/${roomCode}/settings`), { sessionStartedAt: Date.now() });
   }
 
-  function publishSceneData(data) {
-    const payload = { ...data, playing: true, updatedAt: Date.now() };
-    if ('mapImageUrl' in data && data.mapImageUrl !== (scene?.mapImageUrl || '')) {
-      payload.mapPins = null;
-    }
+  function publishMap() {
+    const trimmed = mapImageUrl.trim();
+    const payload = { mapImageUrl: trimmed, updatedAt: Date.now() };
+    if (trimmed !== (scene?.mapImageUrl || '')) payload.mapPins = null;
     update(ref(db, `rooms/${roomCode}/scene`), payload);
   }
 
-  function publishScene(e) {
-    e.preventDefault();
-    publishSceneData({
-      locationImageUrl: locationImageUrl.trim(),
-      focusImageUrl: focusImageUrl.trim(),
-      mapImageUrl: mapImageUrl.trim(),
-      caption: caption.trim(),
-      focusCaption: focusCaption.trim(),
-      musicUrl: musicUrl.trim(),
+  function saveLocation() {
+    if (!locationDraftUrl.trim() || !locationDraftName.trim()) return;
+    push(ref(db, `rooms/${roomCode}/settings/savedLocations`), {
+      name: locationDraftName.trim(),
+      imageUrl: locationDraftUrl.trim(),
+    });
+    setLocationDraftUrl('');
+    setLocationDraftName('');
+  }
+
+  function publishLocation(entry) {
+    update(ref(db, `rooms/${roomCode}/scene`), {
+      locationImageUrl: entry.imageUrl,
+      caption: entry.name,
+      playing: true,
+      updatedAt: Date.now(),
     });
   }
 
-  function applySavedScene(s) {
-    setLocationImageUrl(s.locationImageUrl || '');
-    setFocusImageUrl(s.focusImageUrl || '');
-    setMapImageUrl(s.mapImageUrl || '');
-    setCaption(s.caption || '');
-    setFocusCaption(s.focusCaption || '');
-    setMusicUrl(s.musicUrl || '');
-    publishSceneData({
-      locationImageUrl: s.locationImageUrl || '',
-      focusImageUrl: s.focusImageUrl || '',
-      mapImageUrl: s.mapImageUrl || '',
-      caption: s.caption || '',
-      focusCaption: s.focusCaption || '',
-      musicUrl: s.musicUrl || '',
+  function removeLocation(id) {
+    remove(ref(db, `rooms/${roomCode}/settings/savedLocations/${id}`));
+  }
+
+  function saveFocus() {
+    if (!focusDraftUrl.trim() || !focusDraftName.trim()) return;
+    push(ref(db, `rooms/${roomCode}/settings/savedFocuses`), {
+      name: focusDraftName.trim(),
+      imageUrl: focusDraftUrl.trim(),
+    });
+    setFocusDraftUrl('');
+    setFocusDraftName('');
+  }
+
+  function publishFocus(entry) {
+    update(ref(db, `rooms/${roomCode}/scene`), {
+      focusImageUrl: entry.imageUrl,
+      focusCaption: entry.name,
+      playing: true,
+      updatedAt: Date.now(),
     });
   }
 
-  function saveCurrentScene() {
-    if (!saveSceneName.trim()) return;
-    push(ref(db, `rooms/${roomCode}/settings/savedScenes`), {
-      name: saveSceneName.trim(),
-      locationImageUrl: locationImageUrl.trim(),
-      focusImageUrl: focusImageUrl.trim(),
-      mapImageUrl: mapImageUrl.trim(),
-      caption: caption.trim(),
-      focusCaption: focusCaption.trim(),
-      musicUrl: musicUrl.trim(),
-    });
-    setSaveSceneName('');
+  function removeFocus(id) {
+    remove(ref(db, `rooms/${roomCode}/settings/savedFocuses/${id}`));
   }
 
-  function removeSavedScene(id) {
-    remove(ref(db, `rooms/${roomCode}/settings/savedScenes/${id}`));
+  function saveMusic() {
+    if (!musicDraftUrl.trim() || !musicDraftName.trim()) return;
+    push(ref(db, `rooms/${roomCode}/settings/savedMusic`), {
+      name: musicDraftName.trim(),
+      url: musicDraftUrl.trim(),
+    });
+    setMusicDraftUrl('');
+    setMusicDraftName('');
+  }
+
+  function selectMusic(id, entry) {
+    setSelectedMusicId(id);
+    if (entry) {
+      update(ref(db, `rooms/${roomCode}/scene`), { musicUrl: entry.url });
+    }
+  }
+
+  function removeMusic(id) {
+    remove(ref(db, `rooms/${roomCode}/settings/savedMusic/${id}`));
+    if (selectedMusicId === id) setSelectedMusicId('');
   }
 
   function sendWhisper(e) {
@@ -134,7 +150,9 @@ export default function GMPanel({
   }
 
   const playerList = Object.entries(players || {}).filter(([, p]) => p.role !== 'gm');
-  const savedScenes = Object.entries(settings?.savedScenes || {});
+  const savedLocations = Object.entries(settings?.savedLocations || {});
+  const savedFocuses = Object.entries(settings?.savedFocuses || {});
+  const savedMusicList = Object.entries(settings?.savedMusic || {});
 
   const initiative = settings?.initiative || {};
   const queue = initiative.queue || [];
@@ -249,91 +267,137 @@ export default function GMPanel({
         </label>
       </div>
 
-      {savedScenes.length > 0 && (
-        <div className="gm-section" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>
-          <h3 className="title-font gm-section-title">Kayıtlı Sahneler</h3>
+      <div className="gm-section" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>
+        <h3 className="title-font gm-section-title">Mekan Kütüphanesi</h3>
+        <p className="muted small-hint">Görsel + sahne adını kaydet, sonra listeden tıklayıp canlı sahneye uygula.</p>
+        <div className="inline-form">
+          <input
+            value={locationDraftUrl}
+            onChange={(e) => setLocationDraftUrl(e.target.value)}
+            placeholder="Mekan görseli URL (16:9)"
+          />
+          <input
+            value={locationDraftName}
+            onChange={(e) => setLocationDraftName(e.target.value)}
+            placeholder="Sahne adı"
+          />
+          <button type="button" className="btn-primary small" onClick={saveLocation}>
+            💾 Kaydet
+          </button>
+        </div>
+        {savedLocations.length > 0 && (
           <div className="sfx-library">
-            {savedScenes.map(([id, s]) => (
+            {savedLocations.map(([id, l]) => (
               <div key={id} className="saved-scene-item">
-                <button type="button" className="btn-dice" onClick={() => applySavedScene(s)}>
-                  🎬 {s.name}
-                </button>
                 <button
                   type="button"
-                  className="btn-ghost small"
-                  onClick={() => removeSavedScene(id)}
+                  className={`btn-dice${scene?.locationImageUrl === l.imageUrl ? ' active' : ''}`}
+                  onClick={() => publishLocation(l)}
                 >
+                  🖼️ {l.name}
+                </button>
+                <button type="button" className="btn-ghost small" onClick={() => removeLocation(id)}>
                   Sil
                 </button>
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      <form onSubmit={publishScene} className="scene-form">
-        <label>
-          Mekan Görseli (URL, 16:9)
+      <div className="gm-section">
+        <h3 className="title-font gm-section-title">Odak Kütüphanesi</h3>
+        <p className="muted small-hint">Konuşan karakter/eşya görseli + adını kaydet, listeden seçince canlı sahneye uygular.</p>
+        <div className="inline-form">
           <input
-            value={locationImageUrl}
-            onChange={(e) => setLocationImageUrl(e.target.value)}
-            placeholder="https://..."
+            value={focusDraftUrl}
+            onChange={(e) => setFocusDraftUrl(e.target.value)}
+            placeholder="Odak görseli URL (16:9)"
           />
-        </label>
-        <label>
-          Sahne Adı
           <input
-            value={caption}
-            onChange={(e) => setCaption(e.target.value)}
-            placeholder="Sahnenin açıklaması"
+            value={focusDraftName}
+            onChange={(e) => setFocusDraftName(e.target.value)}
+            placeholder="Karakter / eşya adı"
           />
-        </label>
-        <label>
-          Odak Görseli — Konuşan Karakter / Eşya (URL, 16:9)
+          <button type="button" className="btn-primary small" onClick={saveFocus}>
+            💾 Kaydet
+          </button>
+        </div>
+        {savedFocuses.length > 0 && (
+          <div className="sfx-library">
+            {savedFocuses.map(([id, f]) => (
+              <div key={id} className="saved-scene-item">
+                <button
+                  type="button"
+                  className={`btn-dice${scene?.focusImageUrl === f.imageUrl ? ' active' : ''}`}
+                  onClick={() => publishFocus(f)}
+                >
+                  🎭 {f.name}
+                </button>
+                <button type="button" className="btn-ghost small" onClick={() => removeFocus(id)}>
+                  Sil
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="gm-section">
+        <h3 className="title-font gm-section-title">Müzik Kütüphanesi</h3>
+        <p className="muted small-hint">Müzik linki + ismini kaydet, aşağıdaki menüden seçince canlı müzik değişir.</p>
+        <div className="inline-form">
           <input
-            value={focusImageUrl}
-            onChange={(e) => setFocusImageUrl(e.target.value)}
-            placeholder="https://..."
+            value={musicDraftUrl}
+            onChange={(e) => setMusicDraftUrl(e.target.value)}
+            placeholder="Müzik URL (mp3)"
           />
-        </label>
-        <label>
-          Karakter / Eşya Adı
           <input
-            value={focusCaption}
-            onChange={(e) => setFocusCaption(e.target.value)}
-            placeholder="Örn. Yaşlı Rahip"
+            value={musicDraftName}
+            onChange={(e) => setMusicDraftName(e.target.value)}
+            placeholder="Müzik ismi"
           />
-        </label>
-        <label>
-          Harita Görseli (URL)
+          <button type="button" className="btn-primary small" onClick={saveMusic}>
+            💾 Kaydet
+          </button>
+        </div>
+        {savedMusicList.length > 0 && (
+          <div className="inline-form">
+            <select
+              value={selectedMusicId}
+              onChange={(e) => {
+                const entry = savedMusicList.find(([id]) => id === e.target.value);
+                selectMusic(e.target.value, entry?.[1]);
+              }}
+            >
+              <option value="">Müzik seç...</option>
+              {savedMusicList.map(([id, m]) => (
+                <option key={id} value={id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+            {selectedMusicId && (
+              <button type="button" className="btn-ghost small danger" onClick={() => removeMusic(selectedMusicId)}>
+                Sil
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="gm-section">
+        <h3 className="title-font gm-section-title">Harita</h3>
+        <div className="inline-form">
           <input
             value={mapImageUrl}
             onChange={(e) => setMapImageUrl(e.target.value)}
-            placeholder="https://..."
+            placeholder="Harita görseli URL"
           />
-        </label>
-        <label>
-          Müzik (mp3 URL)
-          <input
-            value={musicUrl}
-            onChange={(e) => setMusicUrl(e.target.value)}
-            placeholder="https://.../muzik.mp3"
-          />
-        </label>
-        <button type="submit" className="btn-primary">
-          Sahneyi Yayınla
-        </button>
-      </form>
-
-      <div className="inline-form save-scene-form">
-        <input
-          value={saveSceneName}
-          onChange={(e) => setSaveSceneName(e.target.value)}
-          placeholder="Bu sahneyi hangi isimle kaydedeyim?"
-        />
-        <button type="button" className="btn-primary small" onClick={saveCurrentScene}>
-          💾 Sahne Olarak Kaydet
-        </button>
+          <button type="button" className="btn-primary small" onClick={publishMap}>
+            Yayınla
+          </button>
+        </div>
       </div>
 
       <div className="gm-section">

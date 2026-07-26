@@ -109,9 +109,7 @@ export default function QuestBoard({ roomCode, quests, isGM, players, calendar }
   }
 
   return (
-    <div className="panel">
-      <h2 className="title-font">📜 Görev Panosu</h2>
-
+    <>
       {list.length === 0 && <p className="muted">Henüz görev yok.</p>}
 
       {active.length > 0 && <ul className="quest-list">{active.map(([id, q]) => renderQuest(id, q))}</ul>}
@@ -181,6 +179,6 @@ export default function QuestBoard({ roomCode, quests, isGM, players, calendar }
           </button>
         </form>
       )}
-    </div>
+    </>
   );
 }

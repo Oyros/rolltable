@@ -51,8 +51,7 @@ export default function GameCalendar({ roomCode, calendar, isGM }) {
   }
 
   return (
-    <div className="panel calendar-panel">
-      <h2 className="title-font">🗓️ Takvim</h2>
+    <div className="calendar-panel">
       <p className="calendar-display">
         {hour >= 6 && hour < 20 ? '☀️' : '🌙'} Gün {day} · {pad(hour)}:{pad(minute)}
       </p>

@@ -47,8 +47,9 @@ export default function HelpGuide({ onClose }) {
             <li><strong>Odak Görseli</strong> — o an konuşan karakter/eşya, kendi adıyla birlikte.</li>
             <li><strong>Harita</strong> — "Haritayı Göster" ile açılır; üzerine tıklayarak pin bırakabilirsin (kendi renginde). Kendi pinini herkes, başkasının pinini sadece GM kaldırabilir.</li>
             <li><strong>Müzik / Ambiyans</strong> — GM çalar/durdurur, herkes kendi ses seviyesini ayarlar.</li>
-            <li><strong>Vinyet, Flaş/Sarsıntı</strong> — GM'in tetiklediği görsel atmosfer efektleri (sağ kenardaki "Atmosfer Kontrolleri"nde).</li>
+            <li><strong>Vinyet, Flaş/Sarsıntı, Hava Durumu</strong> — GM'in tetiklediği görsel atmosfer efektleri (sağ kenardaki "Görsel Efektler"de).</li>
             <li><strong>Tema parçacıkları</strong> — seçilen temaya göre (kül, neon, büyü tozu, sis, yıldız) otomatik arka plan efekti.</li>
+            <li><strong>Gün/Gece Işığı</strong> — gündüz ekrana hafif güneş ışınları vurur; gece genel ekran kararır ama birkaç noktada mum ışığı gibi sıcak parıltılar titreşerek yanar. Takvim saatine göre otomatik geçer.</li>
           </ul>
         </details>
 
@@ -57,10 +58,9 @@ export default function HelpGuide({ onClose }) {
           <p>
             Sol kenarın en üstünde oyun içi gün ve saat gösterilir. GM +1 Saat / +6 Saat / +1 Gün
             butonlarıyla ilerletebilir, ya da gün/saat/dakikayı elle ayarlayabilir (bu kutular hızlı
-            butonlarla birlikte otomatik güncellenir). Herkes aynı takvimi görür. Gece saatlerinde
-            sahnenin vinyet (koyulaşma) efekti otomatik artar ve rengi soğuk bir maviye kayar;
-            gündüz/gece ayrımı takvim başlığındaki ☀️/🌙 simgesinden de anlaşılır — ekstra bir
-            ayar gerekmez.
+            butonlarla birlikte otomatik güncellenir). Herkes aynı takvimi görür. Gündüz/gece
+            ayrımı hem takvim başlığındaki ☀️/🌙 simgesinden hem de ekrandaki güneş ışını / mum
+            ışığı efektinden anlaşılır — ekstra bir ayar gerekmez.
           </p>
         </details>
 
@@ -149,21 +149,30 @@ export default function HelpGuide({ onClose }) {
           <ul>
             <li><strong>Oda Yönetimi</strong> — odayı kilitle/aç (yeni katılımı engelle), oturum zamanlayıcısını başlat/sıfırla, odayı sil (sadece oda sahibi görür).</li>
             <li><strong>Üst Menü Afişi</strong> — sayfanın en üstündeki banner görseli.</li>
-            <li><strong>Kayıtlı Sahneler</strong> — sık kullandığın sahneleri isimle kaydet, tek tıkla tekrar yayınla.</li>
-            <li>Sahne formu — mekan/odak/harita görselleri, sahne adı, müzik linki.</li>
+            <li>
+              <strong>Mekan / Odak / Müzik Kütüphaneleri</strong> — görsel/link ile bir isim
+              girip "💾 Kaydet" dersin, canlı sahneyi <em>hemen değiştirmez</em>, sadece
+              kütüphaneye ekler. Sahneyi güncellemek için kütüphaneden ilgili ismin üstüne
+              tıklarsın (müzikte açılır menüden seçersin) — o an canlı sahneye uygulanır. Böylece
+              önceden bir sürü görsel/müzik hazırlayıp oturum sırasında tek tıkla geçiş
+              yapabilirsin.
+            </li>
+            <li><strong>Harita</strong> — URL gir, "Yayınla" ile canlı haritayı günceller (harita değişirse eski pinler temizlenir).</li>
             <li><strong>İnisiyatif Sırası</strong> — sıraya oyuncu ekle/çıkar, yeniden sırala, sırayı ilerlet (bkz. yukarıdaki "İnisiyatif Sırası" başlığı).</li>
             <li><strong>Gizli Fısıltı</strong> — tek bir oyuncuya ya da "📢 Herkese" özel mesaj gönder.</li>
           </ul>
         </details>
 
         <details>
-          <summary>🌫️ Atmosfer Kontrolleri (sağ kenar, sadece GM)</summary>
+          <summary>🌫️🔊 Görsel Efektler & Ses Efektleri (sağ kenar, sadece GM)</summary>
           <p>
-            Kısa, tek seferlik ses efektlerini (kapı gıcırtısı, kılıç sesi vb.) butona basarak
-            anlık çalabilirsin. Sürekli çalan ambiyans parçaları (yağmur, rüzgar vb.) ise
-            çal/durdur butonuyla açılıp kapanır ve kendi ses düzeyi kaydırıcısına sahiptir. Altta
-            <strong> Hava Durumu</strong> (Yok/🌧️ Yağmur/❄️ Kar — herkesin ekranında animasyonlu
-            görünür), Vinyet yoğunluğu kaydırıcısı ve Flaş/Sarsıntı tetikleyici butonu bulunur.
+            İki ayrı açılır menü halindedir. <strong>Ses Efektleri</strong>'nde kısa, tek seferlik
+            ses efektlerini (kapı gıcırtısı, kılıç sesi vb.) butona basarak anlık çalabilirsin.
+            Sürekli çalan ambiyans parçaları (yağmur, rüzgar vb.) çal/durdur butonuyla açılıp
+            kapanır ve kendi ses düzeyi kaydırıcısına sahiptir. <strong>Görsel Efektler</strong>'de
+            ise <strong>Hava Durumu</strong> (Yok/🌧️ Yağmur/❄️ Kar — herkesin ekranında
+            animasyonlu görünür), Vinyet yoğunluğu kaydırıcısı ve Flaş/Sarsıntı tetikleyici
+            butonu bulunur.
           </p>
         </details>
 

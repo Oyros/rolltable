@@ -11,8 +11,8 @@ export default function NpcNameGenerator({ theme }) {
   }
 
   return (
-    <div className="panel">
-      <h2 className="title-font">🎭 NPC İsim Üretici</h2>
+    <div className="side-accordion-group">
+      <h3 className="side-accordion-group-title">🎭 NPC İsim Üretici</h3>
       <div className="inline-form">
         <select value={category} onChange={(e) => setCategory(e.target.value)}>
           {NPC_CATEGORIES.map((c) => (
