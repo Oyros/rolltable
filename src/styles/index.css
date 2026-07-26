@@ -214,6 +214,29 @@ button:hover {
   margin: 0 0 24px;
 }
 
+.home-choice-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.home-join-btn {
+  width: 100%;
+  padding: 9px 16px;
+  justify-content: center;
+}
+
+.home-hint {
+  font-size: 0.78rem;
+  margin: -6px 0 14px;
+}
+
+.home-back-btn {
+  width: 100%;
+  margin-top: 10px;
+  justify-content: center;
+}
+
 /* Room layout */
 .room {
   height: 100vh;
@@ -1614,4 +1637,49 @@ button:hover {
 .gm-slot-name {
   font-weight: 600;
   color: var(--amber-light);
+}
+
+/* Help guide */
+.help-guide-card details {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  padding: 10px 14px;
+  background: var(--bg-panel-alt);
+}
+
+.help-guide-card summary {
+  cursor: pointer;
+  font-family: var(--font-heading);
+  color: var(--amber-light);
+  font-size: 1rem;
+}
+
+.help-guide-card details[open] summary {
+  margin-bottom: 10px;
+}
+
+.help-guide-card p,
+.help-guide-card li {
+  font-size: 0.85rem;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.help-guide-card ul {
+  margin: 4px 0 6px;
+  padding-left: 20px;
+}
+
+.help-guide-card code {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.82em;
+  color: var(--amber-light);
+}
+
+.help-btn {
+  flex-shrink: 0;
 }

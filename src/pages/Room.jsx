@@ -15,6 +15,7 @@ import ParticleEffect from '../components/ParticleEffect.jsx';
 import SessionTimer from '../components/SessionTimer.jsx';
 import NpcNameGenerator from '../components/NpcNameGenerator.jsx';
 import PromptGenerator from '../components/PromptGenerator.jsx';
+import HelpGuide from '../components/HelpGuide.jsx';
 import { applyTheme, DEFAULT_THEME_ID } from '../utils/themes.js';
 
 const AMBIANCE_VOLUME_KEY = 'sessizlik_ambiance_volume';
@@ -35,6 +36,8 @@ export default function Room({ session, onLeave }) {
   const [ambianceVolume, setAmbianceVolumeState] = useState(loadAmbianceVolume);
   const [joinBlocked, setJoinBlocked] = useState(false);
   const [kicked, setKicked] = useState(false);
+  const [ownerId, setOwnerId] = useState(null);
+  const [showHelp, setShowHelp] = useState(false);
   const flashSeenRef = useRef(undefined);
   const kickSeenRef = useRef(undefined);
 
@@ -119,6 +122,12 @@ export default function Room({ session, onLeave }) {
   }, [roomCode]);
 
   useEffect(() => {
+    const ownerRef = ref(db, `rooms/${roomCode}/ownerId`);
+    const unsub = onValue(ownerRef, (snap) => setOwnerId(snap.val()));
+    return () => unsub();
+  }, [roomCode]);
+
+  useEffect(() => {
     const settingsRef = ref(db, `rooms/${roomCode}/settings`);
     const unsub = onValue(settingsRef, (snap) => setSettings(snap.val() || {}));
     return () => unsub();
@@ -188,7 +197,10 @@ export default function Room({ session, onLeave }) {
     remove(ref(db, `rooms/${roomCode}/players/${targetId}`));
   }
 
+  const isOwner = ownerId ? ownerId === playerId : true;
+
   function deleteRoom() {
+    if (!isOwner) return;
     if (
       !window.confirm(
         'Bu odayı ve içindeki tüm verileri (sahne, karakterler, oyun kuralları) kalıcı olarak silmek istediğine emin misin?'
@@ -220,11 +232,15 @@ export default function Room({ session, onLeave }) {
           <span className="who-am-i">
             {name} · {role === 'gm' ? 'GM' : 'Oyuncu'}
           </span>
+          <button className="btn-ghost" onClick={() => setShowHelp(true)}>
+            ❓ Yardım
+          </button>
           <button className="btn-ghost" onClick={onLeave}>
             Odadan Çık
           </button>
         </div>
       </div>
+      {showHelp && <HelpGuide onClose={() => setShowHelp(false)} />}
     </header>
   );
 
@@ -323,6 +339,7 @@ export default function Room({ session, onLeave }) {
                 settings={settings}
                 gameConfig={gameConfig}
                 onDeleteRoom={deleteRoom}
+                isOwner={isOwner}
               />
             ) : (
               me && (

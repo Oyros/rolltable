@@ -3,7 +3,15 @@ import { ref, update, push, remove } from 'firebase/database';
 import { db } from '../firebase.js';
 import RulesEditor from './RulesEditor.jsx';
 
-export default function GMPanel({ roomCode, scene, players, settings, gameConfig, onDeleteRoom }) {
+export default function GMPanel({
+  roomCode,
+  scene,
+  players,
+  settings,
+  gameConfig,
+  onDeleteRoom,
+  isOwner,
+}) {
   const [showRulesEditor, setShowRulesEditor] = useState(false);
   const [locationImageUrl, setLocationImageUrl] = useState('');
   const [focusImageUrl, setFocusImageUrl] = useState('');
@@ -158,10 +166,17 @@ export default function GMPanel({ roomCode, scene, players, settings, gameConfig
           <button type="button" className="btn-ghost sound-toggle" onClick={startOrResetSession}>
             {settings?.sessionStartedAt ? '🔄 Zamanlayıcıyı Sıfırla' : '▶️ Oturumu Başlat'}
           </button>
-          <button type="button" className="btn-ghost small danger" onClick={onDeleteRoom}>
-            🗑️ Odayı Sil
-          </button>
+          {isOwner && (
+            <button type="button" className="btn-ghost small danger" onClick={onDeleteRoom}>
+              🗑️ Odayı Sil
+            </button>
+          )}
         </div>
+        {!isOwner && (
+          <p className="muted">
+            Bu odayı sadece kuran kişi (oda sahibi) silebilir.
+          </p>
+        )}
         {settings?.locked && (
           <p className="muted">Oda kilitli — yeni oyuncular katılamaz, mevcut oyuncular girebilir.</p>
         )}
