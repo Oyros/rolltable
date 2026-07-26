@@ -7,6 +7,7 @@ import ParticleEffect from '../components/ParticleEffect.jsx';
 import HelpGuide from '../components/HelpGuide.jsx';
 import Home from './Home.jsx';
 import PublicProfile from './PublicProfile.jsx';
+import DMPanel from '../components/DMPanel.jsx';
 import {
   findUserByNickname,
   sendFriendRequest,
@@ -106,7 +107,7 @@ function UserRow({ uid, hint, children, onOpenProfile }) {
   );
 }
 
-function FriendsSection({ profile, playerId, onOpenProfile }) {
+function FriendsSection({ profile, playerId, onOpenProfile, onOpenDM }) {
   const [search, setSearch] = useState('');
   const [searchResult, setSearchResult] = useState(null);
   const [searchError, setSearchError] = useState('');
@@ -248,7 +249,11 @@ function FriendsSection({ profile, playerId, onOpenProfile }) {
       ) : (
         <div className="room-card-list">
           {friends.map((uid) => (
-            <UserRow key={uid} uid={uid} onOpenProfile={onOpenProfile} />
+            <UserRow key={uid} uid={uid} onOpenProfile={onOpenProfile}>
+              <button type="button" className="btn-ghost small" onClick={() => onOpenDM(uid)}>
+                💬 Mesaj
+              </button>
+            </UserRow>
           ))}
         </div>
       )}
@@ -261,6 +266,7 @@ export default function Profile({ authUser, profile, playerId, onJoin }) {
   const [homeView, setHomeView] = useState(initialRoomParam ? 'join' : null);
   const [showHelp, setShowHelp] = useState(false);
   const [viewingUid, setViewingUid] = useState(null);
+  const [dmUid, setDmUid] = useState(null);
 
   useEffect(() => {
     applyTheme(DEFAULT_THEME_ID);
@@ -284,6 +290,10 @@ export default function Profile({ authUser, profile, playerId, onJoin }) {
     onJoin({ roomCode, name: myName || profile.nickname, role: 'oyuncu', playerId });
   }
 
+  if (dmUid) {
+    return <DMPanel myUid={playerId} otherUid={dmUid} onBack={() => setDmUid(null)} />;
+  }
+
   if (viewingUid) {
     return (
       <PublicProfile
@@ -291,6 +301,7 @@ export default function Profile({ authUser, profile, playerId, onJoin }) {
         myUid={playerId}
         myProfile={profile}
         onBack={() => setViewingUid(null)}
+        onOpenDM={setDmUid}
       />
     );
   }
@@ -392,7 +403,12 @@ export default function Profile({ authUser, profile, playerId, onJoin }) {
           )}
         </div>
 
-        <FriendsSection profile={profile} playerId={playerId} onOpenProfile={setViewingUid} />
+        <FriendsSection
+          profile={profile}
+          playerId={playerId}
+          onOpenProfile={setViewingUid}
+          onOpenDM={setDmUid}
+        />
       </div>
       {showHelp && <HelpGuide onClose={() => setShowHelp(false)} />}
     </div>

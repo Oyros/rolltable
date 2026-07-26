@@ -18,14 +18,54 @@ export default function HelpGuide({ onClose }) {
         <details open>
           <summary>🚪 Başlarken</summary>
           <p>
-            <strong>Oda Kur</strong>: yeni bir oda kodu ve isim gir. Otomatik olarak o odanın GM'i
-            olursun ve <strong>sadece sen</strong> o odayı silebilirsin.
+            Oda kurmak veya bir odaya katılmak için önce bir <strong>hesap</strong> gerekir —
+            e-posta/şifre ile ya da Google ile kayıt olabilirsin; kayıt sırasında herkese özel,
+            benzersiz bir <strong>kullanıcı adı</strong> seçersin. Giriş yaptıktan sonra
+            karşına <strong>Profilim</strong> sayfası çıkar.
           </p>
           <p>
-            <strong>Odaya Katıl</strong>: sadece daha önce kurulmuş bir oda koduna girilebilir. Eğer
-            odayı kuran kişiysen otomatik GM olarak tanınırsın, değilsen otomatik Oyuncu olursun.
-            Rol seçmen gerekmez. GM oda için bir <strong>şifre</strong> belirlediyse, katılırken bu
-            şifre de istenir (GM kendisi şifresiz girer).
+            <strong>🎲 Yeni Oda Kur</strong>: yeni bir oda kodu ve isim gir. Otomatik olarak o
+            odanın GM'i olursun ve <strong>sadece sen</strong> o odayı silebilirsin.
+          </p>
+          <p>
+            <strong>🚪 Kodla Odaya Katıl</strong>: sadece daha önce kurulmuş bir oda koduna
+            girilebilir. Eğer odayı kuran kişiysen otomatik GM olarak tanınırsın, değilsen otomatik
+            Oyuncu olursun. Rol seçmen gerekmez. GM oda için bir <strong>şifre</strong>
+            belirlediyse, katılırken bu şifre de istenir (GM kendisi şifresiz girer).
+          </p>
+        </details>
+
+        <details>
+          <summary>👤 Profilim & Oturum Aç/Kapa</summary>
+          <p>
+            Giriş sonrası iniş sayfan. Üstte kullanıcı adın ve <strong>"Aktivitemi Gizle"</strong>
+            (açarsan başkaları senin GM olduğun/katıldığın odaları göremez) anahtarı var.
+          </p>
+          <ul>
+            <li>
+              <strong>GM Olduğun Odalar</strong> — her oda için 🟢 Aktif / ⚪ Kapalı rozeti
+              gösterir. "▶️ Oturumu Başlat" ile oturumu açıp direkt odaya girersin; oturum zaten
+              açıksa aynı buton "Odaya Gir" olarak sadece içeri alır. Oturumu GM Kontrol
+              Paneli'nden "⏹️ Oturumu Sonlandır" ile kapatabilirsin — bu <strong>odayı veya
+              verileri silmez</strong>, sadece kapalı gösterir; sen tekrar başlatana kadar öyle
+              kalır.
+            </li>
+            <li>
+              <strong>Katıldığın Odalar</strong> — oturum aktifse "Oturuma Katıl" butonu çıkar,
+              kapalıyken buton görünmez.
+            </li>
+          </ul>
+        </details>
+
+        <details>
+          <summary>🤝 Arkadaşlar & Mesajlaşma</summary>
+          <p>
+            Profilim sayfasındaki <strong>Arkadaşlar</strong> bölümünden kullanıcı adıyla birini
+            arayıp arkadaşlık isteği gönderebilirsin. Gelen istekleri kabul/reddedebilir, giden
+            istekleri iptal edebilirsin. Bir isme tıklamak o kişinin profilini açar — nickname,
+            avatarı ve (aktivitesini gizlemediyse) GM olduğu/katıldığı odaların listesi görünür.
+            Arkadaş olduğunuzda profilinden veya arkadaş listesinden <strong>💬 Mesaj</strong> ile
+            oturumdan bağımsız, birebir özel yazışma açabilirsin.
           </p>
         </details>
 
@@ -252,12 +292,12 @@ export default function HelpGuide({ onClose }) {
         <details>
           <summary>🔒 Güvenlik Notu</summary>
           <p>
-            Her tarayıcı oturumu Firebase üzerinden gerçek, sahtesi üretilemeyen bir kimlikle
-            (anonim hesap) tanımlanır; oda sahibi (GM) rolü ve her oyuncunun kendi karakteri bu
-            kimliğe bağlıdır — bu, sunucu tarafında da uygulanır (sadece arayüzde gizlemek değil).
-            Buna ek olarak GM isteğe bağlı bir <strong>oda şifresi</strong> belirleyebilir. Oda
-            kodunu yine de tahmin edilmesi zor seç ve sadece güvendiğin kişilerle paylaş —
-            gerçek hesap/şifre girişi olan bir sistem değildir.
+            Her hesap Firebase üzerinden gerçek, sahtesi üretilemeyen bir kimlikle (e-posta/şifre
+            veya Google) tanımlanır; oda sahibi (GM) rolü, her oyuncunun kendi karakteri ve
+            arkadaşlık/mesajlaşma bu kimliğe bağlıdır — bu, sunucu tarafında da uygulanır (sadece
+            arayüzde gizlemek değil). Buna ek olarak GM isteğe bağlı bir
+            <strong> oda şifresi</strong> belirleyebilir. Oda kodunu yine de tahmin edilmesi zor
+            seç ve sadece güvendiğin kişilerle paylaş.
           </p>
         </details>
       </div>

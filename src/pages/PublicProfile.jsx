@@ -38,7 +38,7 @@ function RoomSummary({ roomCode }) {
   );
 }
 
-export default function PublicProfile({ uid, myUid, myProfile, onBack }) {
+export default function PublicProfile({ uid, myUid, myProfile, onBack, onOpenDM }) {
   const [profile, setProfile] = useState(undefined);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -110,14 +110,19 @@ export default function PublicProfile({ uid, myUid, myProfile, onBack }) {
           {!isSelf && (
             <div className="profile-header-actions">
               {isFriend && (
-                <button
-                  type="button"
-                  className="btn-ghost danger"
-                  disabled={busy}
-                  onClick={() => withBusy(() => removeFriend(myUid, uid))}
-                >
-                  Arkadaşlıktan Çıkar
-                </button>
+                <>
+                  <button type="button" className="btn-primary small" onClick={() => onOpenDM(uid)}>
+                    💬 Mesaj Gönder
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-ghost danger"
+                    disabled={busy}
+                    onClick={() => withBusy(() => removeFriend(myUid, uid))}
+                  >
+                    Arkadaşlıktan Çıkar
+                  </button>
+                </>
               )}
               {!isFriend && outgoingPending && (
                 <button

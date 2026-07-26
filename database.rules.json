@@ -32,6 +32,19 @@
       }
     },
 
+    "dmThreads": {
+      "$threadId": {
+        ".read": "auth != null && $threadId.contains(auth.uid)",
+
+        "messages": {
+          "$msgId": {
+            ".write": "auth != null && $threadId.contains(auth.uid) && !data.exists() && newData.child('from').val() === auth.uid",
+            ".validate": "newData.hasChildren(['text', 'from', 'at']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 1000"
+          }
+        }
+      }
+    },
+
     "rooms": {
       "$roomCode": {
         ".read": "auth != null",

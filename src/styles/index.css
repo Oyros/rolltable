@@ -1273,6 +1273,22 @@ button:hover {
   word-break: break-word;
 }
 
+.chat-message.mine {
+  align-self: flex-end;
+  background: linear-gradient(160deg, var(--amber) 0%, var(--amber-dim) 100%);
+  border-color: transparent;
+  max-width: 75%;
+}
+
+.chat-message.mine .chat-message-text {
+  color: #1a1206;
+}
+
+.dm-message-list {
+  max-height: 50vh;
+  min-height: 200px;
+}
+
 .chat-form {
   display: flex;
   gap: 8px;
