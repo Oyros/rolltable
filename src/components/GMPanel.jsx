@@ -68,11 +68,15 @@ export default function GMPanel({
     update(ref(db, `rooms/${roomCode}/settings`), { locked: !settings?.locked });
   }
 
-  function startOrResetSession() {
-    if (settings?.sessionStartedAt && !window.confirm('Oturum zamanlayıcısını sıfırlamak istediğine emin misin?')) {
+  function startSession() {
+    update(ref(db, `rooms/${roomCode}/settings`), { sessionActive: true, sessionStartedAt: Date.now() });
+  }
+
+  function endSession() {
+    if (!window.confirm('Oturumu sonlandırmak istediğine emin misin? Oda ve verileri silinmez, sen tekrar başlatana kadar kapalı görünür.')) {
       return;
     }
-    update(ref(db, `rooms/${roomCode}/settings`), { sessionStartedAt: Date.now() });
+    update(ref(db, `rooms/${roomCode}/settings`), { sessionActive: false });
   }
 
   function publishMap() {
@@ -262,8 +266,12 @@ export default function GMPanel({
           <button type="button" className="btn-ghost sound-toggle" onClick={toggleLock}>
             {settings?.locked ? '🔓 Kilidi Aç' : '🔒 Odayı Kilitle'}
           </button>
-          <button type="button" className="btn-ghost sound-toggle" onClick={startOrResetSession}>
-            {settings?.sessionStartedAt ? '🔄 Zamanlayıcıyı Sıfırla' : '▶️ Oturumu Başlat'}
+          <button
+            type="button"
+            className="btn-ghost sound-toggle"
+            onClick={settings?.sessionActive ? endSession : startSession}
+          >
+            {settings?.sessionActive ? '⏹️ Oturumu Sonlandır' : '▶️ Oturumu Başlat'}
           </button>
           {isOwner && (
             <button type="button" className="btn-ghost small danger" onClick={onDeleteRoom}>

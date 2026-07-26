@@ -9,16 +9,16 @@ function formatElapsed(ms) {
   return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
 }
 
-export default function SessionTimer({ startedAt }) {
+export default function SessionTimer({ startedAt, active }) {
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
-    if (!startedAt) return undefined;
+    if (!active || !startedAt) return undefined;
     const interval = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(interval);
-  }, [startedAt]);
+  }, [active, startedAt]);
 
-  if (!startedAt) return null;
+  if (!active || !startedAt) return null;
 
   return <span className="session-timer">⏱ {formatElapsed(now - startedAt)}</span>;
 }

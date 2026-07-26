@@ -320,7 +320,7 @@ export default function Room({ session, onLeave }) {
           />
         </div>
         <div className="header-right">
-          <SessionTimer startedAt={settings?.sessionStartedAt} />
+          <SessionTimer startedAt={settings?.sessionStartedAt} active={!!settings?.sessionActive} />
           <span className="who-am-i">
             {name} · {role === 'gm' ? 'GM' : 'Oyuncu'}
           </span>
@@ -440,7 +440,7 @@ export default function Room({ session, onLeave }) {
                 playerId={playerId}
                 activeTurnPlayerId={settings?.initiative?.queue?.[settings?.initiative?.currentIndex ?? 0]}
                 roomCode={roomCode}
-                sessionStarted={!!settings?.sessionStartedAt}
+                sessionStarted={!!settings?.sessionActive}
               />
             </div>
           </details>
@@ -524,7 +524,7 @@ export default function Room({ session, onLeave }) {
                       playerId={playerId}
                       player={me}
                       gameConfig={gameConfig}
-                      sessionStarted={!!settings?.sessionStartedAt}
+                      sessionStarted={!!settings?.sessionActive}
                     />
                   )
                 )}

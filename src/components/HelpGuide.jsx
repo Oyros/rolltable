@@ -170,7 +170,7 @@ export default function HelpGuide({ onClose }) {
             tam ekran açılır (kapatmak için "✕ Kapat" ya da dışına tıkla).
           </p>
           <ul>
-            <li><strong>Oda Yönetimi</strong> — odayı kilitle/aç (yeni katılımı engelle), isteğe bağlı <strong>oda şifresi</strong> belirle, oturum zamanlayıcısını başlat/sıfırla, odayı sil (sadece oda sahibi görür).</li>
+            <li><strong>Oda Yönetimi</strong> — odayı kilitle/aç (yeni katılımı engelle), isteğe bağlı <strong>oda şifresi</strong> belirle, "▶️ Oturumu Başlat" / "⏹️ Oturumu Sonlandır" ile oturumu aç/kapa (kapatmak odayı veya verileri silmez — sadece "aktif değil" gösterir, tekrar başlatana kadar), odayı sil (sadece oda sahibi görür).</li>
             <li><strong>Üst Menü Afişi</strong> — sayfanın en üstündeki banner görseli.</li>
             <li>
               <strong>Mekan / Odak / Müzik Kütüphaneleri</strong> — görsel/link ile bir isim
