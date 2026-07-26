@@ -1287,11 +1287,17 @@ button:hover {
 .dm-message-list {
   max-height: 50vh;
   min-height: 200px;
+  justify-content: flex-end;
 }
 
 .chat-form {
   display: flex;
   gap: 8px;
+}
+
+.chat-form button {
+  width: auto;
+  flex-shrink: 0;
 }
 
 .chat-form input {
