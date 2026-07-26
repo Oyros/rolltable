@@ -1,11 +1,8 @@
 function buildSlots(queue, currentIndex) {
   const n = queue.length;
   const slots = [];
-  const seen = new Set();
   for (let offset = -2; offset <= 2; offset += 1) {
     const idx = ((currentIndex + offset) % n + n) % n;
-    if (seen.has(idx)) continue;
-    seen.add(idx);
     slots.push({ offset, playerId: queue[idx] });
   }
   return slots;

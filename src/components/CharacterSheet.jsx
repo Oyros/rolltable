@@ -30,10 +30,6 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
     push(ref(db, `${path}/whispers`), { text: `📝 ${text}`, at: Date.now(), system: true });
   }
 
-  function toggleLock() {
-    patch({ sheetLocked: !locked });
-  }
-
   function commitPortrait() {
     if (portraitDraft !== player.portraitUrl) patch({ portraitUrl: portraitDraft });
   }
@@ -109,16 +105,12 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
     <div className="panel character-sheet">
       <div className="character-sheet-header">
         <h2 className="title-font">{player.name}</h2>
-        {!isGM && (
-          <button type="button" className="btn-ghost small" onClick={toggleLock}>
-            {locked ? '🔓 Kilidi Aç' : '🔒 Kilitle'}
-          </button>
-        )}
+        {locked && <span className="sheet-locked-badge">🔒 Kilitli</span>}
       </div>
 
       {locked && !isGM && (
         <p className="muted sheet-locked-notice">
-          🔒 Karakter kağıdın kilitli. Değişiklik yapmak için kilidi aç.
+          🔒 Karakter kağıdın GM tarafından kilitlendi. Değişiklik yapamazsın.
         </p>
       )}
 

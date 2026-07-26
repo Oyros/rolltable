@@ -113,12 +113,12 @@ export default function HelpGuide({ onClose }) {
             <li>Yetenek/Dal metnini serbestçe yaz.</li>
             <li>Envantere GM'in eşya kataloğundan seçerek veya kendi yazarak eşya ekle.</li>
             <li>
-              <strong>🔒 Kilitle</strong> — karakter kağıdını istediğin an kendin kilitleyip
-              açabilirsin (yanlışlıkla değişiklik yapmayı önlemek için). GM de senin kağıdını
-              istediği zaman kilitleyebilir/açabilir; kilitliyken bile GM "✏️ Karakteri Düzenle"
-              ile her zaman değişiklik yapabilir. Oturum başladıktan (GM "▶️ Oturumu Başlat"
-              dedikten) sonraki stat/envanter/trait/perk/ırk/sınıf değişiklikleri, hangi oyuncuda
-              olduğu belirtilerek Fısıltı Geçmişi'nde otomatik kaydedilir.
+              <strong>🔒 Kilit</strong> — GM istediği zaman senin karakter kağıdını
+              kilitleyebilir/açabilir (sen kendin kilitleyemezsin). Kilitliyken hiçbir alanı
+              değiştiremezsin; GM ise kilitliyken bile "✏️ Karakteri Düzenle" ile her zaman
+              değişiklik yapabilir. Oturum başladıktan (GM "▶️ Oturumu Başlat" dedikten) sonraki
+              stat/envanter/trait/perk/ırk/sınıf değişiklikleri, hangi oyuncuda olduğu belirtilerek
+              Fısıltı Geçmişi'nde otomatik kaydedilir.
             </li>
           </ul>
         </details>
