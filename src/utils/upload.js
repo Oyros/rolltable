@@ -1,5 +1,6 @@
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../firebase.js';
+import { ref as storageRef, uploadBytes, getDownloadURL, listAll, deleteObject } from 'firebase/storage';
+import { ref as dbRef, get } from 'firebase/database';
+import { storage, db } from '../firebase.js';
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const MAX_AUDIO_BYTES = 15 * 1024 * 1024;
@@ -25,4 +26,29 @@ export async function uploadFile(file, roomCode, folder) {
   );
   await Promise.race([uploadBytes(fileRef, file), timeout]);
   return getDownloadURL(fileRef);
+}
+
+export async function deleteRoomUploads(roomCode) {
+  const rootRef = storageRef(storage, `rooms/${roomCode}/uploads`);
+  const { prefixes, items } = await listAll(rootRef);
+  const subLists = await Promise.all(prefixes.map((prefix) => listAll(prefix)));
+  const allItems = [...items, ...subLists.flatMap((l) => l.items)];
+  await Promise.all(allItems.map((item) => deleteObject(item)));
+}
+
+// Scans every room folder under Storage and deletes uploads left behind by
+// rooms whose database entry no longer exists (e.g. deleted before the
+// room-delete cleanup above existed, or removed directly from the DB).
+export async function sweepOrphanedRoomUploads() {
+  const { prefixes } = await listAll(storageRef(storage, 'rooms'));
+  let cleaned = 0;
+  for (const roomPrefix of prefixes) {
+    const roomCode = roomPrefix.name;
+    const snap = await get(dbRef(db, `rooms/${roomCode}`));
+    if (!snap.exists()) {
+      await deleteRoomUploads(roomCode);
+      cleaned += 1;
+    }
+  }
+  return cleaned;
 }

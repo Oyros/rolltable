@@ -27,6 +27,7 @@ import LootGenerator from '../components/LootGenerator.jsx';
 import GameCalendar from '../components/GameCalendar.jsx';
 import InitiativeBar from '../components/InitiativeBar.jsx';
 import { applyTheme, DEFAULT_THEME_ID } from '../utils/themes.js';
+import { deleteRoomUploads, sweepOrphanedRoomUploads } from '../utils/upload.js';
 
 const AMBIANCE_VOLUME_KEY = 'sessizlik_ambiance_volume';
 
@@ -54,6 +55,7 @@ export default function Room({ session, onLeave }) {
   const flashSeenRef = useRef(undefined);
   const kickSeenRef = useRef(undefined);
   const turnSeenRef = useRef(undefined);
+  const deletingRoomRef = useRef(false);
 
   function setAmbianceVolume(value) {
     setAmbianceVolumeState(value);
@@ -122,16 +124,27 @@ export default function Room({ session, onLeave }) {
     const connectedRef = ref(db, '.info/connected');
     const presencePath = `rooms/${roomCode}/players/${playerId}`;
 
+    const presenceRef = ref(db, `${presencePath}/online`);
+
     const unsub = onValue(connectedRef, (snap) => {
       if (snap.val() === true) {
-        onDisconnect(ref(db, `${presencePath}/online`)).set(false);
+        onDisconnect(presenceRef).set(false);
         update(ref(db, presencePath), { online: true });
       }
     });
 
     return () => {
       unsub();
-      update(ref(db, presencePath), { online: false }).catch(() => {});
+      // Cancel the pending server-side disconnect write — otherwise it can
+      // fire later (e.g. as the connection cycles during navigation) and
+      // silently recreate this path even after the room was deleted.
+      onDisconnect(presenceRef).cancel();
+      // If we're unmounting because the room itself was just deleted, don't
+      // write presence data back into it — that's exactly what resurrects a
+      // stray fragment of an otherwise fully-deleted room.
+      if (!deletingRoomRef.current) {
+        update(ref(db, presencePath), { online: false }).catch(() => {});
+      }
     };
   }, [roomCode, playerId, gameConfig]);
 
@@ -266,7 +279,13 @@ export default function Room({ session, onLeave }) {
     ) {
       return;
     }
+    deletingRoomRef.current = true;
+    deleteRoomUploads(roomCode).catch(() => {});
     remove(ref(db, `rooms/${roomCode}`));
+    // Best-effort, silent: while we're here, also clean up storage left
+    // behind by any other room that no longer exists in the database
+    // (e.g. one deleted before this cleanup existed).
+    sweepOrphanedRoomUploads().catch(() => {});
     onLeave();
   }
 

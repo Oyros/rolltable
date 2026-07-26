@@ -3,9 +3,18 @@ service firebase.storage {
   match /b/{bucket}/o {
     match /rooms/{roomCode}/uploads/{folder}/{fileName} {
       allow read: if true;
-      allow write: if request.auth != null
+      allow create, update: if request.auth != null
         && request.resource.size < 20 * 1024 * 1024
         && (request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('audio/.*'));
+      allow delete: if request.auth != null;
+    }
+
+    // listAll() during room-delete cleanup and the orphaned-room sweep
+    // needs an explicit `list` grant at every level it walks (the room
+    // root itself, down through uploads/{folder}) — Storage doesn't
+    // derive `list` from the file-level rules above.
+    match /rooms/{allPaths=**} {
+      allow list: if request.auth != null;
     }
   }
 }
