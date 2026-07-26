@@ -67,6 +67,14 @@
           "$rollId": {
             ".write": "auth != null && !data.exists()"
           }
+        },
+
+        "scene": {
+          "mapPins": {
+            "$pinId": {
+              ".write": "auth != null && ((!data.exists() && newData.child('byId').val() === auth.uid) || (!newData.exists() && data.child('byId').val() === auth.uid))"
+            }
+          }
         }
       }
     }

@@ -483,6 +483,8 @@ export default function Room({ session, onLeave }) {
             savedLocations={settings?.savedLocations}
             savedFocuses={settings?.savedFocuses}
             savedMusic={settings?.savedMusic}
+            players={players}
+            initiativeQueue={settings?.initiative?.queue}
           />
 
           <div className="room-bottom">

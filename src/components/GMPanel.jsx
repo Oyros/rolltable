@@ -3,6 +3,7 @@ import { ref, update, push, remove } from 'firebase/database';
 import { db } from '../firebase.js';
 import RulesEditor from './RulesEditor.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
+import { resolveQueueEntity as resolveEntityShared } from '../utils/initiativeEntity.js';
 
 export default function GMPanel({
   roomCode,
@@ -82,7 +83,10 @@ export default function GMPanel({
   function publishMap() {
     const trimmed = mapImageUrl.trim();
     const payload = { mapImageUrl: trimmed, updatedAt: Date.now() };
-    if (trimmed !== (scene?.mapImageUrl || '')) payload.mapPins = null;
+    if (trimmed !== (scene?.mapImageUrl || '')) {
+      payload.mapPins = null;
+      payload.mapTokens = null;
+    }
     update(ref(db, `rooms/${roomCode}/scene`), payload);
   }
 
@@ -183,10 +187,13 @@ export default function GMPanel({
   const notInQueueNpcs = npcFocusList.filter(([id]) => !queue.includes(id));
 
   function resolveQueueEntity(id) {
-    if (players?.[id]) return { name: players[id].name, imageUrl: players[id].portraitUrl, color: players[id].color, isNpc: false };
-    const npc = settings?.savedFocuses?.[id];
-    if (npc) return { name: npc.name, imageUrl: npc.imageUrl, isNpc: true };
-    return { name: '?', imageUrl: null, isNpc: false };
+    return (
+      resolveEntityShared(id, players, settings?.savedFocuses) || {
+        name: '?',
+        imageUrl: null,
+        isNpc: false,
+      }
+    );
   }
 
   function addToQueue(id) {
@@ -206,6 +213,7 @@ export default function GMPanel({
     if (idx < newIndex) newIndex -= 1;
     if (newIndex >= newQueue.length) newIndex = Math.max(0, newQueue.length - 1);
     update(ref(db, `rooms/${roomCode}/settings/initiative`), { queue: newQueue, currentIndex: newIndex });
+    remove(ref(db, `rooms/${roomCode}/scene/mapTokens/${id}`));
   }
 
   function moveInQueue(id, direction) {

@@ -1,3 +1,5 @@
+import { resolveQueueEntity } from '../utils/initiativeEntity.js';
+
 function buildSlots(queue, currentIndex) {
   const n = queue.length;
   const slots = [];
@@ -8,23 +10,13 @@ function buildSlots(queue, currentIndex) {
   return slots;
 }
 
-function resolveEntity(id, players, npcs) {
-  const p = players?.[id];
-  if (p) return { name: p.name, imageUrl: p.portraitUrl, color: p.color, isNpc: false };
-  const npc = npcs?.[id];
-  if (npc && (npc.category || 'karakter') === 'karakter') {
-    return { name: npc.name, imageUrl: npc.imageUrl, isNpc: true };
-  }
-  return null;
-}
-
 export default function InitiativeBar({ initiative, players, npcs, isGM, onAdvance }) {
   const queue = initiative?.queue || [];
   if (queue.length === 0) return null;
 
   const currentIndex = initiative.currentIndex ?? 0;
   const currentId = queue[currentIndex];
-  if (!resolveEntity(currentId, players, npcs)) return null;
+  if (!resolveQueueEntity(currentId, players, npcs)) return null;
 
   const slots = buildSlots(queue, currentIndex);
 
@@ -37,7 +29,7 @@ export default function InitiativeBar({ initiative, players, npcs, isGM, onAdvan
           </button>
         )}
         {slots.map(({ offset, entityId }) => {
-          const entity = resolveEntity(entityId, players, npcs);
+          const entity = resolveQueueEntity(entityId, players, npcs);
           if (!entity) return null;
           return (
             <div
