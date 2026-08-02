@@ -4,6 +4,7 @@ import { db } from '../firebase.js';
 import { STATUS_LABEL } from '../utils/stats.js';
 import { rollStat } from '../utils/statRoll.js';
 import { isSheetVisibleTo } from '../utils/sheetVisibility.js';
+import { rollModeLabel } from '../utils/rollMode.js';
 import CharacterSheet from './CharacterSheet.jsx';
 import Portal from './Portal.jsx';
 
@@ -117,7 +118,7 @@ export default function PartyOverview({
                             <button
                               type="button"
                               className="stat-roll-trigger"
-                              title="1d20 + bonus at"
+                              title={rollModeLabel()}
                               onClick={() =>
                                 rollStat({
                                   roomCode,

@@ -3,6 +3,7 @@ import { ref, update, push } from 'firebase/database';
 import { db } from '../firebase.js';
 import { STATUS_LABEL } from '../utils/stats.js';
 import { rollStat as rollStatShared } from '../utils/statRoll.js';
+import { rollModeLabel } from '../utils/rollMode.js';
 import Portal from './Portal.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
 
@@ -447,7 +448,7 @@ export default function CharacterSheet({
                 type="button"
                 className="stat-roll-trigger"
                 onClick={() => rollStat(stat.id)}
-                title="1d20 + bonus at"
+                title={rollModeLabel()}
               >
                 <span className="stat-label">{stat.name}</span>
                 <span className="stat-value">{player.stats?.[stat.id] ?? 2}</span>

@@ -171,7 +171,7 @@ export default function HelpGuide({ onClose }) {
             <li><strong>Karakter Adı</strong> dilediğin zaman değiştirilebilir — odaya girerken seçtiğin isimle sınırlı değilsin, buradan güncelleyince sohbet, zar atışları ve Parti panelinde de anında yeni isim görünür.</li>
             <li>Karakter görseli ve <strong>profil rengi</strong> seç — bu renk Parti panelinde ve harita pinlerinde senin rengin olur.</li>
             <li>Irk / Sınıf / Alt Sınıf seç (varsa açıklamaları altında görünür).</li>
-            <li>Statlarını +/- ile ayarla, Durumunu (İyi/Yaralı/Bitkin/Ölü) seç. Bir statın adına/değerine tıklayınca, GM'in belirlediği eşiklere göre bonus eklenmiş bir 1d20 atılır — sonuç herkesin gördüğü zar panelinde çıkar.</li>
+            <li>Statlarını +/- ile ayarla, Durumunu (İyi/Yaralı/Bitkin/Ölü) seç. Bir statın adına/değerine tıklayınca, GM'in belirlediği eşiklere göre bonus eklenmiş bir 1d20 atılır — sonuç herkesin gördüğü zar panelinde çıkar. Zar panelindeki Avantaj/Dezavantaj seçimin neyse (⬇ Dezavantaj / Normal / ⬆ Avantaj), stat atışların da otomatik olarak onu kullanır.</li>
             <li>
               <strong>Kaynaklar</strong> (varsa — Can Puanı, Stres, Fate Puanı gibi) dolgu
               çubuğu olarak görünür, +/- ile değiştirirsin; üst sınırı GM'in tanımladığı değerdir.

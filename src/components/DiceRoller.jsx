@@ -3,6 +3,7 @@ import { ref, push, query, limitToLast, onValue } from 'firebase/database';
 import { db } from '../firebase.js';
 import { playDiceRattle, playCritSuccess, playCritFail } from '../utils/diceSound.js';
 import { parseFormula, rollFormula, rollFudge } from '../utils/diceFormula.js';
+import { getRollMode, setRollMode as persistRollMode } from '../utils/rollMode.js';
 
 const DICE = [4, 6, 8, 10, 12, 20];
 const SPIN_MS = 1100;
@@ -15,6 +16,18 @@ function loadDiceVolume() {
   return Number.isFinite(parsed) ? Math.min(1, Math.max(0, parsed)) : 0.35;
 }
 
+// The raw die face a crit check cares about — for advantage/disadvantage
+// rolls that's whichever of the two dice was actually chosen (not the
+// total after a stat bonus is added), for a single-die formula roll (e.g.
+// a stat check) it's that one die, otherwise it's just the result itself.
+function naturalValueOf(data) {
+  if (data.mode && data.subRolls && data.subRolls.length === 2) {
+    return data.mode === 'advantage' ? Math.max(...data.subRolls) : Math.min(...data.subRolls);
+  }
+  if (data.subRolls && data.subRolls.length === 1) return data.subRolls[0];
+  return data.result;
+}
+
 export default function DiceRoller({ roomCode, name, isGM, canRoll = true }) {
   const [rolls, setRolls] = useState([]);
   const [rollState, setRollState] = useState(null);
@@ -23,7 +36,7 @@ export default function DiceRoller({ roomCode, name, isGM, canRoll = true }) {
   const [showStats, setShowStats] = useState(false);
   const [allRolls, setAllRolls] = useState([]);
   const [diceVolume, setDiceVolume] = useState(loadDiceVolume);
-  const [rollMode, setRollMode] = useState('normal');
+  const [rollMode, setRollModeState] = useState(getRollMode);
   const [formulaInput, setFormulaInput] = useState('');
   const [formulaError, setFormulaError] = useState('');
   const lastKeyRef = useRef(null);
@@ -52,8 +65,7 @@ export default function DiceRoller({ roomCode, name, isGM, canRoll = true }) {
           const canSeeResult = !data.hidden || isGM;
           const playCritSound = () => {
             if (!canSeeResult) return;
-            const natural =
-              data.subRolls && data.subRolls.length === 1 ? data.subRolls[0] : data.result;
+            const natural = naturalValueOf(data);
             if (data.dice && natural === data.dice) playCritSuccess(diceVolumeRef.current);
             else if (data.dice && natural === 1) playCritFail(diceVolumeRef.current);
           };
@@ -97,6 +109,11 @@ export default function DiceRoller({ roomCode, name, isGM, canRoll = true }) {
     });
     return () => unsub();
   }, [roomCode, showStats]);
+
+  function setRollMode(mode) {
+    setRollModeState(mode);
+    persistRollMode(mode);
+  }
 
   function rollDice(sides) {
     let result;
@@ -190,10 +207,7 @@ export default function DiceRoller({ roomCode, name, isGM, canRoll = true }) {
     rollState &&
     ((!rollState.mode && rollState.stage === 'done') || (rollState.mode && rollState.stage === 'reveal2'));
   const canSeeResult = rollState && (!rollState.hidden || isGM);
-  const naturalRollValue =
-    rollState && rollState.subRolls && rollState.subRolls.length === 1
-      ? rollState.subRolls[0]
-      : rollState?.result;
+  const naturalRollValue = rollState ? naturalValueOf(rollState) : undefined;
   const isCritSuccess =
     isRevealed && canSeeResult && !!rollState.dice && naturalRollValue === rollState.dice;
   const isCritFail = isRevealed && canSeeResult && !!rollState.dice && naturalRollValue === 1;
@@ -336,8 +350,11 @@ export default function DiceRoller({ roomCode, name, isGM, canRoll = true }) {
               </span>
             </div>
             <span className="die-roller">
-              {rollState.roller} · d{rollState.dice} ·{' '}
+              {rollState.roller} · {rollState.kind === 'formula' ? rollState.formula : `d${rollState.dice}`} ·{' '}
               {rollState.mode === 'advantage' ? '⬆ Avantaj' : '⬇ Dezavantaj'}
+              {rollState.stage === 'reveal2' && rollState.kind === 'formula' && (
+                <> → <strong>{mask(rollState.result, rollState.hidden)}</strong></>
+              )}
             </span>
           </div>
         )}
