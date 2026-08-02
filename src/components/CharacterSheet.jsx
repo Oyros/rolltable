@@ -31,6 +31,7 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
   const xp = player.xp || 0;
   const maxLevel = gameConfig.maxLevel || 10;
   const xpPerLevel = gameConfig.xpPerLevel || 100;
+  const statMax = gameConfig.statMax || 10;
   const qualifiedLevel = Math.min(maxLevel, Math.floor(xp / xpPerLevel) + 1);
   const atMaxLevel = level >= maxLevel;
   const canLevelUp = !atMaxLevel && (isGM || qualifiedLevel > level);
@@ -53,7 +54,7 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
 
   function changeStat(statId, delta) {
     const current = player.stats?.[statId] ?? 2;
-    const next = Math.min(10, Math.max(0, current + delta));
+    const next = Math.min(statMax, Math.max(0, current + delta));
     if (next === current) return;
     patch({ [`stats/${statId}`]: next });
     const statName = stats.find((s) => s.id === statId)?.name || statId;
@@ -139,7 +140,7 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
 
     if (levelUpStatId) {
       const current = player.stats?.[levelUpStatId] ?? 2;
-      const next = Math.min(10, current + 1);
+      const next = Math.min(statMax, current + 1);
       updates[`stats/${levelUpStatId}`] = next;
       const statName = stats.find((s) => s.id === levelUpStatId)?.name || levelUpStatId;
       logs.push(`${statName} statı ${current} → ${next}`);
@@ -239,7 +240,7 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
                           checked={levelUpStatId === s.id}
                           onChange={() => setLevelUpStatId(s.id)}
                         />
-                        {s.name} ({current} → {Math.min(10, current + 1)})
+                        {s.name} ({current} → {Math.min(statMax, current + 1)})
                       </label>
                     );
                   })}

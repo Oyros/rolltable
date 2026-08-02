@@ -20,6 +20,7 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
   const [theme, setTheme] = useState(initial?.theme || DEFAULT_THEME_ID);
   const [maxLevel, setMaxLevel] = useState(initial?.maxLevel || 10);
   const [xpPerLevel, setXpPerLevel] = useState(initial?.xpPerLevel || 100);
+  const [statMax, setStatMax] = useState(initial?.statMax ?? 10);
   const [statThreshold1, setStatThreshold1] = useState(initial?.statThreshold1 ?? 4);
   const [statThreshold2, setStatThreshold2] = useState(initial?.statThreshold2 ?? 6);
   const [statThreshold3, setStatThreshold3] = useState(initial?.statThreshold3 ?? 8);
@@ -66,6 +67,7 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
         theme,
         maxLevel: Math.max(1, parseInt(maxLevel, 10) || 10),
         xpPerLevel: Math.max(1, parseInt(xpPerLevel, 10) || 100),
+        statMax: Math.max(1, parseInt(statMax, 10) || 10),
         statThreshold1: t1,
         statThreshold2: t2,
         statThreshold3: t3,
@@ -145,8 +147,17 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
       </div>
 
       <div className="level-system-field">
-        <span className="entry-list-label">Stat Zar Bonusu</span>
+        <span className="entry-list-label">Stat Sistemi</span>
         <div className="inline-form">
+          <label className="level-system-input">
+            Maksimum Stat Puanı
+            <input
+              type="number"
+              min="1"
+              value={statMax}
+              onChange={(e) => setStatMax(e.target.value)}
+            />
+          </label>
           <label className="level-system-input">
             +1 için gereken puan
             <input
@@ -176,8 +187,9 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
           </label>
         </div>
         <p className="muted small-hint">
-          Oyuncular karakter kağıdında bir stata tıklayınca 1d20 + bu eşiklere göre hesaplanan
-          bonus atılır. Statlar 0-10 arası tutulur; varsayılan eşikler 4/6/8'dir.
+          Statlar 0 ile Maksimum Stat Puanı arasında tutulur. Oyuncular karakter kağıdında bir
+          stata tıklayınca 1d20 + bu eşiklere göre hesaplanan bonus atılır (varsayılan eşikler
+          4/6/8'dir).
         </p>
       </div>
 
