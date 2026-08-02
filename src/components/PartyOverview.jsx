@@ -95,10 +95,6 @@ export default function PartyOverview({
 
               {expanded && (
                 <div className="party-detail">
-                  {!sheetVisible ? (
-                    <p className="muted">🔒 Bu oyuncu karakter kağıdını gizledi.</p>
-                  ) : (
-                    <>
                   {p.portraitUrl && (
                     <img className="party-detail-image" src={p.portraitUrl} alt={p.name} />
                   )}
@@ -109,29 +105,41 @@ export default function PartyOverview({
                       .join(' · ')}
                   </p>
 
+                  {!sheetVisible ? (
+                    <p className="muted">🔒 Bu oyuncu karakter kağıdının geri kalanını gizledi.</p>
+                  ) : (
+                    <>
                   {stats.length > 0 && (
                     <div className="party-detail-stats">
                       {stats.map((s) => {
                         const statValue = p.stats?.[s.id] ?? 2;
+                        const canRollThis = isGM || id === playerId;
                         return (
                           <div className="stat-box" key={s.id}>
-                            <button
-                              type="button"
-                              className="stat-roll-trigger"
-                              title={rollModeLabel()}
-                              onClick={() =>
-                                rollStat({
-                                  roomCode,
-                                  rollerName: p.name,
-                                  statName: s.name,
-                                  statValue,
-                                  gameConfig,
-                                })
-                              }
-                            >
-                              <span className="stat-label">{s.name}</span>
-                              <span className="stat-value">{statValue}</span>
-                            </button>
+                            {canRollThis ? (
+                              <button
+                                type="button"
+                                className="stat-roll-trigger"
+                                title={rollModeLabel()}
+                                onClick={() =>
+                                  rollStat({
+                                    roomCode,
+                                    rollerName: p.name,
+                                    statName: s.name,
+                                    statValue,
+                                    gameConfig,
+                                  })
+                                }
+                              >
+                                <span className="stat-label">{s.name}</span>
+                                <span className="stat-value">{statValue}</span>
+                              </button>
+                            ) : (
+                              <div className="stat-roll-trigger stat-roll-static">
+                                <span className="stat-label">{s.name}</span>
+                                <span className="stat-value">{statValue}</span>
+                              </div>
+                            )}
                           </div>
                         );
                       })}

@@ -142,10 +142,13 @@ export default function HelpGuide({ onClose }) {
             doğrudan düzenleyebilir. Fısıltılar ve otomatik sistem kayıtları artık ayrı bir liste
             değil — hemen altındaki <strong>💬 Sohbet</strong> panelinde, sohbet mesajlarıyla
             birlikte farklı bir görünümle (🔒 fısıltı, açık renkli sistem kaydı) karışık akışta
-            görünür. GM bir oyuncunun karakter kağıdını görünürlükten zorla gizlemediyse,
-            oyuncular birbirinin statlarını/trait/perk/envanterini görüp görmeyeceğini kendi
-            karakter kağıdındaki bir anahtardan ayarlayabilir — kapatırsa diğer oyuncular sadece
-            "gizledi" notu görür, GM yine de her zaman tam görür.
+            görünür. Bir oyuncunun statlarına tıklayıp onun adına zar atmak sadece GM'e ve
+            oyuncunun kendisine açıktır — başka bir oyuncunun stat'ına tıklayamazsın. GM bir
+            oyuncunun karakter kağıdını görünürlükten zorla gizlemediyse, oyuncular birbirinin
+            statlarını/trait/perk/envanterini görüp görmeyeceğini kendi karakter kağıdındaki bir
+            anahtardan ayarlayabilir — kapatırsa diğer oyuncular portresini, durumunu ve
+            seviye/ırk/sınıf satırını yine de görür, sadece statlardan itibaren "gizledi" notu
+            çıkar; GM yine de her zaman tam görür.
           </p>
         </details>
 
