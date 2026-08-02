@@ -31,7 +31,8 @@ export default function PartyOverview({
     const next = Math.max(0, (currentXp || 0) + delta);
     update(ref(db, `rooms/${roomCode}/players/${id}`), { xp: next });
   }
-  const list = Object.entries(players || {}).filter(([, p]) => p.role !== 'gm');
+  const list = Object.entries(players || {}).filter(([, p]) => p.role === 'oyuncu');
+  const spectators = Object.entries(players || {}).filter(([, p]) => p.role === 'spectator');
 
   const stats = gameConfig?.stats || [];
   const resources = gameConfig?.resources || [];
@@ -226,6 +227,36 @@ export default function PartyOverview({
           );
         })}
       </ul>
+
+      {spectators.length > 0 && (
+        <div className="spectator-section">
+          <span className="party-detail-heading">👁️ İzleyiciler</span>
+          <ul className="spectator-list">
+            {spectators.map(([id, p]) => (
+              <li key={id} className="spectator-row">
+                <span
+                  className={`presence-dot ${p.online ? 'online' : 'offline'}`}
+                  title={p.online ? 'Çevrimiçi' : 'Çevrimdışı'}
+                />
+                <span className="spectator-name">{p.name}</span>
+                {isGM && (
+                  <button
+                    type="button"
+                    className="btn-ghost small danger"
+                    onClick={() => {
+                      if (window.confirm(`${p.name} adlı izleyiciyi odadan atmak istediğine emin misin?`)) {
+                        onKick(id);
+                      }
+                    }}
+                  >
+                    Odadan At
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {isGM && editingId && players?.[editingId] && (
         <Portal>

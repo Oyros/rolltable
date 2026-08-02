@@ -24,7 +24,7 @@ export default function QuestBoard({ roomCode, quests, isGM, players, calendar }
   const [deadlineDay, setDeadlineDay] = useState('');
   const [deadlineHour, setDeadlineHour] = useState('');
 
-  const playerList = Object.entries(players || {}).filter(([, p]) => p.role !== 'gm');
+  const playerList = Object.entries(players || {}).filter(([, p]) => p.role === 'oyuncu');
   const list = Object.entries(quests || {}).sort((a, b) => (a[1].createdAt || 0) - (b[1].createdAt || 0));
   const active = list
     .filter(([, q]) => q.status !== 'done' && q.status !== 'failed')

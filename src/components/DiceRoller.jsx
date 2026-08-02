@@ -15,7 +15,7 @@ function loadDiceVolume() {
   return Number.isFinite(parsed) ? Math.min(1, Math.max(0, parsed)) : 0.35;
 }
 
-export default function DiceRoller({ roomCode, name, isGM }) {
+export default function DiceRoller({ roomCode, name, isGM, canRoll = true }) {
   const [rolls, setRolls] = useState([]);
   const [rollState, setRollState] = useState(null);
   const [hiddenKey, setHiddenKey] = useState(null);
@@ -201,69 +201,75 @@ export default function DiceRoller({ roomCode, name, isGM }) {
 
   return (
     <>
-      <div className="roll-mode-toggle">
-        <button
-          type="button"
-          className={`roll-mode-btn${rollMode === 'disadvantage' ? ' active' : ''}`}
-          onClick={() => setRollMode('disadvantage')}
-        >
-          ⬇ Dezavantaj
-        </button>
-        <button
-          type="button"
-          className={`roll-mode-btn${rollMode === 'normal' ? ' active' : ''}`}
-          onClick={() => setRollMode('normal')}
-        >
-          Normal
-        </button>
-        <button
-          type="button"
-          className={`roll-mode-btn${rollMode === 'advantage' ? ' active' : ''}`}
-          onClick={() => setRollMode('advantage')}
-        >
-          ⬆ Avantaj
-        </button>
-      </div>
+      {!canRoll && <p className="muted small-hint">👁️ İzleyici olarak zar atamazsın, sadece izlersin.</p>}
 
-      {isGM && (
-        <label className="toggle-field">
-          <input
-            type="checkbox"
-            checked={secretMode}
-            onChange={(e) => setSecretMode(e.target.checked)}
-          />
-          Gizli Zar (sadece GM görür)
-        </label>
+      {canRoll && (
+        <>
+          <div className="roll-mode-toggle">
+            <button
+              type="button"
+              className={`roll-mode-btn${rollMode === 'disadvantage' ? ' active' : ''}`}
+              onClick={() => setRollMode('disadvantage')}
+            >
+              ⬇ Dezavantaj
+            </button>
+            <button
+              type="button"
+              className={`roll-mode-btn${rollMode === 'normal' ? ' active' : ''}`}
+              onClick={() => setRollMode('normal')}
+            >
+              Normal
+            </button>
+            <button
+              type="button"
+              className={`roll-mode-btn${rollMode === 'advantage' ? ' active' : ''}`}
+              onClick={() => setRollMode('advantage')}
+            >
+              ⬆ Avantaj
+            </button>
+          </div>
+
+          {isGM && (
+            <label className="toggle-field">
+              <input
+                type="checkbox"
+                checked={secretMode}
+                onChange={(e) => setSecretMode(e.target.checked)}
+              />
+              Gizli Zar (sadece GM görür)
+            </label>
+          )}
+
+          <div className="dice-buttons">
+            {DICE.map((sides) => (
+              <button key={sides} type="button" className="btn-dice" onClick={() => rollDice(sides)}>
+                d{sides}
+              </button>
+            ))}
+            <button type="button" className="btn-dice" onClick={submitFudgeRoll}>
+              🎴 4dF
+            </button>
+          </div>
+
+          <div className="dice-formula-form">
+            <input
+              value={formulaInput}
+              onChange={(e) => setFormulaInput(e.target.value)}
+              placeholder="Zar formülü, örn. 2d6+3"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  submitFormulaRoll();
+                }
+              }}
+            />
+            <button type="button" className="btn-ghost small" onClick={submitFormulaRoll}>
+              At
+            </button>
+          </div>
+          {formulaError && <p className="sound-error">{formulaError}</p>}
+        </>
       )}
-
-      <div className="dice-buttons">
-        {DICE.map((sides) => (
-          <button key={sides} type="button" className="btn-dice" onClick={() => rollDice(sides)}>
-            d{sides}
-          </button>
-        ))}
-        <button type="button" className="btn-dice" onClick={submitFudgeRoll}>
-          🎴 4dF
-        </button>
-      </div>
-
-      <div className="dice-formula-form">
-        <input
-          value={formulaInput}
-          onChange={(e) => setFormulaInput(e.target.value)}
-          placeholder="Zar formülü, örn. 2d6+3"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              submitFormulaRoll();
-            }
-          }}
-        />
-        <button type="button" className="btn-ghost small" onClick={submitFormulaRoll}>
-          At
-        </button>
-      </div>
-      {formulaError && <p className="sound-error">{formulaError}</p>}
 
       <label className="volume-control dice-volume-control">
         🎲 Zar Sesi

@@ -33,6 +33,13 @@ export default function HelpGuide({ onClose }) {
             Oyuncu olursun. Rol seçmen gerekmez. GM oda için bir <strong>şifre</strong>
             belirlediyse, katılırken bu şifre de istenir (GM kendisi şifresiz girer).
           </p>
+          <p>
+            <strong>👁️ İzleyici olarak katıl</strong>: katılma formundaki kutucuğu işaretlersen
+            karakter oluşturmadan sadece izlersin. İzleyiciler sahneyi, zar animasyonunu/geçmişini
+            ve sohbeti görür ama zar atamaz, sohbete yazamaz; sol Parti panelinde ayrı, sade bir
+            "İzleyiciler" listesinde görünür ve göreve/inisiyatife/ganimete dahil edilmez. GM
+            istediği zaman bir izleyiciyi odadan atabilir.
+          </p>
         </details>
 
         <details>

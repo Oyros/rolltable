@@ -7,7 +7,7 @@ export default function LootGenerator({ roomCode, players, theme }) {
   const [items, setItems] = useState([]);
   const [targetId, setTargetId] = useState('');
 
-  const playerList = Object.entries(players || {}).filter(([, p]) => p.role !== 'gm');
+  const playerList = Object.entries(players || {}).filter(([, p]) => p.role === 'oyuncu');
 
   function generate() {
     const loot = generateLoot(theme);

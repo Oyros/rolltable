@@ -78,30 +78,34 @@ export default function Room({ session, onLeave }) {
             return;
           }
         }
-        const defaultStats = {};
-        (gameConfig.stats || []).forEach((stat) => {
-          defaultStats[stat.id] = 2;
-        });
-        const defaultResources = {};
-        (gameConfig.resources || []).forEach((res) => {
-          defaultResources[res.id] = res.max;
-        });
-        update(playerRef, {
-          name,
-          role,
-          status: 'iyi',
-          stats: defaultStats,
-          resources: defaultResources,
-          xp: 0,
-          skills: '',
-          inventory: [],
-          raceId: '',
-          classId: '',
-          subclassId: '',
-          traits: [],
-          perks: [],
-          updatedAt: Date.now(),
-        });
+        if (role === 'spectator') {
+          update(playerRef, { name, role, online: false, updatedAt: Date.now() });
+        } else {
+          const defaultStats = {};
+          (gameConfig.stats || []).forEach((stat) => {
+            defaultStats[stat.id] = 2;
+          });
+          const defaultResources = {};
+          (gameConfig.resources || []).forEach((res) => {
+            defaultResources[res.id] = res.max;
+          });
+          update(playerRef, {
+            name,
+            role,
+            status: 'iyi',
+            stats: defaultStats,
+            resources: defaultResources,
+            xp: 0,
+            skills: '',
+            inventory: [],
+            raceId: '',
+            classId: '',
+            subclassId: '',
+            traits: [],
+            perks: [],
+            updatedAt: Date.now(),
+          });
+        }
       } else {
         // Don't overwrite name here — the player may have renamed their
         // character in-app since first joining, and that should stick
@@ -455,7 +459,14 @@ export default function Room({ session, onLeave }) {
               💬 Sohbet<span className="side-accordion-chevron">▾</span>
             </summary>
             <div className="side-accordion-body">
-              <ChatPanel roomCode={roomCode} name={liveName} playerId={playerId} isGM={role === 'gm'} players={players} />
+              <ChatPanel
+                roomCode={roomCode}
+                name={liveName}
+                playerId={playerId}
+                isGM={role === 'gm'}
+                players={players}
+                readOnly={role === 'spectator'}
+              />
             </div>
           </details>
 
@@ -492,16 +503,18 @@ export default function Room({ session, onLeave }) {
             initiativeQueue={settings?.initiative?.queue}
           />
 
-          <div className="room-bottom">
-            <button
-              type="button"
-              className="panel bottom-panel-trigger"
-              onClick={() => setShowBottomPanel(true)}
-            >
-              <span className="bottom-panel-trigger-icon">{role === 'gm' ? '🛠️' : '📜'}</span>
-              <span>{role === 'gm' ? 'GM Kontrol Panelini Aç' : 'Karakter Kağıdımı Aç'}</span>
-            </button>
-          </div>
+          {role !== 'spectator' && (
+            <div className="room-bottom">
+              <button
+                type="button"
+                className="panel bottom-panel-trigger"
+                onClick={() => setShowBottomPanel(true)}
+              >
+                <span className="bottom-panel-trigger-icon">{role === 'gm' ? '🛠️' : '📜'}</span>
+                <span>{role === 'gm' ? 'GM Kontrol Panelini Aç' : 'Karakter Kağıdımı Aç'}</span>
+              </button>
+            </div>
+          )}
 
           {showBottomPanel && (
             <Portal>
@@ -547,7 +560,12 @@ export default function Room({ session, onLeave }) {
               🎲 Zar<span className="side-accordion-chevron">▾</span>
             </summary>
             <div className="side-accordion-body">
-              <DiceRoller roomCode={roomCode} name={liveName} isGM={role === 'gm'} />
+              <DiceRoller
+                roomCode={roomCode}
+                name={liveName}
+                isGM={role === 'gm'}
+                canRoll={role !== 'spectator'}
+              />
             </div>
           </details>
 

@@ -174,7 +174,7 @@ export default function GMPanel({
     setWhisperText('');
   }
 
-  const playerList = Object.entries(players || {}).filter(([, p]) => p.role !== 'gm');
+  const playerList = Object.entries(players || {}).filter(([, p]) => p.role === 'oyuncu');
   const savedLocations = Object.entries(settings?.savedLocations || {});
   const savedFocuses = Object.entries(settings?.savedFocuses || {});
   const savedMusicList = Object.entries(settings?.savedMusic || {});

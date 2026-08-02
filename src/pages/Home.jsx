@@ -9,6 +9,7 @@ export default function Home({ onJoin, playerId, mode, initialRoomCode, defaultN
   const [name, setName] = useState(defaultName || '');
   const [password, setPassword] = useState('');
   const [needsPassword, setNeedsPassword] = useState(false);
+  const [asSpectator, setAsSpectator] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -63,7 +64,7 @@ export default function Home({ onJoin, playerId, mode, initialRoomCode, defaultN
         return;
       }
 
-      const role = isOwner ? 'gm' : 'oyuncu';
+      const role = isOwner ? 'gm' : asSpectator ? 'spectator' : 'oyuncu';
       if (isOwner) {
         await update(ref(db, `users/${playerId}/roomsAsGM`), { [code]: true });
       } else {
@@ -109,6 +110,17 @@ export default function Home({ onJoin, playerId, mode, initialRoomCode, defaultN
             </p>
           )}
 
+          {mode === 'join' && (
+            <label className="toggle-field">
+              <input
+                type="checkbox"
+                checked={asSpectator}
+                onChange={(e) => setAsSpectator(e.target.checked)}
+              />
+              👁️ Sadece izlemek istiyorum (karakter oluşturmadan)
+            </label>
+          )}
+
           {mode === 'join' && needsPassword && (
             <label>
               Oda Şifresi
@@ -125,7 +137,13 @@ export default function Home({ onJoin, playerId, mode, initialRoomCode, defaultN
           {error && <p className="sound-error">{error}</p>}
 
           <button type="submit" className="btn-primary" disabled={busy}>
-            {busy ? 'Bekleniyor...' : mode === 'create' ? 'Odayı Kur ve Gir' : 'Masaya Otur'}
+            {busy
+              ? 'Bekleniyor...'
+              : mode === 'create'
+                ? 'Odayı Kur ve Gir'
+                : asSpectator
+                  ? 'İzlemeye Başla'
+                  : 'Masaya Otur'}
           </button>
           <button type="button" className="btn-ghost home-back-btn" onClick={onExit}>
             ← Profilime Dön

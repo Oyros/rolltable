@@ -31,7 +31,7 @@ function buildWhisperEntries(players, playerId, isGM) {
   return entries;
 }
 
-export default function ChatPanel({ roomCode, name, playerId, isGM, players }) {
+export default function ChatPanel({ roomCode, name, playerId, isGM, players, readOnly = false }) {
   const [chatMessages, setChatMessages] = useState([]);
   const [text, setText] = useState('');
   const listRef = useRef(null);
@@ -107,17 +107,21 @@ export default function ChatPanel({ roomCode, name, playerId, isGM, players }) {
           );
         })}
       </ul>
-      <form onSubmit={sendMessage} className="chat-form">
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Mesaj yaz..."
-          maxLength={1000}
-        />
-        <button type="submit" className="btn-primary small">
-          Gönder
-        </button>
-      </form>
+      {readOnly ? (
+        <p className="muted small-hint">👁️ İzleyici olarak sadece okuyabilirsin.</p>
+      ) : (
+        <form onSubmit={sendMessage} className="chat-form">
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Mesaj yaz..."
+            maxLength={1000}
+          />
+          <button type="submit" className="btn-primary small">
+            Gönder
+          </button>
+        </form>
+      )}
     </>
   );
 }
