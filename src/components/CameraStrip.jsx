@@ -173,12 +173,20 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomCode, playerId]);
 
+  // The local preview <video> only mounts once cameraOn flips true, so the
+  // srcObject has to be attached after that render, not inline in
+  // startCamera() — at that point the element doesn't exist yet.
+  useEffect(() => {
+    if (cameraOn && localVideoRef.current && localStreamRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
+    }
+  }, [cameraOn]);
+
   async function startCamera() {
     setCameraError('');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       localStreamRef.current = stream;
-      if (localVideoRef.current) localVideoRef.current.srcObject = stream;
       setCameraOn(true);
       setMicOn(true);
       const peerRef = ref(db, `rooms/${roomCode}/webrtc/peers/${playerId}`);
