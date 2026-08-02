@@ -26,6 +26,7 @@ export default function SceneDisplay({
   savedMusic,
   players,
   initiativeQueue,
+  canPin = true,
 }) {
   const audioRef = useRef(null);
   const ambianceRef = useRef(null);
@@ -231,6 +232,7 @@ export default function SceneDisplay({
   }
 
   function handleMapClick(e) {
+    if (!canPin) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
@@ -461,7 +463,7 @@ export default function SceneDisplay({
 
       {mapOpen && scene.mapImageUrl && (
         <div
-          className="scene-image-box scene-image-map map-pin-area"
+          className={`scene-image-box scene-image-map${canPin ? ' map-pin-area' : ''}`}
           ref={mapAreaRef}
           onClick={handleMapClick}
         >

@@ -503,6 +503,7 @@ export default function Room({ session, onLeave }) {
             savedMusic={settings?.savedMusic}
             players={players}
             initiativeQueue={settings?.initiative?.queue}
+            canPin={role !== 'spectator'}
           />
 
           {role !== 'spectator' && (
