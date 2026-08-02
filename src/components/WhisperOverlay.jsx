@@ -17,7 +17,7 @@ export default function WhisperOverlay({ whispers, roomCode, playerId }) {
 
     const seenKey = localStorage.getItem(seenKeyFor(roomCode, playerId));
     if (latest[0] !== seenKey) {
-      setPopup({ key: latest[0], text: latest[1].text });
+      setPopup({ key: latest[0], text: latest[1].text, by: latest[1].by || 'GM' });
     }
   }, [whispers, roomCode, playerId]);
 
@@ -32,7 +32,7 @@ export default function WhisperOverlay({ whispers, roomCode, playerId }) {
     <Portal>
       <div className="whisper-overlay">
         <div className="whisper-box panel">
-          <span className="whisper-label">Fısıltı</span>
+          <span className="whisper-label">🔒 {popup.by} fısıldadı</span>
           <p>{popup.text}</p>
           <button type="button" className="btn-primary small" onClick={dismiss}>
             Kapat

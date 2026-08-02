@@ -331,7 +331,7 @@ export default function Room({ session, onLeave }) {
         <div className="header-right">
           <SessionTimer startedAt={settings?.sessionStartedAt} active={!!settings?.sessionActive} />
           <span className="who-am-i">
-            {liveName} · {role === 'gm' ? 'GM' : 'Oyuncu'}
+            {liveName} · {role === 'gm' ? 'GM' : role === 'spectator' ? 'İzleyici' : 'Oyuncu'}
           </span>
           <button className="btn-ghost" onClick={() => setShowHelp(true)}>
             ❓ Yardım
