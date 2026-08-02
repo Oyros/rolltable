@@ -1069,6 +1069,26 @@ button:hover {
   text-align: center;
 }
 
+.stat-roll-trigger {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 8px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.stat-roll-trigger:hover {
+  background: rgba(207, 154, 63, 0.12);
+}
+
+.stat-roll-trigger:hover .stat-label,
+.stat-roll-trigger:hover .stat-value {
+  color: var(--amber-light);
+}
+
 .stat-label {
   display: block;
   font-size: 0.72rem;

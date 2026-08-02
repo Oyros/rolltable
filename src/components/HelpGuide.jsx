@@ -74,7 +74,7 @@ export default function HelpGuide({ onClose }) {
           <p>Oda ilk kurulduğunda GM'den oyunun kurallarını tanımlaması istenir:</p>
           <ul>
             <li><strong>Kayıtlı Şablon Kullan</strong> — daha önce kaydettiğin bir kural setini tek tıkla uygula.</li>
-            <li><strong>Sıfırdan Oluştur</strong> — Senaryo Adı, Tasarım Teması (21 farklı tür arasından: fantazi, cyberpunk, western, korsan, vampir, uzay operası ve daha fazlası), <strong>Seviye Sistemi</strong> (maksimum seviye + seviye başına gereken XP), Statlar, <strong>Kaynaklar</strong> (Can Puanı, Stres, Kaynak Puanı gibi dolgu çubukları), Irklar, Sınıflar, Alt Sınıflar, Traitler, Perkler ve Bulunabilecek Eşyalar listelerini kendin oluştur.</li>
+            <li><strong>Sıfırdan Oluştur</strong> — Senaryo Adı, Tasarım Teması (21 farklı tür arasından: fantazi, cyberpunk, western, korsan, vampir, uzay operası ve daha fazlası), <strong>Seviye Sistemi</strong> (maksimum seviye + seviye başına gereken XP), <strong>Stat Zar Bonusu</strong> (bir stata tıklanınca atılan 1d20'ye hangi stat puanından itibaren +1/+2/+3 ekleneceği), Statlar, <strong>Kaynaklar</strong> (Can Puanı, Stres, Kaynak Puanı gibi dolgu çubukları), Irklar, Sınıflar, Alt Sınıflar, Traitler, Perkler ve Bulunabilecek Eşyalar listelerini kendin oluştur.</li>
             <li>İstersen bu kural setini bir <strong>şablon olarak kaydedip</strong> başka odalarda tekrar kullanabilirsin.</li>
           </ul>
           <p>
@@ -160,7 +160,7 @@ export default function HelpGuide({ onClose }) {
           <ul>
             <li>Karakter görseli ve <strong>profil rengi</strong> seç — bu renk Parti panelinde ve harita pinlerinde senin rengin olur.</li>
             <li>Irk / Sınıf / Alt Sınıf seç (varsa açıklamaları altında görünür).</li>
-            <li>Statlarını +/- ile ayarla, Durumunu (İyi/Yaralı/Bitkin/Ölü) seç.</li>
+            <li>Statlarını +/- ile ayarla, Durumunu (İyi/Yaralı/Bitkin/Ölü) seç. Bir statın adına/değerine tıklayınca, GM'in belirlediği eşiklere göre bonus eklenmiş bir 1d20 atılır — sonuç herkesin gördüğü zar panelinde çıkar.</li>
             <li>
               <strong>Kaynaklar</strong> (varsa — Can Puanı, Stres, Fate Puanı gibi) dolgu
               çubuğu olarak görünür, +/- ile değiştirirsin; üst sınırı GM'in tanımladığı değerdir.

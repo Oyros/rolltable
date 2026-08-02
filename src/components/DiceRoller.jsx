@@ -52,8 +52,10 @@ export default function DiceRoller({ roomCode, name, isGM }) {
           const canSeeResult = !data.hidden || isGM;
           const playCritSound = () => {
             if (!canSeeResult) return;
-            if (data.result === data.dice) playCritSuccess(diceVolumeRef.current);
-            else if (data.result === 1) playCritFail(diceVolumeRef.current);
+            const natural =
+              data.subRolls && data.subRolls.length === 1 ? data.subRolls[0] : data.result;
+            if (data.dice && natural === data.dice) playCritSuccess(diceVolumeRef.current);
+            else if (data.dice && natural === 1) playCritFail(diceVolumeRef.current);
           };
 
           if (data.mode && data.subRolls) {
@@ -131,6 +133,7 @@ export default function DiceRoller({ roomCode, name, isGM }) {
       formula: formulaInput.trim(),
       subRolls,
       modifier: parsed.modifier,
+      dice: parsed.sides,
       result,
       at: Date.now(),
       hidden: isGM && secretMode,
@@ -187,8 +190,13 @@ export default function DiceRoller({ roomCode, name, isGM }) {
     rollState &&
     ((!rollState.mode && rollState.stage === 'done') || (rollState.mode && rollState.stage === 'reveal2'));
   const canSeeResult = rollState && (!rollState.hidden || isGM);
-  const isCritSuccess = isRevealed && canSeeResult && rollState.result === rollState.dice;
-  const isCritFail = isRevealed && canSeeResult && rollState.result === 1;
+  const naturalRollValue =
+    rollState && rollState.subRolls && rollState.subRolls.length === 1
+      ? rollState.subRolls[0]
+      : rollState?.result;
+  const isCritSuccess =
+    isRevealed && canSeeResult && !!rollState.dice && naturalRollValue === rollState.dice;
+  const isCritFail = isRevealed && canSeeResult && !!rollState.dice && naturalRollValue === 1;
   const critClass = isCritSuccess ? ' crit-success' : isCritFail ? ' crit-fail' : '';
 
   return (

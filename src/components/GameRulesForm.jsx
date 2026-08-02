@@ -20,6 +20,9 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
   const [theme, setTheme] = useState(initial?.theme || DEFAULT_THEME_ID);
   const [maxLevel, setMaxLevel] = useState(initial?.maxLevel || 10);
   const [xpPerLevel, setXpPerLevel] = useState(initial?.xpPerLevel || 100);
+  const [statThreshold1, setStatThreshold1] = useState(initial?.statThreshold1 ?? 4);
+  const [statThreshold2, setStatThreshold2] = useState(initial?.statThreshold2 ?? 6);
+  const [statThreshold3, setStatThreshold3] = useState(initial?.statThreshold3 ?? 8);
   const [lists, setLists] = useState({
     stats: initial?.stats || EMPTY_LISTS.stats,
     resources: initial?.resources || EMPTY_LISTS.resources,
@@ -55,11 +58,17 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
     setError('');
     setSaving(true);
     try {
+      const t1 = Math.max(0, parseInt(statThreshold1, 10) || 4);
+      const t2 = Math.max(t1, parseInt(statThreshold2, 10) || 6);
+      const t3 = Math.max(t2, parseInt(statThreshold3, 10) || 8);
       await onSubmit({
         name: name.trim(),
         theme,
         maxLevel: Math.max(1, parseInt(maxLevel, 10) || 10),
         xpPerLevel: Math.max(1, parseInt(xpPerLevel, 10) || 100),
+        statThreshold1: t1,
+        statThreshold2: t2,
+        statThreshold3: t3,
         ...lists,
       });
     } catch (err) {
@@ -132,6 +141,43 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
           Karakter, biriken toplam XP'si bu değerin katlarını geçtikçe seviye atlamaya hak
           kazanır (XP seviye atlarken sıfırlanmaz). Maksimum seviyeye ulaşınca daha fazla
           atlanamaz.
+        </p>
+      </div>
+
+      <div className="level-system-field">
+        <span className="entry-list-label">Stat Zar Bonusu</span>
+        <div className="inline-form">
+          <label className="level-system-input">
+            +1 için gereken puan
+            <input
+              type="number"
+              min="0"
+              value={statThreshold1}
+              onChange={(e) => setStatThreshold1(e.target.value)}
+            />
+          </label>
+          <label className="level-system-input">
+            +2 için gereken puan
+            <input
+              type="number"
+              min="0"
+              value={statThreshold2}
+              onChange={(e) => setStatThreshold2(e.target.value)}
+            />
+          </label>
+          <label className="level-system-input">
+            +3 için gereken puan
+            <input
+              type="number"
+              min="0"
+              value={statThreshold3}
+              onChange={(e) => setStatThreshold3(e.target.value)}
+            />
+          </label>
+        </div>
+        <p className="muted small-hint">
+          Oyuncular karakter kağıdında bir stata tıklayınca 1d20 + bu eşiklere göre hesaplanan
+          bonus atılır. Statlar 0-10 arası tutulur; varsayılan eşikler 4/6/8'dir.
         </p>
       </div>
 
