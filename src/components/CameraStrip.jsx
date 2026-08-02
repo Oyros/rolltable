@@ -50,18 +50,30 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
   const canBroadcast = role !== 'spectator';
 
   function sendSignal(toUid, type, data) {
+    // Surface failures instead of swallowing them — a denied write here (e.g.
+    // the webrtc rules not published yet) otherwise looks exactly like "the
+    // camera just doesn't work", with nothing on screen to explain why.
     push(ref(db, `rooms/${roomCode}/webrtc/signals/${toUid}`), {
       from: playerId,
       type,
       data,
       at: Date.now(),
+    }).catch((err) => {
+      setCameraError(
+        `Bağlantı kurulamadı (${err.code || err.message}). Firebase kurallarının yayınlandığından emin ol.`
+      );
     });
   }
 
   function attachLocalTracks(pc) {
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((track) => pc.addTrack(track, localStreamRef.current));
+      return;
     }
+    // No camera of our own: still declare receive slots, otherwise the offer
+    // carries no media at all and we'd never be sent their video/audio.
+    pc.addTransceiver('video', { direction: 'recvonly' });
+    pc.addTransceiver('audio', { direction: 'recvonly' });
   }
 
   function setupConnection(uid, pc) {
@@ -192,10 +204,17 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
       }
     }
 
+    // Whoever wants to *receive* opens the connection. That way a viewer with
+    // their camera off still pulls in a broadcaster's stream without having to
+    // turn on their own camera first (and without depending on the broadcaster
+    // having noticed them). Exactly one side initiates per pair:
+    //   - only they broadcast  -> I initiate (recvonly)
+    //   - both broadcast       -> the lower uid initiates
+    //   - only I broadcast     -> they initiate, I just answer
     desired.forEach((uid) => {
       if (peerConnectionsRef.current.has(uid)) return;
       const theyBroadcast = broadcasterUids.includes(uid);
-      const iAmInitiator = cameraOn && (!theyBroadcast || playerId < uid);
+      const iAmInitiator = theyBroadcast && (!cameraOn || playerId < uid);
       if (iAmInitiator) connectTo(uid);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -226,16 +245,26 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
 
   async function startCamera() {
     setCameraError('');
+    let stream;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      localStreamRef.current = stream;
-      setCameraOn(true);
-      setMicOn(true);
-      const peerRef = ref(db, `rooms/${roomCode}/webrtc/peers/${playerId}`);
+      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    } catch (err) {
+      setCameraError('Kameraya erişilemedi: ' + err.message);
+      return;
+    }
+    localStreamRef.current = stream;
+    setCameraOn(true);
+    setMicOn(true);
+    // Announcing ourselves is what makes everyone else connect to us, so a
+    // failure here has to be reported rather than folded into the camera error.
+    const peerRef = ref(db, `rooms/${roomCode}/webrtc/peers/${playerId}`);
+    try {
       await update(peerRef, { mic: true, at: Date.now() });
       onDisconnect(peerRef).remove();
     } catch (err) {
-      setCameraError('Kameraya erişilemedi: ' + err.message);
+      setCameraError(
+        `Yayın duyurulamadı (${err.code || err.message}). Firebase kurallarının yayınlandığından emin ol.`
+      );
     }
   }
 
