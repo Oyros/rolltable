@@ -41,6 +41,7 @@ export default function DiceRoller({ roomCode, name, isGM, canRoll = true }) {
   const [formulaError, setFormulaError] = useState('');
   const lastKeyRef = useRef(null);
   const isFirstSnapshot = useRef(true);
+  const critSoundRef = useRef(null);
   const diceVolumeRef = useRef(diceVolume);
   diceVolumeRef.current = diceVolume;
 
@@ -70,24 +71,8 @@ export default function DiceRoller({ roomCode, name, isGM, canRoll = true }) {
             else if (data.dice && natural === 1) playCritFail(diceVolumeRef.current);
           };
 
-          if (data.mode && data.subRolls) {
-            setRollState({ key, ...data, stage: 'spinning' });
-            setTimeout(() => {
-              setRollState((prev) => (prev?.key === key ? { ...prev, stage: 'reveal1' } : prev));
-            }, SPIN_MS);
-            setTimeout(() => {
-              setRollState((prev) => (prev?.key === key ? { ...prev, stage: 'reveal2' } : prev));
-              setHiddenKey(null);
-              playCritSound();
-            }, SPIN_MS + REVEAL_GAP_MS);
-          } else {
-            setRollState({ key, ...data, stage: 'spinning' });
-            setTimeout(() => {
-              setRollState((prev) => (prev?.key === key ? { ...prev, stage: 'done' } : prev));
-              setHiddenKey(null);
-              playCritSound();
-            }, SPIN_MS);
-          }
+          critSoundRef.current = playCritSound;
+          setRollState({ key, ...data, stage: 'spinning', startedAt: Date.now() });
         } else {
           setRollState({ key, ...data, stage: data.mode ? 'reveal2' : 'done' });
         }
@@ -95,6 +80,43 @@ export default function DiceRoller({ roomCode, name, isGM, canRoll = true }) {
     });
     return () => unsub();
   }, [roomCode]);
+
+  // Drive the reveal animation from an effect rather than fire-and-forget
+  // timers inside the Firebase callback: this always cleans up, re-arms if the
+  // component re-renders, and — because each step is scheduled off the roll's
+  // own startedAt — settles instantly if the tab was backgrounded long enough
+  // for the browser to throttle/drop the timer (which used to leave the die
+  // spinning forever until a refresh).
+  useEffect(() => {
+    if (!rollState || rollState.stage === 'done' || rollState.stage === 'reveal2') return undefined;
+
+    const isDual = !!rollState.mode && !!rollState.subRolls;
+    const elapsed = Date.now() - (rollState.startedAt || 0);
+    const key = rollState.key;
+
+    const settle = () => {
+      setRollState((prev) =>
+        prev?.key === key ? { ...prev, stage: isDual ? 'reveal2' : 'done' } : prev
+      );
+      setHiddenKey(null);
+      critSoundRef.current?.();
+    };
+
+    if (isDual && rollState.stage === 'spinning') {
+      const toReveal1 = setTimeout(() => {
+        setRollState((prev) => (prev?.key === key ? { ...prev, stage: 'reveal1' } : prev));
+      }, Math.max(0, SPIN_MS - elapsed));
+      const toReveal2 = setTimeout(settle, Math.max(0, SPIN_MS + REVEAL_GAP_MS - elapsed));
+      return () => {
+        clearTimeout(toReveal1);
+        clearTimeout(toReveal2);
+      };
+    }
+
+    const target = isDual ? SPIN_MS + REVEAL_GAP_MS : SPIN_MS;
+    const timer = setTimeout(settle, Math.max(0, target - elapsed));
+    return () => clearTimeout(timer);
+  }, [rollState]);
 
   useEffect(() => {
     localStorage.setItem(DICE_VOLUME_KEY, String(diceVolume));
