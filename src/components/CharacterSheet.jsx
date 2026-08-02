@@ -31,6 +31,7 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
   const xp = player.xp || 0;
   const maxLevel = gameConfig.maxLevel || 10;
   const xpPerLevel = gameConfig.xpPerLevel || 100;
+  const statMin = gameConfig.statMin ?? 0;
   const statMax = gameConfig.statMax || 10;
   const qualifiedLevel = Math.min(maxLevel, Math.floor(xp / xpPerLevel) + 1);
   const atMaxLevel = level >= maxLevel;
@@ -54,7 +55,7 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
 
   function changeStat(statId, delta) {
     const current = player.stats?.[statId] ?? 2;
-    const next = Math.min(statMax, Math.max(0, current + delta));
+    const next = Math.min(statMax, Math.max(statMin, current + delta));
     if (next === current) return;
     patch({ [`stats/${statId}`]: next });
     const statName = stats.find((s) => s.id === statId)?.name || statId;

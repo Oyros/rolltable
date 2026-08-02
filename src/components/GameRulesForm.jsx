@@ -20,10 +20,14 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
   const [theme, setTheme] = useState(initial?.theme || DEFAULT_THEME_ID);
   const [maxLevel, setMaxLevel] = useState(initial?.maxLevel || 10);
   const [xpPerLevel, setXpPerLevel] = useState(initial?.xpPerLevel || 100);
+  const [statMin, setStatMin] = useState(initial?.statMin ?? 0);
   const [statMax, setStatMax] = useState(initial?.statMax ?? 10);
   const [statThreshold1, setStatThreshold1] = useState(initial?.statThreshold1 ?? 4);
   const [statThreshold2, setStatThreshold2] = useState(initial?.statThreshold2 ?? 6);
   const [statThreshold3, setStatThreshold3] = useState(initial?.statThreshold3 ?? 8);
+  const [statThresholdNeg1, setStatThresholdNeg1] = useState(initial?.statThresholdNeg1 ?? 2);
+  const [statThresholdNeg2, setStatThresholdNeg2] = useState(initial?.statThresholdNeg2 ?? 1);
+  const [statThresholdNeg3, setStatThresholdNeg3] = useState(initial?.statThresholdNeg3 ?? 0);
   const [lists, setLists] = useState({
     stats: initial?.stats || EMPTY_LISTS.stats,
     resources: initial?.resources || EMPTY_LISTS.resources,
@@ -46,6 +50,11 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
     setLists((prev) => ({ ...prev, [key]: newItems }));
   }
 
+  function toInt(value, fallback) {
+    const n = parseInt(value, 10);
+    return Number.isNaN(n) ? fallback : n;
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!name.trim()) {
@@ -59,18 +68,27 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
     setError('');
     setSaving(true);
     try {
-      const t1 = Math.max(0, parseInt(statThreshold1, 10) || 4);
-      const t2 = Math.max(t1, parseInt(statThreshold2, 10) || 6);
-      const t3 = Math.max(t2, parseInt(statThreshold3, 10) || 8);
+      const min = Math.max(0, toInt(statMin, 0));
+      const max = Math.max(min, toInt(statMax, 10));
+      const t1 = Math.max(min, toInt(statThreshold1, 4));
+      const t2 = Math.max(t1, toInt(statThreshold2, 6));
+      const t3 = Math.max(t2, toInt(statThreshold3, 8));
+      const n1 = Math.min(max, toInt(statThresholdNeg1, 2));
+      const n2 = Math.min(n1, toInt(statThresholdNeg2, 1));
+      const n3 = Math.min(n2, toInt(statThresholdNeg3, 0));
       await onSubmit({
         name: name.trim(),
         theme,
         maxLevel: Math.max(1, parseInt(maxLevel, 10) || 10),
         xpPerLevel: Math.max(1, parseInt(xpPerLevel, 10) || 100),
-        statMax: Math.max(1, parseInt(statMax, 10) || 10),
+        statMin: min,
+        statMax: max,
         statThreshold1: t1,
         statThreshold2: t2,
         statThreshold3: t3,
+        statThresholdNeg1: n1,
+        statThresholdNeg2: n2,
+        statThresholdNeg3: n3,
         ...lists,
       });
     } catch (err) {
@@ -150,6 +168,15 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
         <span className="entry-list-label">Stat Sistemi</span>
         <div className="inline-form">
           <label className="level-system-input">
+            Minimum Stat Puanı
+            <input
+              type="number"
+              min="0"
+              value={statMin}
+              onChange={(e) => setStatMin(e.target.value)}
+            />
+          </label>
+          <label className="level-system-input">
             Maksimum Stat Puanı
             <input
               type="number"
@@ -158,11 +185,14 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
               onChange={(e) => setStatMax(e.target.value)}
             />
           </label>
+        </div>
+
+        <p className="muted small-hint">Bonus eşikleri — bu puana ulaşınca 1d20'ye eklenir:</p>
+        <div className="inline-form">
           <label className="level-system-input">
             +1 için gereken puan
             <input
               type="number"
-              min="0"
               value={statThreshold1}
               onChange={(e) => setStatThreshold1(e.target.value)}
             />
@@ -171,7 +201,6 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
             +2 için gereken puan
             <input
               type="number"
-              min="0"
               value={statThreshold2}
               onChange={(e) => setStatThreshold2(e.target.value)}
             />
@@ -180,16 +209,43 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
             +3 için gereken puan
             <input
               type="number"
-              min="0"
               value={statThreshold3}
               onChange={(e) => setStatThreshold3(e.target.value)}
             />
           </label>
         </div>
+
+        <p className="muted small-hint">Ceza eşikleri — bu puanın altında/eşitinde 1d20'den düşülür:</p>
+        <div className="inline-form">
+          <label className="level-system-input">
+            -1 için gereken puan
+            <input
+              type="number"
+              value={statThresholdNeg1}
+              onChange={(e) => setStatThresholdNeg1(e.target.value)}
+            />
+          </label>
+          <label className="level-system-input">
+            -2 için gereken puan
+            <input
+              type="number"
+              value={statThresholdNeg2}
+              onChange={(e) => setStatThresholdNeg2(e.target.value)}
+            />
+          </label>
+          <label className="level-system-input">
+            -3 için gereken puan
+            <input
+              type="number"
+              value={statThresholdNeg3}
+              onChange={(e) => setStatThresholdNeg3(e.target.value)}
+            />
+          </label>
+        </div>
         <p className="muted small-hint">
-          Statlar 0 ile Maksimum Stat Puanı arasında tutulur. Oyuncular karakter kağıdında bir
-          stata tıklayınca 1d20 + bu eşiklere göre hesaplanan bonus atılır (varsayılan eşikler
-          4/6/8'dir).
+          Statlar Minimum ile Maksimum Stat Puanı arasında tutulur. Oyuncular karakter kağıdında
+          bir stata tıklayınca bu eşiklere göre hesaplanan bonus/ceza ile 1d20 atılır (varsayılan
+          bonus eşikleri 4/6/8, ceza eşikleri 2/1/0'dır).
         </p>
       </div>
 

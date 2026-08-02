@@ -6,6 +6,9 @@ export function statBonusFor(value, gameConfig) {
   if (value >= (gameConfig?.statThreshold3 ?? 8)) return 3;
   if (value >= (gameConfig?.statThreshold2 ?? 6)) return 2;
   if (value >= (gameConfig?.statThreshold1 ?? 4)) return 1;
+  if (value <= (gameConfig?.statThresholdNeg3 ?? 0)) return -3;
+  if (value <= (gameConfig?.statThresholdNeg2 ?? 1)) return -2;
+  if (value <= (gameConfig?.statThresholdNeg1 ?? 2)) return -1;
   return 0;
 }
 

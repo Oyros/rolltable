@@ -74,7 +74,7 @@ export default function HelpGuide({ onClose }) {
           <p>Oda ilk kurulduğunda GM'den oyunun kurallarını tanımlaması istenir:</p>
           <ul>
             <li><strong>Kayıtlı Şablon Kullan</strong> — daha önce kaydettiğin bir kural setini tek tıkla uygula.</li>
-            <li><strong>Sıfırdan Oluştur</strong> — Senaryo Adı, Tasarım Teması (21 farklı tür arasından: fantazi, cyberpunk, western, korsan, vampir, uzay operası ve daha fazlası), <strong>Seviye Sistemi</strong> (maksimum seviye + seviye başına gereken XP), <strong>Stat Sistemi</strong> (statların 0'dan hangi puana kadar çıkabileceği, ve bir stata tıklanınca atılan 1d20'ye hangi puandan itibaren +1/+2/+3 ekleneceği), Statlar, <strong>Kaynaklar</strong> (Can Puanı, Stres, Kaynak Puanı gibi dolgu çubukları), Irklar, Sınıflar, Alt Sınıflar, Traitler, Perkler ve Bulunabilecek Eşyalar listelerini kendin oluştur.</li>
+            <li><strong>Sıfırdan Oluştur</strong> — Senaryo Adı, Tasarım Teması (21 farklı tür arasından: fantazi, cyberpunk, western, korsan, vampir, uzay operası ve daha fazlası), <strong>Seviye Sistemi</strong> (maksimum seviye + seviye başına gereken XP), <strong>Stat Sistemi</strong> (statların hangi puandan hangi puana kadar çıkabileceği, ve bir stata tıklanınca atılan 1d20'ye hangi puanlardan itibaren +1/+2/+3 eklenip -1/-2/-3 düşüleceği), Statlar, <strong>Kaynaklar</strong> (Can Puanı, Stres, Kaynak Puanı gibi dolgu çubukları), Irklar, Sınıflar, Alt Sınıflar, Traitler, Perkler ve Bulunabilecek Eşyalar listelerini kendin oluştur.</li>
             <li>İstersen bu kural setini bir <strong>şablon olarak kaydedip</strong> başka odalarda tekrar kullanabilirsin.</li>
           </ul>
           <p>
