@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ref, update, remove, push, onValue, onDisconnect } from 'firebase/database';
+import { ref, update, remove, push, onValue, onChildAdded, onDisconnect } from 'firebase/database';
 import { db } from '../firebase.js';
 import { createPeerConnection } from '../utils/webrtc.js';
 
@@ -45,6 +45,7 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
   const localVideoRef = useRef(null);
   const localStreamRef = useRef(null);
   const peerConnectionsRef = useRef(new Map());
+  const handledSignalsRef = useRef(new Set());
 
   const canBroadcast = role !== 'spectator';
 
@@ -102,19 +103,25 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
       setupConnection(from, pc);
       attachLocalTracks(pc);
     }
-    if (type === 'offer') {
-      await pc.setRemoteDescription(new RTCSessionDescription(data));
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      sendSignal(from, 'answer', { sdp: answer.sdp, type: answer.type });
-    } else if (type === 'answer') {
-      await pc.setRemoteDescription(new RTCSessionDescription(data));
-    } else if (type === 'candidate') {
-      try {
+    // Every branch is guarded: a signal that arrives out of order (or twice)
+    // must never throw, because an unhandled rejection here would leave the
+    // connection half-built and keep the peers re-negotiating in a loop.
+    try {
+      if (type === 'offer') {
+        if (pc.signalingState !== 'stable') return;
+        await pc.setRemoteDescription(new RTCSessionDescription(data));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        sendSignal(from, 'answer', { sdp: answer.sdp, type: answer.type });
+      } else if (type === 'answer') {
+        if (pc.signalingState !== 'have-local-offer') return;
+        await pc.setRemoteDescription(new RTCSessionDescription(data));
+      } else if (type === 'candidate') {
         await pc.addIceCandidate(new RTCIceCandidate(data));
-      } catch {
-        // benign — candidate can arrive before the remote description is set
       }
+    } catch {
+      // Benign in practice: candidates can land before the remote description
+      // is set, and a duplicate/stale description is safe to drop.
     }
   }
 
@@ -126,28 +133,48 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
   }, [roomCode]);
 
   // Listen for incoming signaling messages addressed to me.
+  //
+  // This MUST be onChildAdded, not onValue: onValue re-fires on every change
+  // and hands back the whole inbox, so every message still awaiting its
+  // (async) delete got re-processed over and over — each redundant offer
+  // producing another answer and another burst of ICE candidates, which
+  // snowballed into a signalling storm that saturated the tab's main thread.
+  // onChildAdded delivers each message exactly once; the id set guards against
+  // a re-delivery if the listener is ever re-attached before the delete lands.
   useEffect(() => {
     const inboxRef = ref(db, `rooms/${roomCode}/webrtc/signals/${playerId}`);
-    const unsub = onValue(inboxRef, (snap) => {
-      const val = snap.val() || {};
-      Object.entries(val).forEach(([sigId, sig]) => {
-        handleSignal(sig).finally(() => {
-          remove(ref(db, `rooms/${roomCode}/webrtc/signals/${playerId}/${sigId}`));
-        });
+    const seen = handledSignalsRef.current;
+    const unsub = onChildAdded(inboxRef, (snap) => {
+      const sigId = snap.key;
+      if (seen.has(sigId)) return;
+      seen.add(sigId);
+      handleSignal(snap.val()).finally(() => {
+        remove(ref(db, `rooms/${roomCode}/webrtc/signals/${playerId}/${sigId}`));
       });
     });
     return () => unsub();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomCode, playerId]);
 
+  // Keyed on the online/broadcaster *identities* rather than the whole players
+  // object, which gets a fresh reference on every unrelated character edit —
+  // otherwise this reconcile re-ran constantly during normal play.
+  const onlineKey = Object.entries(players || {})
+    .filter(([uid, p]) => p.online && uid !== playerId)
+    .map(([uid]) => uid)
+    .sort()
+    .join(',');
+  const broadcasterKey = Object.keys(broadcasters)
+    .filter((uid) => uid !== playerId)
+    .sort()
+    .join(',');
+
   // Reconcile which peer connections should exist: everyone online while I
   // broadcast (so they receive me), plus every other broadcaster (so I can
   // watch them even when my own camera is off).
   useEffect(() => {
-    const onlineUids = Object.entries(players || {})
-      .filter(([uid, p]) => p.online && uid !== playerId)
-      .map(([uid]) => uid);
-    const broadcasterUids = Object.keys(broadcasters).filter((uid) => uid !== playerId);
+    const onlineUids = onlineKey ? onlineKey.split(',') : [];
+    const broadcasterUids = broadcasterKey ? broadcasterKey.split(',') : [];
 
     const desired = new Set();
     if (cameraOn) onlineUids.forEach((uid) => desired.add(uid));
@@ -167,12 +194,12 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
 
     desired.forEach((uid) => {
       if (peerConnectionsRef.current.has(uid)) return;
-      const theyBroadcast = !!broadcasters[uid];
+      const theyBroadcast = broadcasterUids.includes(uid);
       const iAmInitiator = cameraOn && (!theyBroadcast || playerId < uid);
       if (iAmInitiator) connectTo(uid);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cameraOn, broadcasters, players, roomCode, playerId]);
+  }, [cameraOn, onlineKey, broadcasterKey, roomCode, playerId]);
 
   // Full teardown on unmount (leaving the room).
   useEffect(() => {
