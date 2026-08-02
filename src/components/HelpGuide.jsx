@@ -296,7 +296,10 @@ export default function HelpGuide({ onClose }) {
             geçmez; kamera hiçbir zaman otomatik açılmaz, her seferinde tıklaman gerekir.
             Tarayıcılar başkasının sesini otomatik açmaya izin vermediği için her kutucuk
             başlangıçta sessiz gelir — kutucuğun sağ üstündeki 🔇 ikonuna tıklayınca o kişinin
-            sesini açarsın. Bazı
+            sesini açarsın. Kutucuğun kendisine tıklayınca o kişiye özel bir
+            <strong> ses seviyesi</strong> kaydırıcısı açılır (herkesin sesini ayrı ayrı
+            ayarlayabilirsin). Konuşan kişinin kutucuğu <strong>yeşil çerçeveyle</strong>
+            belirginleşir. Bazı
             kısıtlı ağlarda (kurumsal ağ, katı NAT) bağlantı kurulamayabilir — bu durumda o kişinin
             kutucuğu görünmeyebilir.
           </p>

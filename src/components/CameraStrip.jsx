@@ -3,11 +3,71 @@ import { ref, update, remove, push, onValue, onChildAdded, onDisconnect } from '
 import { db } from '../firebase.js';
 import { createPeerConnection } from '../utils/webrtc.js';
 
+let sharedAudioCtx;
+
+function getAudioCtx() {
+  if (!sharedAudioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    sharedAudioCtx = new AudioContextClass();
+  }
+  if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
+  return sharedAudioCtx;
+}
+
+// Lights up while there's actual voice on the stream. The analyser is only
+// ever a tap — it is deliberately not connected to the destination, otherwise
+// the audio would play twice (the <video> element already plays it).
+function useSpeaking(stream) {
+  const [speaking, setSpeaking] = useState(false);
+
+  useEffect(() => {
+    if (!stream || stream.getAudioTracks().length === 0) {
+      setSpeaking(false);
+      return undefined;
+    }
+    let source;
+    let analyser;
+    try {
+      const ctx = getAudioCtx();
+      source = ctx.createMediaStreamSource(stream);
+      analyser = ctx.createAnalyser();
+      analyser.fftSize = 512;
+      source.connect(analyser);
+    } catch {
+      return undefined;
+    }
+    const samples = new Uint8Array(analyser.fftSize);
+    const timer = setInterval(() => {
+      analyser.getByteTimeDomainData(samples);
+      let sum = 0;
+      for (let i = 0; i < samples.length; i += 1) {
+        const deviation = (samples[i] - 128) / 128;
+        sum += deviation * deviation;
+      }
+      setSpeaking(Math.sqrt(sum / samples.length) > 0.045);
+    }, 180);
+    return () => {
+      clearInterval(timer);
+      try {
+        source.disconnect();
+        analyser.disconnect();
+      } catch {
+        // already torn down with the stream
+      }
+    };
+  }, [stream]);
+
+  return speaking;
+}
+
 function RemoteTile({ uid, stream, name, color, micOn }) {
   const videoRef = useRef(null);
   // Browsers block autoplay of unmuted video without a user gesture — start
   // muted (always allowed) and let the viewer unmute with a real click.
   const [muted, setMuted] = useState(true);
+  const [volume, setVolume] = useState(1);
+  const [showVolume, setShowVolume] = useState(false);
+  const speaking = useSpeaking(stream);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -16,17 +76,44 @@ function RemoteTile({ uid, stream, name, color, micOn }) {
     }
   }, [stream]);
 
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.volume = volume;
+  }, [volume, muted]);
+
   return (
-    <div className="camera-tile" key={uid}>
+    <div
+      className={`camera-tile${speaking && !muted ? ' speaking' : ''}`}
+      key={uid}
+      onClick={() => setShowVolume((v) => !v)}
+      title="Ses seviyesi için tıkla"
+    >
       <video ref={videoRef} autoPlay playsInline muted={muted} />
       <button
         type="button"
         className="camera-tile-unmute"
-        onClick={() => setMuted((m) => !m)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setMuted((m) => !m);
+        }}
         title={muted ? 'Sesi aç' : 'Sesi kapat'}
       >
         {muted ? '🔇' : '🔊'}
       </button>
+      {showVolume && (
+        <div className="camera-tile-volume" onClick={(e) => e.stopPropagation()}>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={(e) => {
+              setVolume(parseFloat(e.target.value));
+              if (muted) setMuted(false);
+            }}
+          />
+        </div>
+      )}
       <span className="camera-tile-name" style={color ? { color } : undefined}>
         {micOn === false ? '🔇 ' : ''}
         {name || '?'}
@@ -41,6 +128,9 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
   const [broadcasters, setBroadcasters] = useState({});
   const [remoteStreams, setRemoteStreams] = useState({});
   const [cameraError, setCameraError] = useState('');
+  // Mirrors localStreamRef so the speaking indicator can react to it; the ref
+  // stays for the imperative reads in connectTo/attachLocalTracks.
+  const [localStream, setLocalStream] = useState(null);
 
   const localVideoRef = useRef(null);
   const localStreamRef = useRef(null);
@@ -48,6 +138,7 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
   const handledSignalsRef = useRef(new Set());
 
   const canBroadcast = role !== 'spectator';
+  const localSpeaking = useSpeaking(localStream);
 
   function sendSignal(toUid, type, data) {
     // Surface failures instead of swallowing them — a denied write here (e.g.
@@ -253,6 +344,7 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
       return;
     }
     localStreamRef.current = stream;
+    setLocalStream(stream);
     setCameraOn(true);
     setMicOn(true);
     // Announcing ourselves is what makes everyone else connect to us, so a
@@ -269,6 +361,7 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
   }
 
   function stopCamera() {
+    setLocalStream(null);
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((t) => t.stop());
       localStreamRef.current = null;
@@ -316,7 +409,7 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
 
       <div className="camera-tiles">
         {cameraOn && (
-          <div className="camera-tile">
+          <div className={`camera-tile${localSpeaking ? ' speaking' : ''}`}>
             <video ref={localVideoRef} autoPlay playsInline muted />
             <span className="camera-tile-name" style={color ? { color } : undefined}>
               {micOn === false ? '🔇 ' : ''}
