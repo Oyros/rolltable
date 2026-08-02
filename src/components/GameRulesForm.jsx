@@ -68,7 +68,7 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
     setError('');
     setSaving(true);
     try {
-      const min = Math.max(0, toInt(statMin, 0));
+      const min = toInt(statMin, 0);
       const max = Math.max(min, toInt(statMax, 10));
       const t1 = Math.max(min, toInt(statThreshold1, 4));
       const t2 = Math.max(t1, toInt(statThreshold2, 6));
@@ -171,7 +171,6 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
             Minimum Stat Puanı
             <input
               type="number"
-              min="0"
               value={statMin}
               onChange={(e) => setStatMin(e.target.value)}
             />
