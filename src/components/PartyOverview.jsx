@@ -3,6 +3,7 @@ import { ref, update } from 'firebase/database';
 import { db } from '../firebase.js';
 import { STATUS_LABEL } from '../utils/stats.js';
 import { rollStat } from '../utils/statRoll.js';
+import { isSheetVisibleTo } from '../utils/sheetVisibility.js';
 import CharacterSheet from './CharacterSheet.jsx';
 import Portal from './Portal.jsx';
 
@@ -19,6 +20,7 @@ export default function PartyOverview({
   activeTurnPlayerId,
   roomCode,
   sessionStarted,
+  settings,
 }) {
   const [expandedId, setExpandedId] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -55,6 +57,13 @@ export default function PartyOverview({
           const perkNames = (p.perks || []).map((pid) => nameOf(perks, pid)).filter(Boolean);
 
           const isActiveTurn = activeTurnPlayerId && activeTurnPlayerId === id;
+          const sheetVisible = isSheetVisibleTo({
+            viewerIsGM: isGM,
+            viewerId: playerId,
+            ownerId: id,
+            ownerSheetVisible: p.sheetVisible,
+            forceMode: settings?.sheetVisibilityForce,
+          });
 
           return (
             <li key={id} className={`party-row status-${p.status || 'iyi'}${isActiveTurn ? ' active-turn' : ''}`}>
@@ -85,6 +94,10 @@ export default function PartyOverview({
 
               {expanded && (
                 <div className="party-detail">
+                  {!sheetVisible ? (
+                    <p className="muted">🔒 Bu oyuncu karakter kağıdını gizledi.</p>
+                  ) : (
+                    <>
                   {p.portraitUrl && (
                     <img className="party-detail-image" src={p.portraitUrl} alt={p.name} />
                   )}
@@ -221,6 +234,8 @@ export default function PartyOverview({
                       </button>
                     </div>
                   )}
+                    </>
+                  )}
                 </div>
               )}
             </li>
@@ -273,6 +288,7 @@ export default function PartyOverview({
                 playerId={editingId}
                 player={players[editingId]}
                 gameConfig={gameConfig}
+                settings={settings}
                 isGM
                 sessionStarted={sessionStarted}
               />

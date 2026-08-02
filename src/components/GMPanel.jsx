@@ -313,6 +313,26 @@ export default function GMPanel({
             Yeni oyuncular katılırken bu şifreyi girecek. Sen (GM) her zaman şifresiz girersin.
           </p>
         )}
+
+        <label>
+          Karakter Kağıdı Görünürlüğü (statlar, traitler, envanter vb. — diğer oyunculara)
+          <select
+            value={settings?.sheetVisibilityForce || ''}
+            onChange={(e) =>
+              update(ref(db, `rooms/${roomCode}/settings`), {
+                sheetVisibilityForce: e.target.value,
+              })
+            }
+          >
+            <option value="">Oyuncunun kendi seçimine bırak</option>
+            <option value="show">Herkese zorla göster</option>
+            <option value="hide">Herkesten zorla gizle</option>
+          </select>
+        </label>
+        <p className="muted small-hint">
+          Sen (GM) her zaman herkesin karakter kağıdını tam görürsün. Bu ayar sadece
+          oyuncuların birbirini görüp göremeyeceğini belirler.
+        </p>
       </div>
 
       <div className="banner-field">

@@ -6,7 +6,15 @@ import { rollStat as rollStatShared } from '../utils/statRoll.js';
 import Portal from './Portal.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
 
-export default function CharacterSheet({ roomCode, playerId, player, gameConfig, isGM = false, sessionStarted = false }) {
+export default function CharacterSheet({
+  roomCode,
+  playerId,
+  player,
+  gameConfig,
+  settings,
+  isGM = false,
+  sessionStarted = false,
+}) {
   const path = `rooms/${roomCode}/players/${playerId}`;
   const [newItem, setNewItem] = useState('');
   const [catalogItemId, setCatalogItemId] = useState('');
@@ -308,6 +316,24 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
           placeholder="Karakter adın"
         />
       </label>
+
+      {settings?.sheetVisibilityForce ? (
+        <p className="muted small-hint">
+          {settings.sheetVisibilityForce === 'hide'
+            ? '🔒 GM, herkesin karakter kağıdını diğer oyunculardan gizledi.'
+            : '👁️ GM, herkesin karakter kağıdını diğer oyunculara zorla gösteriyor.'}
+        </p>
+      ) : (
+        <label className="toggle-field">
+          <input
+            type="checkbox"
+            checked={player.sheetVisible !== false}
+            onChange={(e) => patch({ sheetVisible: e.target.checked })}
+          />
+          Karakter kağıdımı (statlar, traitler, envanter vb.) diğer oyunculara göster
+        </label>
+      )}
+
       <div className="portrait-field">
         {portraitDraft && (
           <img className="portrait-preview" src={portraitDraft} alt={player.name} />

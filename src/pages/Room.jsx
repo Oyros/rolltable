@@ -450,6 +450,7 @@ export default function Room({ session, onLeave }) {
                 activeTurnPlayerId={settings?.initiative?.queue?.[settings?.initiative?.currentIndex ?? 0]}
                 roomCode={roomCode}
                 sessionStarted={!!settings?.sessionActive}
+                settings={settings}
               />
             </div>
           </details>
@@ -546,6 +547,7 @@ export default function Room({ session, onLeave }) {
                       playerId={playerId}
                       player={me}
                       gameConfig={gameConfig}
+                      settings={settings}
                       sessionStarted={!!settings?.sessionActive}
                     />
                   )

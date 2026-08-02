@@ -142,7 +142,10 @@ export default function HelpGuide({ onClose }) {
             doğrudan düzenleyebilir. Fısıltılar ve otomatik sistem kayıtları artık ayrı bir liste
             değil — hemen altındaki <strong>💬 Sohbet</strong> panelinde, sohbet mesajlarıyla
             birlikte farklı bir görünümle (🔒 fısıltı, açık renkli sistem kaydı) karışık akışta
-            görünür.
+            görünür. GM bir oyuncunun karakter kağıdını görünürlükten zorla gizlemediyse,
+            oyuncular birbirinin statlarını/trait/perk/envanterini görüp görmeyeceğini kendi
+            karakter kağıdındaki bir anahtardan ayarlayabilir — kapatırsa diğer oyuncular sadece
+            "gizledi" notu görür, GM yine de her zaman tam görür.
           </p>
         </details>
 
@@ -219,7 +222,7 @@ export default function HelpGuide({ onClose }) {
             tam ekran açılır (kapatmak için "✕ Kapat" ya da dışına tıkla).
           </p>
           <ul>
-            <li><strong>Oda Yönetimi</strong> — odayı kilitle/aç (yeni katılımı engelle), isteğe bağlı <strong>oda şifresi</strong> belirle, "▶️ Oturumu Başlat" / "⏹️ Oturumu Sonlandır" ile oturumu aç/kapa (kapatmak odayı veya verileri silmez — sadece "aktif değil" gösterir, tekrar başlatana kadar), odayı sil (sadece oda sahibi görür).</li>
+            <li><strong>Oda Yönetimi</strong> — odayı kilitle/aç (yeni katılımı engelle), isteğe bağlı <strong>oda şifresi</strong> belirle, "▶️ Oturumu Başlat" / "⏹️ Oturumu Sonlandır" ile oturumu aç/kapa (kapatmak odayı veya verileri silmez — sadece "aktif değil" gösterir, tekrar başlatana kadar), odayı sil (sadece oda sahibi görür), <strong>Karakter Kağıdı Görünürlüğü</strong> ile oyuncuların birbirinin statlarını/traitlerini/envanterini görüp göremeyeceğini "Herkese zorla göster", "Herkesten zorla gizle" ya da "Oyuncunun kendi seçimine bırak" olarak ayarla (sen GM olarak her zaman herkesi tam görürsün).</li>
             <li><strong>Üst Menü Afişi</strong> — sayfanın en üstündeki banner görseli.</li>
             <li>
               <strong>Mekan / Odak / Müzik Kütüphaneleri</strong> — görsel/link ile bir isim
