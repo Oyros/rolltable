@@ -1322,6 +1322,7 @@ button:hover {
 
 .chat-form {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -1332,12 +1333,12 @@ button:hover {
 
 .chat-form input {
   flex: 1;
+  min-width: 0;
 }
 
 .chat-target-select {
-  width: auto;
-  max-width: 110px;
-  flex-shrink: 0;
+  flex: 1 1 100%;
+  width: 100%;
 }
 
 .file-upload-field {
