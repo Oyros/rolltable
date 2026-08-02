@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ref, update, push } from 'firebase/database';
 import { db } from '../firebase.js';
 import { STATUS_LABEL } from '../utils/stats.js';
-import { rollFormula } from '../utils/diceFormula.js';
+import { rollStat as rollStatShared } from '../utils/statRoll.js';
 import Portal from './Portal.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
 
@@ -60,29 +60,10 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
     logChange(`${statName} statı ${current} → ${next} oldu`);
   }
 
-  function statBonusFor(value) {
-    if (value >= (gameConfig.statThreshold3 ?? 8)) return 3;
-    if (value >= (gameConfig.statThreshold2 ?? 6)) return 2;
-    if (value >= (gameConfig.statThreshold1 ?? 4)) return 1;
-    return 0;
-  }
-
   function rollStat(statId) {
     const statName = stats.find((s) => s.id === statId)?.name || statId;
-    const value = player.stats?.[statId] ?? 2;
-    const bonus = statBonusFor(value);
-    const { subRolls, result } = rollFormula({ count: 1, sides: 20, modifier: bonus });
-    push(ref(db, `rooms/${roomCode}/rolls`), {
-      roller: player.name,
-      kind: 'formula',
-      formula: `${statName} (1d20${bonus >= 0 ? '+' : ''}${bonus})`,
-      subRolls,
-      modifier: bonus,
-      dice: 20,
-      result,
-      at: Date.now(),
-      hidden: false,
-    });
+    const statValue = player.stats?.[statId] ?? 2;
+    rollStatShared({ roomCode, rollerName: player.name, statName, statValue, gameConfig });
   }
 
   function changeResource(resourceId, delta) {

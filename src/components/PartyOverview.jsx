@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ref, update } from 'firebase/database';
 import { db } from '../firebase.js';
 import { STATUS_LABEL } from '../utils/stats.js';
+import { rollStat } from '../utils/statRoll.js';
 import CharacterSheet from './CharacterSheet.jsx';
 import Portal from './Portal.jsx';
 
@@ -95,12 +96,30 @@ export default function PartyOverview({
 
                   {stats.length > 0 && (
                     <div className="party-detail-stats">
-                      {stats.map((s) => (
-                        <div className="stat-box" key={s.id}>
-                          <span className="stat-label">{s.name}</span>
-                          <span className="stat-value">{p.stats?.[s.id] ?? 2}</span>
-                        </div>
-                      ))}
+                      {stats.map((s) => {
+                        const statValue = p.stats?.[s.id] ?? 2;
+                        return (
+                          <div className="stat-box" key={s.id}>
+                            <button
+                              type="button"
+                              className="stat-roll-trigger"
+                              title="1d20 + bonus at"
+                              onClick={() =>
+                                rollStat({
+                                  roomCode,
+                                  rollerName: p.name,
+                                  statName: s.name,
+                                  statValue,
+                                  gameConfig,
+                                })
+                              }
+                            >
+                              <span className="stat-label">{s.name}</span>
+                              <span className="stat-value">{statValue}</span>
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
