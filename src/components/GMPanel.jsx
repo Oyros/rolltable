@@ -7,6 +7,8 @@ import { resolveQueueEntity as resolveEntityShared } from '../utils/initiativeEn
 
 export default function GMPanel({
   roomCode,
+  playerId,
+  name,
   scene,
   players,
   settings,
@@ -164,12 +166,13 @@ export default function GMPanel({
     if (!whisperTarget || !whisperText.trim()) return;
     const text = whisperText.trim();
     const at = Date.now();
+    const payload = { text, at, by: name, byId: playerId };
     if (whisperTarget === '__all__') {
       playerList.forEach(([id]) => {
-        push(ref(db, `rooms/${roomCode}/players/${id}/whispers`), { text, at });
+        push(ref(db, `rooms/${roomCode}/players/${id}/whispers`), payload);
       });
     } else {
-      push(ref(db, `rooms/${roomCode}/players/${whisperTarget}/whispers`), { text, at });
+      push(ref(db, `rooms/${roomCode}/players/${whisperTarget}/whispers`), payload);
     }
     setWhisperText('');
   }

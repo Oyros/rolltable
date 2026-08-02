@@ -530,6 +530,8 @@ export default function Room({ session, onLeave }) {
                 {role === 'gm' ? (
                   <GMPanel
                     roomCode={roomCode}
+                    playerId={playerId}
+                    name={liveName}
                     scene={scene}
                     players={players}
                     settings={settings}

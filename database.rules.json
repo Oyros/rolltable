@@ -52,7 +52,14 @@
 
         "players": {
           "$uid": {
-            ".write": "auth != null && auth.uid === $uid"
+            ".write": "auth != null && auth.uid === $uid",
+
+            "whispers": {
+              "$whisperId": {
+                ".write": "auth != null && !data.exists() && newData.child('byId').val() === auth.uid",
+                ".validate": "newData.hasChildren(['text', 'at']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 1000"
+              }
+            }
           }
         },
 

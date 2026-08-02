@@ -4,36 +4,31 @@ import { db } from '../firebase.js';
 
 function buildWhisperEntries(players, playerId, isGM) {
   const entries = [];
-  if (isGM) {
-    Object.entries(players || {}).forEach(([pid, p]) => {
-      if (p.role === 'gm') return;
-      Object.entries(p.whispers || {}).forEach(([key, w]) => {
-        entries.push({
-          key: `w-${pid}-${key}`,
-          at: w.at,
-          kind: w.system ? 'system' : 'whisper',
-          text: w.text,
-          target: p.name,
-        });
-      });
-    });
-  } else {
-    const me = players?.[playerId];
-    Object.entries(me?.whispers || {}).forEach(([key, w]) => {
+  Object.entries(players || {}).forEach(([pid, p]) => {
+    Object.entries(p.whispers || {}).forEach(([key, w]) => {
+      const sentByMe = !!w.byId && w.byId === playerId;
+      const sentToMe = pid === playerId;
+      if (!isGM && !sentByMe && !sentToMe) return;
+
       entries.push({
-        key: `w-${key}`,
+        key: `w-${pid}-${key}`,
         at: w.at,
         kind: w.system ? 'system' : 'whisper',
         text: w.text,
+        sentByMe,
+        sentToMe,
+        fromName: w.by || 'GM',
+        toName: p.name,
       });
     });
-  }
+  });
   return entries;
 }
 
 export default function ChatPanel({ roomCode, name, playerId, isGM, players, readOnly = false }) {
   const [chatMessages, setChatMessages] = useState([]);
   const [text, setText] = useState('');
+  const [whisperTarget, setWhisperTarget] = useState('');
   const listRef = useRef(null);
 
   useEffect(() => {
@@ -57,6 +52,10 @@ export default function ChatPanel({ roomCode, name, playerId, isGM, players, rea
   const whisperEntries = buildWhisperEntries(players, playerId, isGM);
   const merged = [...chatEntries, ...whisperEntries].sort((a, b) => (a.at || 0) - (b.at || 0));
 
+  const whisperTargets = Object.entries(players || {}).filter(
+    ([id, p]) => id !== playerId && p.role !== 'spectator'
+  );
+
   useEffect(() => {
     if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
   }, [merged.length]);
@@ -65,13 +64,23 @@ export default function ChatPanel({ roomCode, name, playerId, isGM, players, rea
     e.preventDefault();
     const trimmed = text.trim();
     if (!trimmed) return;
-    push(ref(db, `rooms/${roomCode}/chat`), {
-      text: trimmed,
-      by: name,
-      byId: playerId,
-      isGM: !!isGM,
-      at: Date.now(),
-    });
+    if (whisperTarget) {
+      push(ref(db, `rooms/${roomCode}/players/${whisperTarget}/whispers`), {
+        text: trimmed,
+        by: name,
+        byId: playerId,
+        at: Date.now(),
+      });
+      setWhisperTarget('');
+    } else {
+      push(ref(db, `rooms/${roomCode}/chat`), {
+        text: trimmed,
+        by: name,
+        byId: playerId,
+        isGM: !!isGM,
+        at: Date.now(),
+      });
+    }
     setText('');
   }
 
@@ -92,16 +101,21 @@ export default function ChatPanel({ roomCode, name, playerId, isGM, players, rea
             );
           }
           if (e.kind === 'whisper') {
+            const label = e.sentByMe
+              ? `Fısıltı → ${e.toName}`
+              : e.sentToMe
+                ? `${e.fromName} fısıldadı`
+                : `${e.fromName} → ${e.toName}`;
             return (
               <li key={e.key} className="chat-message whisper">
-                <span className="chat-message-author">🔒 {isGM ? `Fısıltı → ${e.target}` : 'GM fısıldadı'}</span>
+                <span className="chat-message-author">🔒 {label}</span>
                 <span className="chat-message-text">{e.text}</span>
               </li>
             );
           }
           return (
             <li key={e.key} className="chat-message system">
-              <span className="chat-message-author">{isGM ? e.target : 'Sistem Kaydı'}</span>
+              <span className="chat-message-author">{isGM ? e.toName : 'Sistem Kaydı'}</span>
               <span className="chat-message-text">{e.text}</span>
             </li>
           );
@@ -111,14 +125,29 @@ export default function ChatPanel({ roomCode, name, playerId, isGM, players, rea
         <p className="muted small-hint">👁️ İzleyici olarak sadece okuyabilirsin.</p>
       ) : (
         <form onSubmit={sendMessage} className="chat-form">
+          {whisperTargets.length > 0 && (
+            <select
+              className="chat-target-select"
+              value={whisperTarget}
+              onChange={(e) => setWhisperTarget(e.target.value)}
+              title="Kime göndereceğini seç"
+            >
+              <option value="">📢 Herkese</option>
+              {whisperTargets.map(([id, p]) => (
+                <option key={id} value={id}>
+                  🔒 {p.role === 'gm' ? 'GM' : p.name}
+                </option>
+              ))}
+            </select>
+          )}
           <input
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Mesaj yaz..."
+            placeholder={whisperTarget ? 'Fısıltı yaz...' : 'Mesaj yaz...'}
             maxLength={1000}
           />
           <button type="submit" className="btn-primary small">
-            Gönder
+            {whisperTarget ? '🔒 Fısılda' : 'Gönder'}
           </button>
         </form>
       )}

@@ -1334,6 +1334,12 @@ button:hover {
   flex: 1;
 }
 
+.chat-target-select {
+  width: auto;
+  max-width: 110px;
+  flex-shrink: 0;
+}
+
 .file-upload-field {
   display: flex;
   align-items: center;

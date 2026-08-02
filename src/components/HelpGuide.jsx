@@ -265,9 +265,11 @@ export default function HelpGuide({ onClose }) {
           <ul>
             <li>Normal sohbet mesajları — herkesin yazdığı, herkesin gördüğü.</li>
             <li>
-              <strong>🔒 Fısıltılar</strong> — GM Kontrol Paneli'ndeki "Gizli Fısıltı" ile gönderilen
-              özel mesajlar; kesikli amber çerçeveyle vurgulanır. Oyuncu sadece kendine gelenleri
-              görür, GM tüm oyunculara giden fısıltıları (kime gittiği belirtilerek) görür.
+              <strong>🔒 Fısıltılar</strong> — mesaj kutusunun yanındaki "📢 Herkese" açılır
+              menüsünden bir kişi (GM dahil) seçip özel mesaj gönderebilirsin; herkes birbirine
+              fısıldayabilir, sadece GM ve GM Kontrol Paneli'ne özel değil. Sadece gönderen ve alan
+              görür — GM istisna olarak, kendisini ilgilendirmeyen oyuncular arası fısıltıları da
+              dahil, masadaki tüm fısıltıları görür.
             </li>
             <li>
               <strong>Sistem kayıtları</strong> — oturum başladıktan sonra karakter kağıdında olan
