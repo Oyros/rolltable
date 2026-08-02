@@ -293,7 +293,10 @@ export default function HelpGuide({ onClose }) {
             ile kendi kamera/mikrofonunu açabilir, açıkken <strong>"🎤 Sustur"</strong> ile sadece
             mikrofonu kapatabilir. İzleyiciler kamera açamaz ama şeritteki herkesi izleyebilir.
             Görüntü/ses tarayıcılar arasında doğrudan (uçtan uca şifreli) akar, hiçbir sunucudan
-            geçmez; kamera hiçbir zaman otomatik açılmaz, her seferinde tıklaman gerekir. Bazı
+            geçmez; kamera hiçbir zaman otomatik açılmaz, her seferinde tıklaman gerekir.
+            Tarayıcılar başkasının sesini otomatik açmaya izin vermediği için her kutucuk
+            başlangıçta sessiz gelir — kutucuğun sağ üstündeki 🔇 ikonuna tıklayınca o kişinin
+            sesini açarsın. Bazı
             kısıtlı ağlarda (kurumsal ağ, katı NAT) bağlantı kurulamayabilir — bu durumda o kişinin
             kutucuğu görünmeyebilir.
           </p>

@@ -5,14 +5,28 @@ import { createPeerConnection } from '../utils/webrtc.js';
 
 function RemoteTile({ uid, stream, name, color, micOn }) {
   const videoRef = useRef(null);
+  // Browsers block autoplay of unmuted video without a user gesture — start
+  // muted (always allowed) and let the viewer unmute with a real click.
+  const [muted, setMuted] = useState(true);
 
   useEffect(() => {
-    if (videoRef.current) videoRef.current.srcObject = stream;
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play().catch(() => {});
+    }
   }, [stream]);
 
   return (
     <div className="camera-tile" key={uid}>
-      <video ref={videoRef} autoPlay playsInline />
+      <video ref={videoRef} autoPlay playsInline muted={muted} />
+      <button
+        type="button"
+        className="camera-tile-unmute"
+        onClick={() => setMuted((m) => !m)}
+        title={muted ? 'Sesi aç' : 'Sesi kapat'}
+      >
+        {muted ? '🔇' : '🔊'}
+      </button>
       <span className="camera-tile-name" style={color ? { color } : undefined}>
         {micOn === false ? '🔇 ' : ''}
         {name || '?'}
@@ -179,6 +193,7 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
   useEffect(() => {
     if (cameraOn && localVideoRef.current && localStreamRef.current) {
       localVideoRef.current.srcObject = localStreamRef.current;
+      localVideoRef.current.play().catch(() => {});
     }
   }, [cameraOn]);
 

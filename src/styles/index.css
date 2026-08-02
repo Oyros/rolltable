@@ -781,6 +781,23 @@ button:hover {
   text-overflow: ellipsis;
 }
 
+.camera-tile-unmute {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.55);
+  font-size: 0.85rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .bottom-panel-trigger {
   width: 100%;
   display: flex;
