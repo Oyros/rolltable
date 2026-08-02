@@ -287,6 +287,19 @@ export default function HelpGuide({ onClose }) {
         </details>
 
         <details>
+          <summary>📷 Kamera & Mikrofon (alt kenar)</summary>
+          <p>
+            Ekranın en altında sabit bir şerit — GM ve oyuncular <strong>"📷 Kamerayı Aç"</strong>
+            ile kendi kamera/mikrofonunu açabilir, açıkken <strong>"🎤 Sustur"</strong> ile sadece
+            mikrofonu kapatabilir. İzleyiciler kamera açamaz ama şeritteki herkesi izleyebilir.
+            Görüntü/ses tarayıcılar arasında doğrudan (uçtan uca şifreli) akar, hiçbir sunucudan
+            geçmez; kamera hiçbir zaman otomatik açılmaz, her seferinde tıklaman gerekir. Bazı
+            kısıtlı ağlarda (kurumsal ağ, katı NAT) bağlantı kurulamayabilir — bu durumda o kişinin
+            kutucuğu görünmeyebilir.
+          </p>
+        </details>
+
+        <details>
           <summary>📋 Oturum Kaydı (sağ kenar)</summary>
           <p>
             "📥 Oturumu Dışa Aktar" butonu zar atışlarını, sohbeti (fısıltı ve sistem kayıtları

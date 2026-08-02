@@ -26,6 +26,7 @@ import QuestBoard from '../components/QuestBoard.jsx';
 import LootGenerator from '../components/LootGenerator.jsx';
 import GameCalendar from '../components/GameCalendar.jsx';
 import InitiativeBar from '../components/InitiativeBar.jsx';
+import CameraStrip from '../components/CameraStrip.jsx';
 import { applyTheme, DEFAULT_THEME_ID } from '../utils/themes.js';
 import { deleteRoomUploads, sweepOrphanedRoomUploads } from '../utils/upload.js';
 
@@ -645,6 +646,15 @@ export default function Room({ session, onLeave }) {
           )}
         </aside>
       </div>
+
+      <CameraStrip
+        roomCode={roomCode}
+        playerId={playerId}
+        name={liveName}
+        role={role}
+        color={me?.color}
+        players={players}
+      />
     </div>
   );
 }

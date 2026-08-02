@@ -716,6 +716,71 @@ button:hover {
   flex-shrink: 0;
 }
 
+/* Camera strip */
+.camera-strip {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  background: var(--bg-panel);
+  border-top: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.camera-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.camera-controls button {
+  width: auto;
+}
+
+.camera-tiles {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.camera-tile {
+  position: relative;
+  flex-shrink: 0;
+  width: 180px;
+  height: 110px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #0a0704;
+  border: 1px solid var(--border);
+}
+
+.camera-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.camera-tile-name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  font-family: var(--font-heading);
+  color: var(--amber-light);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .bottom-panel-trigger {
   width: 100%;
   display: flex;

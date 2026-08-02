@@ -82,6 +82,23 @@
               ".write": "auth != null && ((!data.exists() && newData.child('byId').val() === auth.uid) || (!newData.exists() && data.child('byId').val() === auth.uid))"
             }
           }
+        },
+
+        "webrtc": {
+          "peers": {
+            "$uid": {
+              ".write": "auth != null && auth.uid === $uid"
+            }
+          },
+
+          "signals": {
+            "$toUid": {
+              "$sigId": {
+                ".write": "auth != null && !data.exists() && newData.child('from').val() === auth.uid",
+                ".validate": "newData.hasChildren(['from', 'type', 'data', 'at'])"
+              }
+            }
+          }
         }
       }
     }
