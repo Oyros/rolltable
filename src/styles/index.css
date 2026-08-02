@@ -846,8 +846,12 @@ button:hover {
 .scene-image-box img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   display: block;
+}
+
+.scene-image-focus img {
+  object-fit: contain;
 }
 
 .scene-placeholder {
@@ -1039,8 +1043,7 @@ button:hover {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  object-fit: contain;
-  background: var(--bg-panel-alt);
+  object-fit: cover;
   border: 1px solid var(--border);
   flex-shrink: 0;
 }
@@ -1425,7 +1428,7 @@ button:hover {
 .party-avatar img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   border-radius: 50%;
 }
 
@@ -1478,8 +1481,7 @@ button:hover {
   width: auto;
   border-radius: 8px;
   border: 1px solid var(--border);
-  background: var(--bg-panel-alt);
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .party-detail-stats {
@@ -2283,7 +2285,7 @@ button:hover {
 .map-token img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .map-token-fallback {
@@ -2899,7 +2901,7 @@ button:hover {
 .initiative-avatar img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   border-radius: 50%;
 }
 
