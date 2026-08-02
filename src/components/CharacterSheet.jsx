@@ -10,6 +10,7 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
   const path = `rooms/${roomCode}/players/${playerId}`;
   const [newItem, setNewItem] = useState('');
   const [catalogItemId, setCatalogItemId] = useState('');
+  const [nameDraft, setNameDraft] = useState(player.name || '');
   const [skillsDraft, setSkillsDraft] = useState(player.skills || '');
   const [portraitDraft, setPortraitDraft] = useState(player.portraitUrl || '');
   const [showLevelUp, setShowLevelUp] = useState(false);
@@ -51,6 +52,18 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
 
   function commitPortrait() {
     if (portraitDraft !== player.portraitUrl) patch({ portraitUrl: portraitDraft });
+  }
+
+  function commitName() {
+    const trimmed = nameDraft.trim();
+    if (!trimmed) {
+      setNameDraft(player.name || '');
+      return;
+    }
+    if (trimmed !== player.name) {
+      patch({ name: trimmed });
+      logChange(`İsim "${player.name}" → "${trimmed}" oldu`);
+    }
   }
 
   function changeStat(statId, delta) {
@@ -286,6 +299,15 @@ export default function CharacterSheet({ roomCode, playerId, player, gameConfig,
       )}
 
       <fieldset disabled={!editable} className="character-sheet-fields">
+      <label className="character-name-field">
+        Karakter Adı
+        <input
+          value={nameDraft}
+          onChange={(e) => setNameDraft(e.target.value)}
+          onBlur={commitName}
+          placeholder="Karakter adın"
+        />
+      </label>
       <div className="portrait-field">
         {portraitDraft && (
           <img className="portrait-preview" src={portraitDraft} alt={player.name} />

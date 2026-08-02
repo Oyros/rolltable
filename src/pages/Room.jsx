@@ -103,7 +103,11 @@ export default function Room({ session, onLeave }) {
           updatedAt: Date.now(),
         });
       } else {
-        update(playerRef, { name, role, updatedAt: Date.now() });
+        // Don't overwrite name here — the player may have renamed their
+        // character in-app since first joining, and that should stick
+        // across reconnects/refreshes rather than reverting to the name
+        // captured at the original join screen.
+        update(playerRef, { role, updatedAt: Date.now() });
       }
     }
 
@@ -296,6 +300,7 @@ export default function Room({ session, onLeave }) {
   }
 
   const me = players[playerId];
+  const liveName = me?.name || name;
 
   const header = (
     <header className="room-header">
@@ -322,7 +327,7 @@ export default function Room({ session, onLeave }) {
         <div className="header-right">
           <SessionTimer startedAt={settings?.sessionStartedAt} active={!!settings?.sessionActive} />
           <span className="who-am-i">
-            {name} · {role === 'gm' ? 'GM' : 'Oyuncu'}
+            {liveName} · {role === 'gm' ? 'GM' : 'Oyuncu'}
           </span>
           <button className="btn-ghost" onClick={() => setShowHelp(true)}>
             ❓ Yardım
@@ -450,7 +455,7 @@ export default function Room({ session, onLeave }) {
               💬 Sohbet<span className="side-accordion-chevron">▾</span>
             </summary>
             <div className="side-accordion-body">
-              <ChatPanel roomCode={roomCode} name={name} playerId={playerId} isGM={role === 'gm'} players={players} />
+              <ChatPanel roomCode={roomCode} name={liveName} playerId={playerId} isGM={role === 'gm'} players={players} />
             </div>
           </details>
 
@@ -475,7 +480,7 @@ export default function Room({ session, onLeave }) {
             scene={scene}
             roomCode={roomCode}
             isGM={role === 'gm'}
-            name={name}
+            name={liveName}
             playerId={playerId}
             pinColor={me?.color}
             ambianceVolume={ambianceVolume}
@@ -542,7 +547,7 @@ export default function Room({ session, onLeave }) {
               🎲 Zar<span className="side-accordion-chevron">▾</span>
             </summary>
             <div className="side-accordion-body">
-              <DiceRoller roomCode={roomCode} name={name} isGM={role === 'gm'} />
+              <DiceRoller roomCode={roomCode} name={liveName} isGM={role === 'gm'} />
             </div>
           </details>
 

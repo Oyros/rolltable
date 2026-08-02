@@ -1022,6 +1022,12 @@ button:hover {
 }
 
 /* Character sheet */
+.character-name-field input {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--amber-light);
+}
+
 .portrait-field {
   display: flex;
   align-items: center;
