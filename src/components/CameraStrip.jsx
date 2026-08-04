@@ -186,6 +186,34 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
     };
   }
 
+  // Turning our camera on/off after a connection already exists means the
+  // existing connection was negotiated without our media (it was receive-only).
+  // Push our tracks onto it and re-offer, otherwise the other side would never
+  // be sent our video at all — which is exactly what happened when someone
+  // switched their camera on after the connection had been established.
+  async function syncLocalTracksInto(uid, pc) {
+    const stream = localStreamRef.current;
+    const senders = pc.getSenders().filter((s) => s.track);
+
+    if (stream) {
+      const alreadySent = new Set(senders.map((s) => s.track));
+      const missing = stream.getTracks().filter((t) => !alreadySent.has(t));
+      if (missing.length === 0) return;
+      missing.forEach((track) => pc.addTrack(track, stream));
+    } else {
+      if (senders.length === 0) return;
+      senders.forEach((sender) => pc.removeTrack(sender));
+    }
+
+    try {
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      sendSignal(uid, 'offer', { sdp: offer.sdp, type: offer.type });
+    } catch {
+      // A collision (both sides re-offering at once) resolves on the next pass.
+    }
+  }
+
   async function connectTo(uid) {
     const pc = createPeerConnection();
     peerConnectionsRef.current.set(uid, pc);
@@ -234,6 +262,16 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
     const unsub = onValue(peersRef, (snap) => setBroadcasters(snap.val() || {}));
     return () => unsub();
   }, [roomCode]);
+
+  // Our camera just came on (or went off) — bring every already-open
+  // connection in line with that, re-offering so the other side actually
+  // receives (or stops receiving) our media.
+  useEffect(() => {
+    peerConnectionsRef.current.forEach((pc, uid) => {
+      syncLocalTracksInto(uid, pc);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localStream]);
 
   // Listen for incoming signaling messages addressed to me.
   //
