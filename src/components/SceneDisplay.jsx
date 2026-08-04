@@ -3,6 +3,7 @@ import { ref, update, push, remove } from 'firebase/database';
 import { db } from '../firebase.js';
 import TypewriterText from './TypewriterText.jsx';
 import { resolveQueueEntity } from '../utils/initiativeEntity.js';
+import { entryLabel, entryCaption, groupByFolder } from '../utils/library.js';
 
 const VOLUME_KEY = 'sessizlik_volume';
 
@@ -35,6 +36,7 @@ export default function SceneDisplay({
   const ambiancePendingRef = useRef(false);
   const sfxSeenRef = useRef(undefined);
   const mapAreaRef = useRef(null);
+  const loadedMusicUrlRef = useRef('');
 
   const [volume, setVolume] = useState(() => loadVolume(VOLUME_KEY, 0.6));
   const [soundError, setSoundError] = useState('');
@@ -68,11 +70,16 @@ export default function SceneDisplay({
     if (!scene?.musicUrl) {
       audio.pause();
       audio.removeAttribute('src');
+      loadedMusicUrlRef.current = '';
       setSoundError('');
       return;
     }
 
-    if (audio.src !== scene.musicUrl) {
+    // Track the loaded URL ourselves rather than comparing against audio.src:
+    // the DOM normalises that value, so a mismatch could re-assign the very
+    // same track and snap playback back to zero.
+    if (loadedMusicUrlRef.current !== scene.musicUrl) {
+      loadedMusicUrlRef.current = scene.musicUrl;
       audio.src = scene.musicUrl;
       audio.volume = volume;
     }
@@ -204,11 +211,12 @@ export default function SceneDisplay({
     update(ref(db, `rooms/${roomCode}/scene`), { ambiancePlaying: !isAmbiancePlaying });
   }
 
+  // Changing the scene must leave the music alone — these used to also write
+  // `playing: true`, which resumed/restarted the track on every scene change.
   function selectLocation(entry) {
     update(ref(db, `rooms/${roomCode}/scene`), {
       locationImageUrl: entry.imageUrl,
-      caption: entry.name,
-      playing: true,
+      caption: entryCaption(entry),
       updatedAt: Date.now(),
     });
     setLocationPickerOpen(false);
@@ -217,17 +225,21 @@ export default function SceneDisplay({
   function selectFocus(entry) {
     update(ref(db, `rooms/${roomCode}/scene`), {
       focusImageUrl: entry.imageUrl,
-      focusCaption: entry.name,
-      playing: true,
+      focusCaption: entryCaption(entry),
       updatedAt: Date.now(),
     });
     setFocusPickerOpen(false);
   }
 
+  // Picking a different track is the one place music restarts from the top.
   function selectMusic(e) {
     const entry = savedMusicList.find(([id]) => id === e.target.value);
     if (entry) {
-      update(ref(db, `rooms/${roomCode}/scene`), { musicUrl: entry[1].url });
+      update(ref(db, `rooms/${roomCode}/scene`), {
+        musicUrl: entry[1].url,
+        playing: true,
+        restartAt: Date.now(),
+      });
     }
   }
 
@@ -322,15 +334,20 @@ export default function SceneDisplay({
               {savedLocationList.length === 0 ? (
                 <p className="muted small-hint">Henüz kayıtlı mekan yok — GM panelinden ekle.</p>
               ) : (
-                savedLocationList.map(([id, l]) => (
-                  <button
-                    key={id}
-                    type="button"
-                    className={`btn-ghost small${scene.locationImageUrl === l.imageUrl ? ' active' : ''}`}
-                    onClick={() => selectLocation(l)}
-                  >
-                    {l.name}
-                  </button>
+                groupByFolder(savedLocationList).map(([folderName, entries]) => (
+                  <div key={folderName} className="scene-picker-group">
+                    <span className="scene-picker-folder">📁 {folderName}</span>
+                    {entries.map(([id, l]) => (
+                      <button
+                        key={id}
+                        type="button"
+                        className={`btn-ghost small${scene.locationImageUrl === l.imageUrl ? ' active' : ''}`}
+                        onClick={() => selectLocation(l)}
+                      >
+                        {entryLabel(l)}
+                      </button>
+                    ))}
+                  </div>
                 ))
               )}
             </div>
@@ -352,15 +369,20 @@ export default function SceneDisplay({
               {savedFocusList.length === 0 ? (
                 <p className="muted small-hint">Henüz kayıtlı odak yok — GM panelinden ekle.</p>
               ) : (
-                savedFocusList.map(([id, f]) => (
-                  <button
-                    key={id}
-                    type="button"
-                    className={`btn-ghost small${scene.focusImageUrl === f.imageUrl ? ' active' : ''}`}
-                    onClick={() => selectFocus(f)}
-                  >
-                    {f.name}
-                  </button>
+                groupByFolder(savedFocusList).map(([folderName, entries]) => (
+                  <div key={folderName} className="scene-picker-group">
+                    <span className="scene-picker-folder">📁 {folderName}</span>
+                    {entries.map(([id, f]) => (
+                      <button
+                        key={id}
+                        type="button"
+                        className={`btn-ghost small${scene.focusImageUrl === f.imageUrl ? ' active' : ''}`}
+                        onClick={() => selectFocus(f)}
+                      >
+                        {entryLabel(f)}
+                      </button>
+                    ))}
+                  </div>
                 ))
               )}
             </div>
@@ -392,10 +414,14 @@ export default function SceneDisplay({
                         onChange={selectMusic}
                       >
                         <option value="">Müzik seç...</option>
-                        {savedMusicList.map(([id, m]) => (
-                          <option key={id} value={id}>
-                            {m.name}
-                          </option>
+                        {groupByFolder(savedMusicList).map(([folderName, entries]) => (
+                          <optgroup key={folderName} label={folderName}>
+                            {entries.map(([id, m]) => (
+                              <option key={id} value={id}>
+                                {entryLabel(m)}
+                              </option>
+                            ))}
+                          </optgroup>
                         ))}
                       </select>
                     )}

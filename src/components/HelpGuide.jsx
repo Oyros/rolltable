@@ -98,7 +98,7 @@ export default function HelpGuide({ onClose }) {
             <li><strong>Odak Görseli</strong> — o an konuşan karakter/eşya, kendi adıyla birlikte.</li>
             <li><strong>Harita</strong> — "Haritayı Göster" ile açılır; üzerine tıklayarak pin bırakabilirsin (kendi renginde). Kendi pinini herkes, başkasının pinini sadece GM kaldırabilir.</li>
             <li><strong>Taktiksel Token'lar</strong> — inisiyatif sırasındaki her oyuncu ve NPC, harita açıldığında otomatik olarak bir token (portre + renkli halka; NPC'ler kırmızı) halinde haritada belirir. Sadece GM token'ları sürükleyip konumlandırabilir; oyuncular canlı olarak izler. Kuyruktan çıkarılan bir karakterin token'ı da haritadan kalkar.</li>
-            <li><strong>Müzik / Ambiyans</strong> — GM çalar/durdurur, herkes kendi ses seviyesini ayarlar.</li>
+            <li><strong>Müzik / Ambiyans</strong> — GM çalar/durdurur, herkes kendi ses seviyesini ayarlar. Sahne değiştirmek müziğe dokunmaz: müzik kaldığı yerden çalmaya devam eder. Müzik yalnızca menüden farklı bir parça seçildiğinde (ya da "⏮ Baştan Başlat" denildiğinde) baştan başlar.</li>
             <li><strong>Vinyet, Flaş/Sarsıntı, Hava Durumu</strong> — GM'in tetiklediği görsel atmosfer efektleri (sağ kenardaki "Görsel Efektler"de).</li>
             <li><strong>Tema parçacıkları</strong> — seçilen temaya göre değişen otomatik arka plan efekti (kül, neon, kiraz çiçeği, kar, konfeti ve daha fazlası) — renk paleti, fontlar ve tüm üreteçler de temayla birlikte değişir.</li>
           </ul>
@@ -236,6 +236,14 @@ export default function HelpGuide({ onClose }) {
               için de "▶️ Devam Ettir" butonunun solundaki açılır menüden seçim yaparsın — hepsi
               anında canlı sahneye uygulanır. Böylece önceden bir sürü görsel/müzik hazırlayıp
               oturum sırasında tek tıkla geçiş yapabilirsin.
+            </li>
+            <li>
+              <strong>Kütüphane adı ve sahne metni ayrıdır</strong> — "Kütüphane adı" sadece sana
+              görünür (kayıtları kolayca bulman için), "Sahnede yazacak metin" ise oyuncuların
+              görselin üzerinde göreceği yazıdır. Boş bırakırsan sahnede metin çıkmaz. Ayrıca
+              isteğe bağlı bir <strong>klasör</strong> adı verip kütüphaneni gruplayabilirsin;
+              klasörler hem GM panelinde hem de sahne seçim menüsünde ayrı başlıklar halinde
+              görünür.
             </li>
             <li>
               Her görsel/ses alanının yanındaki <strong>"📤 Yükle"</strong> butonuyla bir link

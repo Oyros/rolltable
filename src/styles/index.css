@@ -1009,6 +1009,23 @@ button:hover {
   text-align: left;
 }
 
+.scene-picker-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scene-picker-group + .scene-picker-group {
+  margin-top: 8px;
+}
+
+.scene-picker-folder {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
 .music-quick-select {
   max-width: 160px;
 }
@@ -2219,6 +2236,18 @@ button:hover {
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 12px;
+}
+
+.library-folder > summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.8rem;
+  color: var(--amber-light);
+  padding: 4px 0;
+}
+
+.library-folder > summary::-webkit-details-marker {
+  display: none;
 }
 
 /* Rules editor overlay */

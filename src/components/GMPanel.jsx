@@ -4,6 +4,7 @@ import { db } from '../firebase.js';
 import RulesEditor from './RulesEditor.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
 import { resolveQueueEntity as resolveEntityShared } from '../utils/initiativeEntity.js';
+import { entryLabel, entryCaption, groupByFolder, folderNames } from '../utils/library.js';
 
 export default function GMPanel({
   roomCode,
@@ -21,12 +22,17 @@ export default function GMPanel({
   const mapSynced = useRef(false);
 
   const [locationDraftUrl, setLocationDraftUrl] = useState('');
-  const [locationDraftName, setLocationDraftName] = useState('');
+  const [locationDraftLabel, setLocationDraftLabel] = useState('');
+  const [locationDraftCaption, setLocationDraftCaption] = useState('');
+  const [locationDraftFolder, setLocationDraftFolder] = useState('');
   const [focusDraftUrl, setFocusDraftUrl] = useState('');
-  const [focusDraftName, setFocusDraftName] = useState('');
+  const [focusDraftLabel, setFocusDraftLabel] = useState('');
+  const [focusDraftCaption, setFocusDraftCaption] = useState('');
+  const [focusDraftFolder, setFocusDraftFolder] = useState('');
   const [focusDraftCategory, setFocusDraftCategory] = useState('karakter');
   const [musicDraftUrl, setMusicDraftUrl] = useState('');
   const [musicDraftName, setMusicDraftName] = useState('');
+  const [musicDraftFolder, setMusicDraftFolder] = useState('');
   const [selectedMusicId, setSelectedMusicId] = useState('');
 
   const [whisperTarget, setWhisperTarget] = useState('');
@@ -93,20 +99,24 @@ export default function GMPanel({
   }
 
   function saveLocation() {
-    if (!locationDraftUrl.trim() || !locationDraftName.trim()) return;
+    if (!locationDraftUrl.trim() || !locationDraftLabel.trim()) return;
     push(ref(db, `rooms/${roomCode}/settings/savedLocations`), {
-      name: locationDraftName.trim(),
+      label: locationDraftLabel.trim(),
+      caption: locationDraftCaption.trim(),
+      folder: locationDraftFolder.trim(),
       imageUrl: locationDraftUrl.trim(),
     });
     setLocationDraftUrl('');
-    setLocationDraftName('');
+    setLocationDraftLabel('');
+    setLocationDraftCaption('');
   }
 
+  // Publishing a scene must not touch the music — it used to also write
+  // `playing: true`, which restarted/resumed the track on every scene change.
   function publishLocation(entry) {
     update(ref(db, `rooms/${roomCode}/scene`), {
       locationImageUrl: entry.imageUrl,
-      caption: entry.name,
-      playing: true,
+      caption: entryCaption(entry),
       updatedAt: Date.now(),
     });
   }
@@ -116,21 +126,23 @@ export default function GMPanel({
   }
 
   function saveFocus() {
-    if (!focusDraftUrl.trim() || !focusDraftName.trim()) return;
+    if (!focusDraftUrl.trim() || !focusDraftLabel.trim()) return;
     push(ref(db, `rooms/${roomCode}/settings/savedFocuses`), {
-      name: focusDraftName.trim(),
+      label: focusDraftLabel.trim(),
+      caption: focusDraftCaption.trim(),
+      folder: focusDraftFolder.trim(),
       imageUrl: focusDraftUrl.trim(),
       category: focusDraftCategory,
     });
     setFocusDraftUrl('');
-    setFocusDraftName('');
+    setFocusDraftLabel('');
+    setFocusDraftCaption('');
   }
 
   function publishFocus(entry) {
     update(ref(db, `rooms/${roomCode}/scene`), {
       focusImageUrl: entry.imageUrl,
-      focusCaption: entry.name,
-      playing: true,
+      focusCaption: entryCaption(entry),
       updatedAt: Date.now(),
     });
   }
@@ -142,17 +154,23 @@ export default function GMPanel({
   function saveMusic() {
     if (!musicDraftUrl.trim() || !musicDraftName.trim()) return;
     push(ref(db, `rooms/${roomCode}/settings/savedMusic`), {
-      name: musicDraftName.trim(),
+      label: musicDraftName.trim(),
+      folder: musicDraftFolder.trim(),
       url: musicDraftUrl.trim(),
     });
     setMusicDraftUrl('');
     setMusicDraftName('');
   }
 
+  // Picking a different track is the one place music restarts from the top.
   function selectMusic(id, entry) {
     setSelectedMusicId(id);
     if (entry) {
-      update(ref(db, `rooms/${roomCode}/scene`), { musicUrl: entry.url });
+      update(ref(db, `rooms/${roomCode}/scene`), {
+        musicUrl: entry.url,
+        playing: true,
+        restartAt: Date.now(),
+      });
     }
   }
 
@@ -358,7 +376,10 @@ export default function GMPanel({
 
       <div className="gm-section" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>
         <h3 className="title-font gm-section-title">Mekan Kütüphanesi</h3>
-        <p className="muted small-hint">Görsel + sahne adını kaydet, sonra listeden tıklayıp canlı sahneye uygula.</p>
+        <p className="muted small-hint">
+          Kütüphane adı sadece sana görünür (kolay bulman için); sahnede yazacak metni ayrı
+          girersin. Klasör vererek kütüphaneyi gruplayabilirsin.
+        </p>
         <div className="inline-form">
           <input
             value={locationDraftUrl}
@@ -372,32 +393,55 @@ export default function GMPanel({
             onUploaded={setLocationDraftUrl}
           />
           <input
-            value={locationDraftName}
-            onChange={(e) => setLocationDraftName(e.target.value)}
-            placeholder="Sahne adı"
+            value={locationDraftLabel}
+            onChange={(e) => setLocationDraftLabel(e.target.value)}
+            placeholder="Kütüphane adı (sadece sen görürsün)"
           />
+          <input
+            value={locationDraftCaption}
+            onChange={(e) => setLocationDraftCaption(e.target.value)}
+            placeholder="Sahnede yazacak metin"
+          />
+          <input
+            value={locationDraftFolder}
+            onChange={(e) => setLocationDraftFolder(e.target.value)}
+            placeholder="Klasör (opsiyonel)"
+            list="location-folders"
+          />
+          <datalist id="location-folders">
+            {folderNames(savedLocations).map((f) => (
+              <option key={f} value={f} />
+            ))}
+          </datalist>
           <button type="button" className="btn-primary small" onClick={saveLocation}>
             💾 Kaydet
           </button>
         </div>
-        {savedLocations.length > 0 && (
-          <div className="sfx-library">
-            {savedLocations.map(([id, l]) => (
-              <div key={id} className="saved-scene-item">
-                <button
-                  type="button"
-                  className={`btn-dice${scene?.locationImageUrl === l.imageUrl ? ' active' : ''}`}
-                  onClick={() => publishLocation(l)}
-                >
-                  🖼️ {l.name}
-                </button>
-                <button type="button" className="btn-ghost small" onClick={() => removeLocation(id)}>
-                  Sil
-                </button>
+        {savedLocations.length > 0 &&
+          groupByFolder(savedLocations).map(([folderName, entries]) => (
+            <details key={folderName} className="library-folder" open>
+              <summary>
+                📁 {folderName} <span className="muted">({entries.length})</span>
+              </summary>
+              <div className="sfx-library">
+                {entries.map(([id, l]) => (
+                  <div key={id} className="saved-scene-item">
+                    <button
+                      type="button"
+                      className={`btn-dice${scene?.locationImageUrl === l.imageUrl ? ' active' : ''}`}
+                      onClick={() => publishLocation(l)}
+                      title={entryCaption(l) ? `Sahnede: ${entryCaption(l)}` : 'Sahnede metin yok'}
+                    >
+                      🖼️ {entryLabel(l)}
+                    </button>
+                    <button type="button" className="btn-ghost small" onClick={() => removeLocation(id)}>
+                      Sil
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            </details>
+          ))}
       </div>
 
       <div className="gm-section">
@@ -419,10 +463,26 @@ export default function GMPanel({
             onUploaded={setFocusDraftUrl}
           />
           <input
-            value={focusDraftName}
-            onChange={(e) => setFocusDraftName(e.target.value)}
-            placeholder="Karakter / eşya adı"
+            value={focusDraftLabel}
+            onChange={(e) => setFocusDraftLabel(e.target.value)}
+            placeholder="Kütüphane adı (sadece sen görürsün)"
           />
+          <input
+            value={focusDraftCaption}
+            onChange={(e) => setFocusDraftCaption(e.target.value)}
+            placeholder="Sahnede yazacak metin"
+          />
+          <input
+            value={focusDraftFolder}
+            onChange={(e) => setFocusDraftFolder(e.target.value)}
+            placeholder="Klasör (opsiyonel)"
+            list="focus-folders"
+          />
+          <datalist id="focus-folders">
+            {folderNames(savedFocuses).map((f) => (
+              <option key={f} value={f} />
+            ))}
+          </datalist>
           <select value={focusDraftCategory} onChange={(e) => setFocusDraftCategory(e.target.value)}>
             <option value="karakter">🎭 Karakter / NPC</option>
             <option value="obje">📦 Obje / Eşya</option>
@@ -431,24 +491,31 @@ export default function GMPanel({
             💾 Kaydet
           </button>
         </div>
-        {savedFocuses.length > 0 && (
-          <div className="sfx-library">
-            {savedFocuses.map(([id, f]) => (
-              <div key={id} className="saved-scene-item">
-                <button
-                  type="button"
-                  className={`btn-dice${scene?.focusImageUrl === f.imageUrl ? ' active' : ''}`}
-                  onClick={() => publishFocus(f)}
-                >
-                  {(f.category || 'karakter') === 'karakter' ? '🎭' : '📦'} {f.name}
-                </button>
-                <button type="button" className="btn-ghost small" onClick={() => removeFocus(id)}>
-                  Sil
-                </button>
+        {savedFocuses.length > 0 &&
+          groupByFolder(savedFocuses).map(([folderName, entries]) => (
+            <details key={folderName} className="library-folder" open>
+              <summary>
+                📁 {folderName} <span className="muted">({entries.length})</span>
+              </summary>
+              <div className="sfx-library">
+                {entries.map(([id, f]) => (
+                  <div key={id} className="saved-scene-item">
+                    <button
+                      type="button"
+                      className={`btn-dice${scene?.focusImageUrl === f.imageUrl ? ' active' : ''}`}
+                      onClick={() => publishFocus(f)}
+                      title={entryCaption(f) ? `Sahnede: ${entryCaption(f)}` : 'Sahnede metin yok'}
+                    >
+                      {(f.category || 'karakter') === 'karakter' ? '🎭' : '📦'} {entryLabel(f)}
+                    </button>
+                    <button type="button" className="btn-ghost small" onClick={() => removeFocus(id)}>
+                      Sil
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            </details>
+          ))}
       </div>
 
       <div className="gm-section">
@@ -471,6 +538,17 @@ export default function GMPanel({
             onChange={(e) => setMusicDraftName(e.target.value)}
             placeholder="Müzik ismi"
           />
+          <input
+            value={musicDraftFolder}
+            onChange={(e) => setMusicDraftFolder(e.target.value)}
+            placeholder="Klasör (opsiyonel)"
+            list="music-folders"
+          />
+          <datalist id="music-folders">
+            {folderNames(savedMusicList).map((f) => (
+              <option key={f} value={f} />
+            ))}
+          </datalist>
           <button type="button" className="btn-primary small" onClick={saveMusic}>
             💾 Kaydet
           </button>
@@ -485,10 +563,14 @@ export default function GMPanel({
               }}
             >
               <option value="">Müzik seç...</option>
-              {savedMusicList.map(([id, m]) => (
-                <option key={id} value={id}>
-                  {m.name}
-                </option>
+              {groupByFolder(savedMusicList).map(([folderName, entries]) => (
+                <optgroup key={folderName} label={folderName}>
+                  {entries.map(([id, m]) => (
+                    <option key={id} value={id}>
+                      {entryLabel(m)}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
             {selectedMusicId && (
