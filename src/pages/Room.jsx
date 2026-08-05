@@ -59,6 +59,7 @@ export default function Room({ session, onLeave }) {
   const [showBottomPanel, setShowBottomPanel] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [questsOpen, setQuestsOpen] = useState(false);
   const [turnBannerActive, setTurnBannerActive] = useState(false);
   const flashSeenRef = useRef(undefined);
   const kickSeenRef = useRef(undefined);
@@ -337,6 +338,7 @@ export default function Room({ session, onLeave }) {
             players={players}
             playerId={playerId}
             isGM={role === 'gm'}
+            chatOpen={chatOpen}
             onOpen={() => setChatOpen(true)}
           />
           <button
@@ -362,6 +364,13 @@ export default function Room({ session, onLeave }) {
               {mapOpen ? '🗺️ Haritayı Gizle' : '🗺️ Haritayı Göster'}
             </button>
           )}
+          <button
+            type="button"
+            className="btn-ghost sound-toggle map-toggle-btn"
+            onClick={() => setQuestsOpen((v) => !v)}
+          >
+            {questsOpen ? '📜 Görevleri Gizle' : '📜 Görevleri Göster'}
+          </button>
         </div>
         <div className="header-right">
           <SessionTimer startedAt={settings?.sessionStartedAt} active={!!settings?.sessionActive} />
@@ -490,20 +499,6 @@ export default function Room({ session, onLeave }) {
             </div>
           </details>
 
-          <details className="panel side-accordion">
-            <summary>
-              📜 Görev Panosu<span className="side-accordion-chevron">▾</span>
-            </summary>
-            <div className="side-accordion-body">
-              <QuestBoard
-                roomCode={roomCode}
-                quests={quests}
-                isGM={role === 'gm'}
-                players={players}
-                calendar={settings?.calendar}
-              />
-            </div>
-          </details>
         </ResizableSidebar>
 
         <div className="room-content">
@@ -605,6 +600,23 @@ export default function Room({ session, onLeave }) {
               isGM={role === 'gm'}
               players={players}
               readOnly={role === 'spectator'}
+            />
+          </FloatingWindow>
+        )}
+
+        {questsOpen && (
+          <FloatingWindow
+            title="📜 Görev Panosu"
+            storageKey="rolltable_quests_window_box"
+            defaultBox={{ x: 120, y: 130, w: 420, h: 460 }}
+            onClose={() => setQuestsOpen(false)}
+          >
+            <QuestBoard
+              roomCode={roomCode}
+              quests={quests}
+              isGM={role === 'gm'}
+              players={players}
+              calendar={settings?.calendar}
             />
           </FloatingWindow>
         )}

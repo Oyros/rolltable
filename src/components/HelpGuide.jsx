@@ -42,7 +42,8 @@ export default function HelpGuide({ onClose }) {
             <strong>👁️ İzleyici olarak katıl</strong>: katılma formundaki kutucuğu işaretlersen
             karakter oluşturmadan sadece izlersin. İzleyiciler sahneyi, zar animasyonunu/geçmişini
             ve sohbeti görür ama zar atamaz, sohbete yazamaz; sol Parti panelinde ayrı, sade bir
-            "İzleyiciler" listesinde görünür ve göreve/inisiyatife/ganimete dahil edilmez. GM
+            "İzleyiciler" listesinde görünür (bu liste de diğer menüler gibi başlığına tıklanarak
+            katlanabilir) ve göreve/inisiyatife/ganimete dahil edilmez. GM
             istediği zaman bir izleyiciyi odadan atabilir.
           </p>
         </details>
@@ -158,7 +159,13 @@ export default function HelpGuide({ onClose }) {
         </details>
 
         <details>
-          <summary>📜 Görev Panosu (sol kenar)</summary>
+          <summary>📜 Görev Panosu (üst menü)</summary>
+          <p>
+            Üst menüde harita tuşunun yanındaki <strong>"📜 Görevleri Göster"</strong> ile serbest
+            bir pencere olarak açılır, aynı tuşa tekrar basınca kapanır. Harita ve sohbet
+            pencereleri gibi üst çubuğundan sürüklenip alt köşelerinden boyutlandırılabilir; yeri
+            ve boyutu tarayıcında hatırlanır.
+          </p>
           <p>
             GM görev ekler; başlık, açıklama, <strong>öncelik</strong> (Normal/🔴 Acil),
             <strong> atanan oyuncu</strong> (opsiyonel — boş bırakılırsa "Genel" sayılır) ve
@@ -286,8 +293,11 @@ export default function HelpGuide({ onClose }) {
             ve boyutu hatırlanır. Pencerenin solunda, sohbet kapalıyken bile <strong>son birkaç
             mesajı</strong> gösteren küçük bir kayıt duruyor; ona tıklayarak da sohbeti
             açabilirsin (o küçük kayıt da sohbetin tamamını yansıtır: fısıltılar ve sistem
-            kayıtları dahil, sadece senin görmeye yetkili olduğun kadarıyla). Üç tür mesaj aynı
-            akışta, farklı görünümle karışık sırayla listelenir:
+            kayıtları dahil, sadece senin görmeye yetkili olduğun kadarıyla). Başkasından yeni bir
+            mesaj geldiğinde kısa bir <strong>bildirim sesi</strong> çalar (ses seviyesi, zar
+            sesleriyle aynı 🔊 ayarına bağlıdır) ve sohbet kapalıysa küçük kayıt odanın temasına
+            uygun renkte <strong>yanıp söner</strong>; sohbeti açtığında uyarı söner. Üç tür mesaj
+            aynı akışta, farklı görünümle karışık sırayla listelenir:
           </p>
           <ul>
             <li>Normal sohbet mesajları — herkesin yazdığı, herkesin gördüğü.</li>

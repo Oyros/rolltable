@@ -1,7 +1,12 @@
 import { useState } from 'react';
 
 const MIN_WIDTH = 200;
-const DEFAULT_WIDTH = 280;
+
+// Two 280px sidebars eat 40% of a 1366px laptop screen, so start narrower
+// there. Only affects the first visit — after that the dragged width wins.
+function defaultWidth() {
+  return window.innerWidth <= 1500 ? 230 : 280;
+}
 
 function maxWidth() {
   return Math.max(MIN_WIDTH, Math.round(window.innerWidth * 0.4));
@@ -13,8 +18,8 @@ function clampWidth(value) {
 
 function loadWidth(storageKey) {
   const raw = localStorage.getItem(storageKey);
-  const parsed = raw ? parseInt(raw, 10) : DEFAULT_WIDTH;
-  return clampWidth(Number.isFinite(parsed) ? parsed : DEFAULT_WIDTH);
+  const parsed = raw ? parseInt(raw, 10) : defaultWidth();
+  return clampWidth(Number.isFinite(parsed) ? parsed : defaultWidth());
 }
 
 // Sidebar whose width the player can drag, mirroring the camera strip's

@@ -256,8 +256,11 @@ export default function PartyOverview({
       </ul>
 
       {spectators.length > 0 && (
-        <div className="spectator-section">
-          <span className="party-detail-heading">👁️ İzleyiciler</span>
+        <details className="side-accordion spectator-section" open>
+          <summary>
+            👁️ İzleyiciler ({spectators.length})
+            <span className="side-accordion-chevron">▾</span>
+          </summary>
           <ul className="spectator-list">
             {spectators.map(([id, p]) => (
               <li key={id} className="spectator-row">
@@ -282,7 +285,7 @@ export default function PartyOverview({
               </li>
             ))}
           </ul>
-        </div>
+        </details>
       )}
 
       {isGM && editingId && players?.[editingId] && (

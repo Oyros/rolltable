@@ -114,6 +114,35 @@ export function playCritFail(volume = 0.35) {
   }
 }
 
+// Short two-note chime for incoming chat — deliberately quiet and quick so it
+// doesn't cut across whatever music the GM has playing.
+export function playChatPing(volume = 0.3) {
+  try {
+    const ctx = getContext();
+    const now = ctx.currentTime;
+    [
+      { freq: 880, delay: 0 },
+      { freq: 1170, delay: 0.07 },
+    ].forEach(({ freq, delay }) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + delay);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, now + delay);
+      gain.gain.exponentialRampToValueAtTime(volume * 0.35, now + delay + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + 0.16);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + delay);
+      osc.stop(now + delay + 0.18);
+    });
+  } catch {
+    // Web Audio unavailable or blocked — fail silently
+  }
+}
+
 export function playDiceRattle(durationMs = 1000, volume = 0.35) {
   try {
     const ctx = getContext();

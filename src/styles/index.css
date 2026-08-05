@@ -726,9 +726,10 @@ button:hover {
   position: relative; /* anchors the map panel to this corner */
   display: flex;
   align-items: stretch;
-  gap: 20px;
+  /* Kept tight on purpose: every pixel here comes out of the play area. */
+  gap: 10px;
   width: 100%;
-  padding: 24px;
+  padding: 12px;
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -750,7 +751,7 @@ button:hover {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
 }
 
 .sidebar-resizer {
@@ -784,7 +785,7 @@ button:hover {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
 }
 
 .room-bottom {
@@ -964,6 +965,96 @@ button:hover {
 .bottom-panel-close {
   align-self: flex-end;
   flex-shrink: 0;
+}
+
+/* Compact laptops (1366×768 and similar). Above 900px the layout still has
+   sidebars, so instead of restacking it claws back the chrome — header,
+   gutters, panel padding — to leave the play area as much room as possible.
+   No overlap with the stacking breakpoint below thanks to min-width: 901px. */
+@media (min-width: 901px) and (max-width: 1500px),
+  (min-width: 901px) and (max-height: 850px) {
+  .room-header {
+    min-height: 100px;
+    padding: 8px 16px;
+  }
+
+  .header-left h1 {
+    font-size: 1.2rem;
+  }
+
+  .room-code,
+  .who-am-i,
+  .session-timer {
+    font-size: 0.78rem;
+  }
+
+  .initiative-avatar {
+    width: 38px;
+    height: 38px;
+  }
+
+  .initiative-slot[data-offset='0'] .initiative-avatar {
+    width: 56px;
+    height: 56px;
+  }
+
+  .initiative-slot[data-offset='0'] .initiative-avatar-fallback {
+    font-size: 1.2rem;
+  }
+
+  .initiative-strip {
+    padding: 5px 10px;
+    gap: 8px;
+  }
+
+  .initiative-slot-name {
+    font-size: 0.7rem;
+    max-width: 66px;
+  }
+
+  .initiative-slot[data-offset='0'] .initiative-slot-name {
+    font-size: 0.82rem;
+    max-width: 92px;
+  }
+
+  .mini-chat-log {
+    max-width: 180px;
+    font-size: 0.65rem;
+  }
+
+  .room-body {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .room-content {
+    gap: 8px;
+  }
+
+  .room-sidebar-content {
+    gap: 8px;
+  }
+
+  .panel {
+    padding: 12px;
+  }
+
+  .side-accordion[open] > summary {
+    margin-bottom: 12px;
+  }
+
+  .side-accordion-body {
+    gap: 14px;
+  }
+
+  .bottom-panel-trigger {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+
+  .scene-images {
+    gap: 12px;
+  }
 }
 
 @media (max-width: 900px) {
@@ -1755,6 +1846,19 @@ button:hover {
 
 .spectator-section {
   margin: 16px 0 0;
+}
+
+/* Nested inside the Parti accordion, so it stays at heading scale */
+.spectator-section > summary {
+  font-family: inherit;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--amber-light);
+}
+
+.spectator-section[open] > summary {
+  margin-bottom: 8px;
 }
 
 .spectator-list {
@@ -2742,6 +2846,7 @@ button:hover {
 
 /* Header peek at the last few chat lines — visible even when chat is closed */
 .mini-chat-log {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -2761,6 +2866,59 @@ button:hover {
 
 .mini-chat-log:hover {
   border-color: var(--amber);
+}
+
+/* Unread beacon — themed, so it stays in the room's palette */
+@keyframes mini-chat-unread {
+  0%,
+  100% {
+    border-color: var(--border);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+
+  50% {
+    border-color: var(--amber);
+    box-shadow: 0 0 9px var(--amber);
+  }
+}
+
+@keyframes mini-chat-dot {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.7);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.mini-chat-log.has-unread {
+  animation: mini-chat-unread 1.3s ease-in-out infinite;
+}
+
+.mini-chat-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--amber);
+  animation: mini-chat-dot 1.3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mini-chat-log.has-unread,
+  .mini-chat-dot {
+    animation: none;
+  }
+
+  .mini-chat-log.has-unread {
+    border-color: var(--amber);
+  }
 }
 
 .mini-chat-line {
@@ -3099,17 +3257,23 @@ button:hover {
 .roll-mode-toggle,
 .weather-toggle {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   margin-bottom: 14px;
 }
 
+/* The basis is the wrap threshold: all three sit on one row in a normal
+   sidebar and fold onto two rows once it's dragged narrow, instead of the
+   last one spilling out of view. */
 .roll-mode-btn {
-  flex: 1;
+  flex: 1 1 72px;
+  min-width: 0;
   background: var(--bg-panel-alt);
   border: 1px solid var(--border);
   color: var(--text-muted);
   padding: 6px 8px;
   font-size: 0.78rem;
+  line-height: 1.2;
   border-radius: 20px;
 }
 

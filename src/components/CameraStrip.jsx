@@ -5,7 +5,12 @@ import { createPeerConnection } from '../utils/webrtc.js';
 
 const STRIP_HEIGHT_KEY = 'rolltable_camera_strip_height';
 const MIN_STRIP_HEIGHT = 96;
-const DEFAULT_STRIP_HEIGHT = 150;
+
+// On a 768px-tall laptop the strip competes with the play area, so start it
+// shorter there. First visit only — the dragged height wins afterwards.
+function defaultStripHeight() {
+  return window.innerHeight <= 850 ? 118 : 150;
+}
 
 function maxStripHeight() {
   return Math.round(window.innerHeight * 0.6);
@@ -17,8 +22,8 @@ function clampStripHeight(value) {
 
 function loadStripHeight() {
   const raw = localStorage.getItem(STRIP_HEIGHT_KEY);
-  const parsed = raw ? parseInt(raw, 10) : DEFAULT_STRIP_HEIGHT;
-  return clampStripHeight(Number.isFinite(parsed) ? parsed : DEFAULT_STRIP_HEIGHT);
+  const parsed = raw ? parseInt(raw, 10) : defaultStripHeight();
+  return clampStripHeight(Number.isFinite(parsed) ? parsed : defaultStripHeight());
 }
 
 let sharedAudioCtx;
