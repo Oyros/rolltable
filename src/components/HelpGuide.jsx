@@ -22,6 +22,29 @@ export default function HelpGuide({ onClose }) {
         </p>
 
         <details>
+          <summary>📱 Telefon & Tablet</summary>
+          <p>
+            Dar ekranlarda oda tek sütuna iner ve altta sabit bir <strong>sekme çubuğu</strong>
+            belirir: <strong>🎭 Sahne</strong>, <strong>👥 Parti</strong>, <strong>🎲 Zar</strong>,
+            <strong> 💬 Sohbet</strong>. Her seferinde tek bölüm tam ekran görünür, böylece
+            hiçbir şey minicik kalmaz.
+          </p>
+          <ul>
+            <li>
+              <strong>💬 Sohbet</strong> sekmesi bir başlatıcıdır: Sohbet, Harita, Görev Panosu ve
+              İşlem Geçmişi'ni buradan tam ekran açarsın.
+            </li>
+            <li>
+              GM Kontrol Paneli ve karakter kağıdı üst menüdeki tuşundan telefonda da açılır.
+            </li>
+            <li>
+              Pencereler (harita, sohbet, görevler) telefonda sürüklenmez — sekme çubuğunun
+              üstünde kalan alanı tamamen kaplar.
+            </li>
+          </ul>
+        </details>
+
+        <details>
           <summary>↩️ Geri Alma & İşlem Geçmişi</summary>
           <p>
             Üst menüdeki <strong>"↩️ Geçmiş"</strong> tuşu (ya da <strong>Ctrl+Z</strong>) son

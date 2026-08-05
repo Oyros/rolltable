@@ -61,7 +61,7 @@ export default function ResizableSidebar({ side, storageKey, children }) {
   );
 
   return (
-    <aside className="room-sidebar" style={{ width, flexBasis: width }}>
+    <aside className={`room-sidebar room-sidebar-${side}`} style={{ width, flexBasis: width }}>
       {side === 'right' && grip}
       <div className="room-sidebar-content">{children}</div>
       {side === 'left' && grip}

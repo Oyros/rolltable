@@ -57,6 +57,9 @@ export default function Room({ session, onLeave }) {
   const [handoutSends, setHandoutSends] = useState({});
   const [journal, setJournal] = useState({});
   const [historyOpen, setHistoryOpen] = useState(false);
+  // Phone layout only: which single column is on screen. Ignored above 900px,
+  // where all three columns show at once.
+  const [mobileTab, setMobileTab] = useState('sahne');
   const [flashActive, setFlashActive] = useState(false);
   const [ambianceVolume, setAmbianceVolumeState] = useState(loadAmbianceVolume);
   const [joinBlocked, setJoinBlocked] = useState(false);
@@ -583,7 +586,7 @@ export default function Room({ session, onLeave }) {
 
       {header}
 
-      <div className="room-body">
+      <div className="room-body" data-tab={mobileTab}>
         <ResizableSidebar side="left" storageKey="rolltable_sidebar_left_width">
           <GmSlotCard players={players} />
 
@@ -739,6 +742,24 @@ export default function Room({ session, onLeave }) {
           </FloatingWindow>
         )}
 
+        {/* Phone-only launcher: the windows that have no column of their own. */}
+        <div className="mobile-launcher">
+          <button type="button" className="btn-ghost sound-toggle" onClick={() => setChatOpen(true)}>
+            💬 Sohbeti Aç
+          </button>
+          {scene?.mapImageUrl && (
+            <button type="button" className="btn-ghost sound-toggle" onClick={() => setMapOpen(true)}>
+              🗺️ Haritayı Aç
+            </button>
+          )}
+          <button type="button" className="btn-ghost sound-toggle" onClick={() => setQuestsOpen(true)}>
+            📜 Görev Panosu
+          </button>
+          <button type="button" className="btn-ghost sound-toggle" onClick={() => setHistoryOpen(true)}>
+            ↩️ İşlem Geçmişi
+          </button>
+        </div>
+
         <ResizableSidebar side="right" storageKey="rolltable_sidebar_right_width">
           <details className="panel side-accordion" open>
             <summary>
@@ -826,6 +847,24 @@ export default function Room({ session, onLeave }) {
           )}
         </ResizableSidebar>
       </div>
+
+      <nav className="mobile-tabs">
+        {[
+          { id: 'sahne', label: '🎭 Sahne' },
+          { id: 'parti', label: '👥 Parti' },
+          { id: 'zar', label: '🎲 Zar' },
+          { id: 'baglantilar', label: '💬 Sohbet' },
+        ].map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            className={`mobile-tab${mobileTab === t.id ? ' active' : ''}`}
+            onClick={() => setMobileTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
 
       <CameraStrip
         roomCode={roomCode}
