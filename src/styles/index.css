@@ -779,8 +779,12 @@ button:hover {
   gap: 20px;
 }
 
+/* The scene above has a capped height and doesn't grow, so without this the
+   trigger floats mid-column with dead space beneath it. Pushing it down keeps
+   it sitting just above the camera strip however tall the scene ends up. */
 .room-bottom {
   flex-shrink: 0;
+  margin-top: auto;
 }
 
 /* Camera strip */
