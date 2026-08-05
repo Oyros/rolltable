@@ -779,12 +779,8 @@ button:hover {
   gap: 20px;
 }
 
-/* The scene above has a capped height and doesn't grow, so without this the
-   trigger floats mid-column with dead space beneath it. Pushing it down keeps
-   it sitting just above the camera strip however tall the scene ends up. */
 .room-bottom {
   flex-shrink: 0;
-  margin-top: auto;
 }
 
 /* Camera strip */
@@ -1002,12 +998,15 @@ button:hover {
 }
 
 /* Scene */
+/* Fills whatever height the column has left (scrolling internally when its
+   contents don't fit) so no dead space is left between the scene, the panel
+   trigger below it and the camera strip. */
 .scene-display {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  flex-shrink: 1;
-  max-height: 55vh;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
