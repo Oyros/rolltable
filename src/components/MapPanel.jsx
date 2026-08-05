@@ -36,10 +36,17 @@ export default function MapPanel({
   const [dragToken, setDragToken] = useState(null); // { id, x, y } while dragging
 
   const canvasRef = useRef(null);
+  const viewportRef = useRef(null);
   const panStartRef = useRef(null);
   // Set when a press turned into a pan, so the click that follows doesn't
   // also drop a pin.
   const suppressClickRef = useRef(false);
+  // The wheel handler is bound once natively, so it reads live values through
+  // refs rather than a stale closure.
+  const zoomRef = useRef(zoom);
+  const panRef = useRef(pan);
+  zoomRef.current = zoom;
+  panRef.current = pan;
 
   function changeZoom(delta) {
     setZoom((current) => {
@@ -53,6 +60,53 @@ export default function MapPanel({
     setZoom(MIN_ZOOM);
     setPan({ x: 0, y: 0 });
   }
+
+  // Wheel zoom, anchored to the cursor so the spot under the pointer stays put.
+  // Bound natively because it must be non-passive to preventDefault the page
+  // scroll, which React's synthetic onWheel can't guarantee.
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return undefined;
+
+    const onWheel = (e) => {
+      e.preventDefault();
+      const currentZoom = zoomRef.current;
+      const next = Math.min(
+        MAX_ZOOM,
+        Math.max(MIN_ZOOM, +(currentZoom + (e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP)).toFixed(2))
+      );
+      if (next === currentZoom) return;
+
+      if (next === MIN_ZOOM) {
+        setZoom(next);
+        setPan({ x: 0, y: 0 });
+        return;
+      }
+
+      // The canvas fills the viewport and scales about its centre, so a screen
+      // point s maps to the untransformed point c by:
+      //   s = c*zoom + pan + centre*(1 - zoom)
+      // Solve for c at the old zoom, then re-solve for the pan that keeps that
+      // same c under the cursor at the new zoom.
+      const rect = el.getBoundingClientRect();
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+      const { x: panX, y: panY } = panRef.current;
+      const pointX = (sx - panX - cx * (1 - currentZoom)) / currentZoom;
+      const pointY = (sy - panY - cy * (1 - currentZoom)) / currentZoom;
+
+      setZoom(next);
+      setPan({
+        x: sx - pointX * next - cx * (1 - next),
+        y: sy - pointY * next - cy * (1 - next),
+      });
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
 
   function startPan(e) {
     if (e.button !== 0 || zoom === MIN_ZOOM) return;
@@ -212,7 +266,7 @@ export default function MapPanel({
       barExtra={barExtra}
       onClose={onClose}
     >
-      <div className={`map-viewport${zoom > MIN_ZOOM ? ' pannable' : ''}`}>
+      <div ref={viewportRef} className={`map-viewport${zoom > MIN_ZOOM ? ' pannable' : ''}`}>
         <div
           className={`map-canvas${canPin ? ' map-pin-area' : ''}`}
           ref={canvasRef}
