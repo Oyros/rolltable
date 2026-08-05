@@ -10,10 +10,10 @@ import { portraitUrl, portraitLabel, portraitDisplayName, makePortrait } from '.
 import {
   configGroups,
   groupEntries,
-  levelUpGroup,
   entryAvailableTo,
   selectableEntries,
 } from '../utils/traitGroups.js';
+import { resolveLevelReward, describeReward } from '../utils/levelRewards.js';
 import Portal from './Portal.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
 
@@ -40,8 +40,9 @@ export default function CharacterSheet({
   const [portraitDraft, setPortraitDraft] = useState(player.portraitUrl || '');
   const [portraitNameDraft, setPortraitNameDraft] = useState('');
   const [showLevelUp, setShowLevelUp] = useState(false);
-  const [levelUpStatId, setLevelUpStatId] = useState('');
-  const [levelUpPerkId, setLevelUpPerkId] = useState('');
+  // { statId: pointsAdded } and { groupId: [entryId] } for the current wizard.
+  const [levelUpStats, setLevelUpStats] = useState({});
+  const [levelUpPicks, setLevelUpPicks] = useState({});
 
   const stats = gameConfig.stats || [];
   const resources = gameConfig.resources || [];
@@ -50,9 +51,6 @@ export default function CharacterSheet({
   const subclasses = gameConfig.subclasses || [];
   const items = gameConfig.items || [];
   const groups = configGroups(gameConfig);
-  // Level-ups still hand out one entry from the perk-style group.
-  const perkGroup = levelUpGroup(groups);
-  const perks = perkGroup ? groupEntries(gameConfig, perkGroup.id) : [];
 
   const locked = !!player.sheetLocked;
   const editable = isGM || !locked;
@@ -67,10 +65,27 @@ export default function CharacterSheet({
   const canLevelUp = !atMaxLevel && (isGM || qualifiedLevel > level);
   const xpIntoLevel = xp - (level - 1) * xpPerLevel;
   const xpBarPct = atMaxLevel ? 100 : Math.max(0, Math.min(100, (xpIntoLevel / xpPerLevel) * 100));
-  const ownedPerkIds = (perkGroup ? player[perkGroup.id] : null) || [];
-  const availablePerksToGain = perks.filter(
-    (p) => !ownedPerkIds.includes(p.id) && entryAvailableTo(p, player)
+  // What reaching the next level hands out, and how much of it is still
+  // unspent in the open wizard.
+  const nextLevelReward = resolveLevelReward(gameConfig, level + 1);
+  const statPointsUsed = Object.values(levelUpStats).reduce((sum, n) => sum + n, 0);
+  const statPointsLeft = Math.max(0, nextLevelReward.statPoints - statPointsUsed);
+  const rewardGroups = groups
+    .map((group) => {
+      const allowance = nextLevelReward.picks[group.id] || 0;
+      if (allowance === 0) return null;
+      const owned = player[group.id] || [];
+      const available = groupEntries(gameConfig, group.id).filter(
+        (e) => !owned.includes(e.id) && entryAvailableTo(e, player)
+      );
+      // Can't ask for three picks out of two remaining entries.
+      return { group, allowance: Math.min(allowance, available.length), available };
+    })
+    .filter((r) => r && r.allowance > 0);
+  const picksComplete = rewardGroups.every(
+    (r) => (levelUpPicks[r.group.id] || []).length === r.allowance
   );
+  const levelUpReady = statPointsLeft === 0 && picksComplete;
 
   const portraits = player.portraits || {};
   // Characters created before the gallery existed have a portraitUrl but no
@@ -241,9 +256,33 @@ export default function CharacterSheet({
   }
 
   function openLevelUp() {
-    setLevelUpStatId(stats[0]?.id || '');
-    setLevelUpPerkId('');
+    setLevelUpStats({});
+    setLevelUpPicks({});
     setShowLevelUp(true);
+  }
+
+  function addStatPoint(statId, delta) {
+    setLevelUpStats((prev) => {
+      const current = player.stats?.[statId] ?? 2;
+      const added = prev[statId] || 0;
+      const room = Math.max(0, statMax - current - added);
+      if (delta > 0 && (statPointsLeft === 0 || room === 0)) return prev;
+      if (delta < 0 && added === 0) return prev;
+      const next = { ...prev, [statId]: added + delta };
+      if (next[statId] === 0) delete next[statId];
+      return next;
+    });
+  }
+
+  function toggleLevelUpPick(groupId, entryId, allowance) {
+    setLevelUpPicks((prev) => {
+      const current = prev[groupId] || [];
+      if (current.includes(entryId)) {
+        return { ...prev, [groupId]: current.filter((x) => x !== entryId) };
+      }
+      if (current.length >= allowance) return prev;
+      return { ...prev, [groupId]: [...current, entryId] };
+    });
   }
 
   function confirmLevelUp() {
@@ -251,19 +290,23 @@ export default function CharacterSheet({
     const updates = { level: newLevel };
     const logs = [`Seviye ${newLevel} oldu`];
 
-    if (levelUpStatId) {
-      const current = player.stats?.[levelUpStatId] ?? 2;
-      const next = Math.min(statMax, current + 1);
-      updates[`stats/${levelUpStatId}`] = next;
-      const statName = stats.find((s) => s.id === levelUpStatId)?.name || levelUpStatId;
+    Object.entries(levelUpStats).forEach(([statId, added]) => {
+      if (!added) return;
+      const current = player.stats?.[statId] ?? 2;
+      const next = Math.min(statMax, current + added);
+      updates[`stats/${statId}`] = next;
+      const statName = stats.find((s) => s.id === statId)?.name || statId;
       logs.push(`${statName} statı ${current} → ${next}`);
-    }
+    });
 
-    if (levelUpPerkId && perkGroup) {
-      updates[perkGroup.id] = [...ownedPerkIds, levelUpPerkId];
-      const perkName = perks.find((p) => p.id === levelUpPerkId)?.name || levelUpPerkId;
-      logs.push(`yeni ${perkGroup.name.toLowerCase()}: ${perkName}`);
-    }
+    Object.entries(levelUpPicks).forEach(([groupId, picked]) => {
+      if (!picked || picked.length === 0) return;
+      const group = groups.find((g) => g.id === groupId);
+      const catalog = groupEntries(gameConfig, groupId);
+      updates[groupId] = [...(player[groupId] || []), ...picked];
+      const names = picked.map((id) => catalog.find((e) => e.id === id)?.name || id);
+      logs.push(`yeni ${(group?.name || groupId).toLowerCase()}: ${names.join(', ')}`);
+    });
 
     if (resources.length > 0) {
       resources.forEach((res) => {
@@ -337,59 +380,87 @@ export default function CharacterSheet({
               </button>
             </div>
 
-            {stats.length > 0 && (
+            <p className="muted small-hint">
+              Bu seviyenin ödülü: {describeReward(nextLevelReward, groups)}
+            </p>
+
+            {nextLevelReward.statPoints > 0 && stats.length > 0 && (
               <div className="level-up-section">
-                <span className="pick-list-label">Hangi stat +1 alsın?</span>
-                <div className="pick-list-options">
+                <span className="pick-list-label">
+                  Stat puanlarını dağıt — kalan: {statPointsLeft} / {nextLevelReward.statPoints}
+                </span>
+                <div className="levelup-stat-list">
                   {stats.map((s) => {
                     const current = player.stats?.[s.id] ?? 2;
+                    const added = levelUpStats[s.id] || 0;
+                    const atCap = current + added >= statMax;
                     return (
-                      <label key={s.id} className="pick-list-option">
-                        <input
-                          type="radio"
-                          name="levelup-stat"
-                          checked={levelUpStatId === s.id}
-                          onChange={() => setLevelUpStatId(s.id)}
-                        />
-                        {s.name} ({current} → {Math.min(statMax, current + 1)})
-                      </label>
+                      <div key={s.id} className="levelup-stat-row">
+                        <span className="levelup-stat-name">{s.name}</span>
+                        <span className="levelup-stat-value">
+                          {current}
+                          {added > 0 && ` → ${current + added}`}
+                          {atCap && added === 0 && ' (maks)'}
+                        </span>
+                        <button
+                          type="button"
+                          className="btn-ghost small"
+                          onClick={() => addStatPoint(s.id, -1)}
+                          disabled={added === 0}
+                        >
+                          −
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-ghost small"
+                          onClick={() => addStatPoint(s.id, 1)}
+                          disabled={statPointsLeft === 0 || atCap}
+                        >
+                          +
+                        </button>
+                      </div>
                     );
                   })}
                 </div>
               </div>
             )}
 
-            {availablePerksToGain.length > 0 && (
-              <div className="level-up-section">
-                <span className="pick-list-label">
-                  Yeni bir {(perkGroup?.name || 'perk').toLowerCase()} almak ister misin?
-                </span>
-                <div className="pick-list-options">
-                  <label className="pick-list-option">
-                    <input
-                      type="radio"
-                      name="levelup-perk"
-                      checked={levelUpPerkId === ''}
-                      onChange={() => setLevelUpPerkId('')}
-                    />
-                    Almıyorum
-                  </label>
-                  {availablePerksToGain.map((p) => (
-                    <label key={p.id} className="pick-list-option">
-                      <input
-                        type="radio"
-                        name="levelup-perk"
-                        checked={levelUpPerkId === p.id}
-                        onChange={() => setLevelUpPerkId(p.id)}
-                      />
-                      {p.name}
-                    </label>
-                  ))}
+            {rewardGroups.map(({ group, allowance, available }) => {
+              const picked = levelUpPicks[group.id] || [];
+              return (
+                <div key={group.id} className="level-up-section">
+                  <span className="pick-list-label">
+                    {group.name} — {picked.length} / {allowance} seçildi
+                  </span>
+                  <div className="pick-list-options">
+                    {available.map((e) => (
+                      <label key={e.id} className="pick-list-option">
+                        <input
+                          type="checkbox"
+                          checked={picked.includes(e.id)}
+                          disabled={!picked.includes(e.id) && picked.length >= allowance}
+                          onChange={() => toggleLevelUpPick(group.id, e.id, allowance)}
+                        />
+                        {e.name}
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              );
+            })}
+
+            {!levelUpReady && (
+              <p className="muted small-hint">
+                Onaylamak için tüm stat puanlarını dağıtıp seçimlerini tamamla.
+              </p>
             )}
 
-            <button type="button" className="btn-primary" onClick={confirmLevelUp}>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={confirmLevelUp}
+              disabled={!levelUpReady}
+            >
               Seviyeyi Onayla
             </button>
           </div>

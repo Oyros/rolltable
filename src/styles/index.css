@@ -2520,6 +2520,51 @@ button:hover {
   font-size: 0.78rem;
 }
 
+/* Level-up reward rules (rules editor) */
+.reward-fields {
+  align-items: flex-end;
+}
+
+.level-reward-override {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+
+.level-reward-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* Level-up wizard: point allocation */
+.levelup-stat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.levelup-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+.levelup-stat-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.levelup-stat-value {
+  color: var(--amber-light);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Renameable trait/perk categories */
 .trait-groups {
   margin-bottom: 18px;

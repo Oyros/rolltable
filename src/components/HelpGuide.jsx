@@ -87,13 +87,42 @@ export default function HelpGuide({ onClose }) {
           <p>Oda ilk kurulduğunda GM'den oyunun kurallarını tanımlaması istenir:</p>
           <ul>
             <li><strong>Kayıtlı Şablon Kullan</strong> — daha önce kaydettiğin bir kural setini tek tıkla uygula.</li>
-            <li><strong>Sıfırdan Oluştur</strong> — Senaryo Adı, Tasarım Teması (21 farklı tür arasından: fantazi, cyberpunk, western, korsan, vampir, uzay operası ve daha fazlası), <strong>Seviye Sistemi</strong> (maksimum seviye + seviye başına gereken XP), <strong>Stat Sistemi</strong> (statların hangi puandan hangi puana kadar çıkabileceği, ve bir stata tıklanınca atılan 1d20'ye hangi puanlardan itibaren +1/+2/+3 eklenip -1/-2/-3 düşüleceği), Statlar, <strong>Kaynaklar</strong> (Can Puanı, Stres, Kaynak Puanı gibi dolgu çubukları), Irklar, Sınıflar, Alt Sınıflar, <strong>Trait/Perk Kategorileri</strong> ve Bulunabilecek Eşyalar listelerini kendin oluştur.</li>
+            <li><strong>Sıfırdan Oluştur</strong> — Senaryo Adı, Tasarım Teması (21 farklı tür arasından: fantazi, cyberpunk, western, korsan, vampir, uzay operası ve daha fazlası), <strong>Seviye Sistemi</strong> (maksimum seviye + seviye başına gereken XP), <strong>Stat Sistemi</strong> (statların hangi puandan hangi puana kadar çıkabileceği, ve bir stata tıklanınca atılan 1d20'ye hangi puanlardan itibaren +1/+2/+3 eklenip -1/-2/-3 düşüleceği), Statlar, <strong>Kaynaklar</strong> (Can Puanı, Stres, Kaynak Puanı gibi dolgu çubukları), Irklar, Sınıflar, Alt Sınıflar, <strong>Trait/Perk Kategorileri</strong>, <strong>Seviye Atlama Ödülleri</strong> ve Bulunabilecek Eşyalar listelerini kendin oluştur.</li>
             <li>İstersen bu kural setini bir <strong>şablon olarak kaydedip</strong> başka odalarda tekrar kullanabilirsin.</li>
           </ul>
           <p>
             GM daha sonra <strong>"⚙️ Kuralları Düzenle"</strong> ile oyun ortasında yeni kayıt, eşya,
             ırk vb. ekleyebilir — oyuncuların mevcut seçimleri bozulmaz.
           </p>
+        </details>
+
+        <details>
+          <summary>🎉 Seviye Atlama Ödülleri (sadece GM)</summary>
+          <p>
+            Kurulum ekranında ve "⚙️ Kuralları Düzenle"de, seviye atlayan bir karakterin ne
+            kazanacağını sen belirlersin:
+          </p>
+          <ul>
+            <li>
+              <strong>Genel kural</strong> — kaç <strong>stat puanı</strong> dağıtılacağı ve her
+              trait/perk kategorisinden kaçar seçim hakkı verileceği. Bu kural, özel kuralı
+              olmayan bütün seviyeler için geçerlidir.
+            </li>
+            <li>
+              <strong>Seviyeye özel kural</strong> — "➕ Seviyeye Özel Kural Ekle" ile bir seviye
+              numarası seçip o seviyeye başka değerler verebilirsin (örneğin 3. seviyede 2 stat
+              puanı + 1 büyü seçimi, diğerlerinde 1 stat puanı). Ulaşılan seviyenin kendi kuralı
+              varsa o, yoksa genel kural uygulanır.
+            </li>
+            <li>
+              Hepsini 0 yaparsan o seviyede sadece seviye artar (ve kaynaklar dolar). Bir
+              kategoriden kalan seçenek sayısı verilen haktan azsa, oyuncudan sadece kalan kadarı
+              istenir.
+            </li>
+            <li>
+              Hiç ayar yapmadıysan eski davranış sürer: 1 stat puanı + 1 perk seçimi.
+            </li>
+          </ul>
         </details>
 
         <details>
@@ -236,10 +265,14 @@ export default function HelpGuide({ onClose }) {
               atlarken sıfırlanmaz, birikmeye devam eder.
             </li>
             <li>
-              <strong>🎉 Seviye Atla</strong> — yeterli XP'ye ulaşınca buton parlayarak aktif olur;
-              açılan ekranda bir stata +1 verip (varsa) henüz almadığın bir perk seçersin,
-              onaylayınca seviyen artar ve kaynakların (varsa) tamamen dolar. Maksimum seviyeye
-              ulaşınca buton kaybolur. (GM her zaman, XP yetmese bile seviye atlatabilir.)
+              <strong>🎉 Seviye Atla</strong> — yeterli XP'ye ulaşınca buton parlayarak aktif olur.
+              Açılan ekranda o seviyenin ödülü yazar: GM'in belirlediği kadar <strong>stat
+              puanını</strong> +/- düğmeleriyle istediğin statlara dağıtırsın (bir stata birden
+              fazla puan koyabilirsin, maksimum stat puanını aşamazsın) ve her kategoriden
+              belirlenen sayıda seçim yaparsın. Tüm puanları dağıtıp seçimleri tamamlamadan onay
+              düğmesi açılmaz. Onaylayınca seviyen artar ve kaynakların (varsa) tamamen dolar.
+              Maksimum seviyeye ulaşınca buton kaybolur. (GM her zaman, XP yetmese bile seviye
+              atlatabilir.)
             </li>
             <li>
               <strong>🔒 Kilit</strong> — GM istediği zaman senin karakter kağıdını

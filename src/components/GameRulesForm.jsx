@@ -4,6 +4,53 @@ import ResourceListEditor from './ResourceListEditor.jsx';
 import ParticleEffect from './ParticleEffect.jsx';
 import { THEMES, DEFAULT_THEME_ID } from '../utils/themes.js';
 import { configGroups, newGroupId, NO_GROUPS } from '../utils/traitGroups.js';
+import { defaultRule, levelOverrides, levelKey } from '../utils/levelRewards.js';
+
+// Only counts above zero are stored, and picks for deleted categories are
+// dropped so they can't linger in the saved config.
+function ruleForSave(rule, liveGroupIds) {
+  const picks = {};
+  liveGroupIds.forEach((id) => {
+    const n = parseInt(rule.picks?.[id], 10);
+    if (Number.isFinite(n) && n > 0) picks[id] = n;
+  });
+  const statPoints = parseInt(rule.statPoints, 10);
+  return {
+    statPoints: Number.isFinite(statPoints) && statPoints > 0 ? statPoints : 0,
+    picks: Object.keys(picks).length > 0 ? picks : null,
+  };
+}
+
+// Stat points + "how many picks from each category" — used for the general
+// rule and for each level-specific override.
+function RewardFields({ rule, groups, onChange }) {
+  return (
+    <div className="inline-form reward-fields">
+      <label className="level-system-input">
+        Stat puanı
+        <input
+          type="number"
+          min="0"
+          value={rule.statPoints}
+          onChange={(e) => onChange({ ...rule, statPoints: e.target.value })}
+        />
+      </label>
+      {groups.map((g, i) => (
+        <label key={g.id} className="level-system-input">
+          {g.name.trim() || `Kategori ${i + 1}`}
+          <input
+            type="number"
+            min="0"
+            value={rule.picks?.[g.id] ?? 0}
+            onChange={(e) =>
+              onChange({ ...rule, picks: { ...(rule.picks || {}), [g.id]: e.target.value } })
+            }
+          />
+        </label>
+      ))}
+    </div>
+  );
+}
 
 const EMPTY_LISTS = {
   stats: [],
@@ -45,6 +92,9 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
     });
     return start;
   });
+  // Level-up rewards: one general rule plus optional per-level overrides.
+  const [rewardDefault, setRewardDefault] = useState(() => defaultRule(initial));
+  const [rewardOverrides, setRewardOverrides] = useState(() => levelOverrides(initial));
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -69,6 +119,27 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
     const id = newGroupId();
     setGroups((prev) => [...prev, { id, name: '' }]);
     setGroupLists((prev) => ({ ...prev, [id]: [] }));
+  }
+
+  function addOverride() {
+    const used = rewardOverrides.map((o) => o.level);
+    const top = Math.max(1, parseInt(maxLevel, 10) || 10);
+    // First level from 2 up that doesn't have its own rule yet.
+    let next = 2;
+    while (used.includes(next) && next < top) next += 1;
+    setRewardOverrides((prev) =>
+      [...prev, { level: next, rule: { statPoints: rewardDefault.statPoints, picks: { ...rewardDefault.picks } } }].sort(
+        (a, b) => a.level - b.level
+      )
+    );
+  }
+
+  function updateOverride(index, patch) {
+    setRewardOverrides((prev) => prev.map((o, i) => (i === index ? { ...o, ...patch } : o)));
+  }
+
+  function removeOverride(index) {
+    setRewardOverrides((prev) => prev.filter((_, i) => i !== index));
   }
 
   function removeGroup(groupId) {
@@ -125,9 +196,18 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
       configGroups(initial).forEach((g) => {
         if (!cleanGroups.some((c) => c.id === g.id)) groupPayload[g.id] = null;
       });
+      const liveGroupIds = cleanGroups.map((g) => g.id);
+      const byLevel = {};
+      rewardOverrides.forEach((o) => {
+        byLevel[levelKey(o.level)] = ruleForSave(o.rule, liveGroupIds);
+      });
       await onSubmit({
         traitGroups: cleanGroups.length > 0 ? cleanGroups : NO_GROUPS,
         ...groupPayload,
+        levelRewards: {
+          default: ruleForSave(rewardDefault, liveGroupIds),
+          byLevel: Object.keys(byLevel).length > 0 ? byLevel : null,
+        },
         name: name.trim(),
         theme,
         maxLevel: Math.max(1, parseInt(maxLevel, 10) || 10),
@@ -354,6 +434,50 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
         ))}
         <button type="button" className="btn-ghost small" onClick={addGroup}>
           ➕ Kategori Ekle
+        </button>
+      </div>
+
+      <div className="level-system-field">
+        <span className="entry-list-label">Seviye Atlama Ödülleri</span>
+        <p className="muted small-hint">
+          Seviye atlayan karakterin kaç stat puanı dağıtacağını ve hangi kategoriden kaçar seçim
+          hakkı kazanacağını belirle. Aşağıdaki genel kural <strong>bütün seviyeler</strong> için
+          geçerlidir; istersen tek tek seviyelere özel kural ekleyebilirsin.
+        </p>
+        <RewardFields rule={rewardDefault} groups={groups} onChange={setRewardDefault} />
+
+        {rewardOverrides.map((o, index) => (
+          <div key={`${o.level}-${index}`} className="level-reward-override">
+            <div className="level-reward-head">
+              <label className="level-system-input">
+                Seviye
+                <input
+                  type="number"
+                  min="2"
+                  value={o.level}
+                  onChange={(e) =>
+                    updateOverride(index, { level: Math.max(2, parseInt(e.target.value, 10) || 2) })
+                  }
+                />
+              </label>
+              <button
+                type="button"
+                className="btn-ghost small danger"
+                onClick={() => removeOverride(index)}
+              >
+                Kuralı Sil
+              </button>
+            </div>
+            <RewardFields
+              rule={o.rule}
+              groups={groups}
+              onChange={(rule) => updateOverride(index, { rule })}
+            />
+          </div>
+        ))}
+
+        <button type="button" className="btn-ghost small" onClick={addOverride}>
+          ➕ Seviyeye Özel Kural Ekle
         </button>
       </div>
       <EntryListEditor
