@@ -8,6 +8,7 @@ import { rollModeLabel } from '../utils/rollMode.js';
 import { itemLabel, itemName } from '../utils/inventory.js';
 import { configGroups, groupEntries } from '../utils/traitGroups.js';
 import CharacterSheet from './CharacterSheet.jsx';
+import HoverTip from './HoverTip.jsx';
 import Portal from './Portal.jsx';
 
 function nameOf(list, id) {
@@ -18,15 +19,21 @@ function entryOf(list, id) {
   return list.find((x) => x.id === id);
 }
 
-// Hovering shows whatever description the GM wrote for it in the rules. Uses
-// the native title tooltip on purpose: the sidebar scrolls, so a CSS tooltip
-// would be clipped by the panel.
+// Hovering shows whatever description the GM wrote for it in the rules.
 function DescribedName({ entry }) {
   if (!entry?.description) return <span>{entry?.name}</span>;
   return (
-    <span className="described" title={entry.description}>
+    <HoverTip
+      className="described"
+      content={
+        <>
+          <strong className="hover-tip-title">{entry.name}</strong>
+          <span>{entry.description}</span>
+        </>
+      }
+    >
       {entry.name}
-    </span>
+    </HoverTip>
   );
 }
 
@@ -92,26 +99,39 @@ export default function PartyOverview({
           });
 
           // Quick look without expanding the row. Race/class/subclass are
-          // public either way; the rest follows the sheet's visibility.
-          const hoverLines = [
-            `${p.name} · Seviye ${p.level || 1}`,
-            raceName && `Irk: ${raceName}`,
-            className && `Sınıf: ${className}`,
-            subclassName && `Alt Sınıf: ${subclassName}`,
+          // public either way; the picks follow the sheet's visibility.
+          const hoverRows = [
+            ['Irk', raceName],
+            ['Sınıf', className],
+            ['Alt Sınıf', subclassName],
             ...(sheetVisible
-              ? [
-                  ...groupPicks.map((g) => `${g.name}: ${g.entries.map((e) => e.name).join(', ')}`),
-                  p.skills && `Özgeçmiş: ${p.skills}`,
-                ]
-              : ['🔒 Karakter kağıdının geri kalanı gizli']),
-          ].filter(Boolean);
+              ? groupPicks.map((g) => [g.name, g.entries.map((e) => e.name).join(', ')])
+              : []),
+          ].filter(([, value]) => value);
+
+          const rowTip = (
+            <>
+              <strong className="hover-tip-title">
+                {p.name} · Seviye {p.level || 1}
+              </strong>
+              {hoverRows.map(([label, value]) => (
+                <span key={label} className="hover-tip-row">
+                  <span className="hover-tip-key">{label}</span>
+                  <span>{value}</span>
+                </span>
+              ))}
+              {!sheetVisible && (
+                <span className="hover-tip-row">🔒 Karakter kağıdının geri kalanı gizli</span>
+              )}
+            </>
+          );
 
           return (
             <li key={id} className={`party-row status-${p.status || 'iyi'}${isActiveTurn ? ' active-turn' : ''}`}>
+              <HoverTip wrapperTag="div" content={rowTip}>
               <button
                 type="button"
                 className="party-row-summary"
-                title={hoverLines.join('\n')}
                 onClick={() => setExpandedId(expanded ? null : id)}
               >
                 <span className="party-avatar" style={p.color ? { borderColor: p.color } : undefined}>
@@ -133,6 +153,7 @@ export default function PartyOverview({
                 {isActiveTurn && <span className="active-turn-badge" title="Sırası">🎙️</span>}
                 <span className="party-status-badge">{STATUS_LABEL[p.status] || 'İyi'}</span>
               </button>
+              </HoverTip>
 
               {expanded && (
                 <div className="party-detail">
@@ -262,13 +283,21 @@ export default function PartyOverview({
                           // matched by name to surface its description.
                           const catalogItem = items.find((c) => c.name === itemName(item));
                           return (
-                            <li
+                            <HoverTip
                               key={i}
+                              wrapperTag="li"
                               className={catalogItem?.description ? 'described' : undefined}
-                              title={catalogItem?.description || undefined}
+                              content={
+                                catalogItem?.description ? (
+                                  <>
+                                    <strong className="hover-tip-title">{catalogItem.name}</strong>
+                                    <span>{catalogItem.description}</span>
+                                  </>
+                                ) : null
+                              }
                             >
                               {itemLabel(item)}
-                            </li>
+                            </HoverTip>
                           );
                         })}
                       </ul>

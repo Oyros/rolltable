@@ -203,7 +203,7 @@ export default function HelpGuide({ onClose }) {
           <p>
             En üstte GM'in kutucuğu (isim, avatar, çevrimiçi/çevrimdışı durumu) bulunur. Altında
             oyuncu listesi vardır — bir oyuncuya tıklayınca statları, ırk/sınıf/alt sınıfı,
-            trait/perkleri, özgeçmişini ve envanterini görürsün. Bir oyuncunun satırının <strong>üzerine gelmen</strong> (tıklamadan) ırkını, sınıfını, alt sınıfını, seçtiği trait/perkleri ve özgeçmişini özetleyen bir ipucu gösterir. Açılan detayda ırk/sınıf/alt sınıf, trait/perk ve envanter isimlerinin üzerine gelirsen, kurallarda o kayıt için yazdığın <strong>açıklama</strong> belirir (altı noktalı çizgili olanların açıklaması vardır). GM buradan oyuncuyu odadan
+            trait/perkleri, özgeçmişini ve envanterini görürsün. Bir oyuncunun satırının <strong>üzerine gelmen</strong> (tıklamadan) ırkını, sınıfını, alt sınıfını, seçtiği trait/perkleri özetleyen bir ipucu gösterir. Açılan detayda ırk/sınıf/alt sınıf, trait/perk ve envanter isimlerinin üzerine gelirsen, kurallarda o kayıt için yazdığın <strong>açıklama</strong> belirir (altı noktalı çizgili olanların açıklaması vardır). GM buradan oyuncuyu odadan
             atabilir; oyuncunun karakter kağıdını kilitleyebilir ve "✏️ Karakteri Düzenle" ile
             doğrudan düzenleyebilir. Fısıltılar ve otomatik sistem kayıtları artık ayrı bir liste
             değil — hemen altındaki <strong>💬 Sohbet</strong> panelinde, sohbet mesajlarıyla
