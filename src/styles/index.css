@@ -1061,7 +1061,10 @@ button:hover {
   display: block;
 }
 
-.scene-image-focus img {
+/* Focus art and maps must be seen whole — the box's dark background shows
+   through as letterbox bands when the aspect ratios don't match. */
+.scene-image-focus img,
+.scene-image-map img {
   object-fit: contain;
 }
 
