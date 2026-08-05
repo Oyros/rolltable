@@ -4,7 +4,23 @@
 // players see on the scene) separately, plus an optional `folder`. Entries
 // saved before this change only have `name`, so both fall back to it.
 
+import { ref, update } from 'firebase/database';
+import { db } from '../firebase.js';
+
 export const UNFILED = 'Klasörsüz';
+
+// Pin/token coordinates belong to the map they were placed on, so switching to
+// a different image clears them. Shared by the GM panel's library list and the
+// map window's own switcher.
+export function publishMapEntry(roomCode, entry, currentUrl) {
+  const url = entry.imageUrl;
+  const payload = { mapImageUrl: url, updatedAt: Date.now() };
+  if (url !== (currentUrl || '')) {
+    payload.mapPins = null;
+    payload.mapTokens = null;
+  }
+  update(ref(db, `rooms/${roomCode}/scene`), payload);
+}
 
 export function entryLabel(entry) {
   return entry?.label || entry?.name || '';

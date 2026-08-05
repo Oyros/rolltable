@@ -2,12 +2,19 @@ import { useEffect, useRef, useState } from 'react';
 import { ref, update, push, remove } from 'firebase/database';
 import { db } from '../firebase.js';
 import { resolveQueueEntity } from '../utils/initiativeEntity.js';
+import { entryLabel, groupByFolder } from '../utils/library.js';
+import FloatingWindow from './FloatingWindow.jsx';
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
 const ZOOM_STEP = 0.25;
 // Past this much pointer travel a press counts as a pan, not a pin drop.
 const PAN_THRESHOLD_PX = 4;
+
+function defaultMapBox() {
+  const w = Math.min(460, window.innerWidth - 48);
+  return { x: Math.max(24, window.innerWidth - w - 24), y: 150, w, h: 340 };
+}
 
 export default function MapPanel({
   roomCode,
@@ -19,7 +26,9 @@ export default function MapPanel({
   canPin,
   players,
   savedFocuses,
+  savedMaps,
   initiativeQueue,
+  onSelectMap,
   onClose,
 }) {
   const [zoom, setZoom] = useState(MIN_ZOOM);
@@ -155,27 +164,54 @@ export default function MapPanel({
 
   if (!scene?.mapImageUrl) return null;
 
-  return (
-    <div className="map-panel panel">
-      <div className="map-panel-bar">
-        <span className="map-panel-title">🗺️ Harita</span>
-        <div className="map-panel-zoom">
-          <button type="button" className="btn-ghost small" onClick={() => changeZoom(-ZOOM_STEP)} title="Uzaklaştır">
-            ➖
-          </button>
-          <span className="map-zoom-level">{Math.round(zoom * 100)}%</span>
-          <button type="button" className="btn-ghost small" onClick={() => changeZoom(ZOOM_STEP)} title="Yakınlaştır">
-            ➕
-          </button>
-          <button type="button" className="btn-ghost small" onClick={resetView} title="Sıfırla">
-            ⟲
-          </button>
-        </div>
-        <button type="button" className="btn-ghost small" onClick={onClose} title="Kapat">
-          ✕
-        </button>
-      </div>
+  const mapList = Object.entries(savedMaps || {});
 
+  const barExtra = (
+    <>
+      {isGM && mapList.length > 0 && (
+        <select
+          className="map-panel-select"
+          value={mapList.find(([, m]) => m.imageUrl === scene.mapImageUrl)?.[0] || ''}
+          onChange={(e) => {
+            const entry = mapList.find(([id]) => id === e.target.value);
+            if (entry) onSelectMap(entry[1]);
+          }}
+          title="Haritayı değiştir"
+        >
+          <option value="">Haritayı değiştir...</option>
+          {groupByFolder(mapList).map(([folderName, entries]) => (
+            <optgroup key={folderName} label={folderName}>
+              {entries.map(([id, m]) => (
+                <option key={id} value={id}>
+                  {entryLabel(m)}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+      )}
+      <button type="button" className="btn-ghost small" onClick={() => changeZoom(-ZOOM_STEP)} title="Uzaklaştır">
+        ➖
+      </button>
+      <span className="map-zoom-level">{Math.round(zoom * 100)}%</span>
+      <button type="button" className="btn-ghost small" onClick={() => changeZoom(ZOOM_STEP)} title="Yakınlaştır">
+        ➕
+      </button>
+      <button type="button" className="btn-ghost small" onClick={resetView} title="Sıfırla">
+        ⟲
+      </button>
+    </>
+  );
+
+  return (
+    <FloatingWindow
+      title="🗺️ Harita"
+      storageKey="rolltable_map_window_box"
+      defaultBox={defaultMapBox()}
+      className="map-window"
+      barExtra={barExtra}
+      onClose={onClose}
+    >
       <div className={`map-viewport${zoom > MIN_ZOOM ? ' pannable' : ''}`}>
         <div
           className={`map-canvas${canPin ? ' map-pin-area' : ''}`}
@@ -263,6 +299,6 @@ export default function MapPanel({
           })}
         </div>
       </div>
-    </div>
+    </FloatingWindow>
   );
 }

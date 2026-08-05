@@ -996,15 +996,22 @@ button:hover {
     display: none;
   }
 
-  /* Stacked layout: pinning the map to a corner would just cover the page, so
-     it flows inline with everything else and its placeholder isn't needed. */
-  .map-panel {
-    position: static;
-    width: 100%;
-    max-width: none;
+  /* Too little room to drag windows around — dock them to the bottom instead
+     and hide the resize grips (the inline size is overridden here). */
+  .floating-window {
+    left: 8px !important;
+    right: 8px;
+    top: auto !important;
+    bottom: 8px;
+    width: auto !important;
+    height: 55vh !important;
   }
 
-  .map-panel-spacer {
+  .floating-resize-grip {
+    display: none;
+  }
+
+  .mini-chat-log {
     display: none;
   }
 
@@ -2602,28 +2609,18 @@ button:hover {
   margin-top: 14px;
 }
 
-/* Map panel — pinned to the top-right of the play area */
-.map-panel {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  z-index: 6;
-  width: 460px;
-  max-width: calc(100% - 48px);
+/* Free-floating windows (map, chat): dragged by the bar, resized from either
+   bottom corner, position and size persisted per window. */
+.floating-window {
+  position: fixed;
+  z-index: 60;
   padding: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-/* Reserves the panel's footprint in the right sidebar so its accordions stay
-   reachable underneath. Kept in sync with .map-panel's height by hand. */
-.map-panel-spacer {
-  flex-shrink: 0;
-  height: 292px;
-}
-
-.map-panel-bar {
+.floating-window-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2631,22 +2628,119 @@ button:hover {
   padding: 6px 10px;
   border-bottom: 1px solid var(--border);
   background: var(--bg-panel-alt);
+  cursor: grab;
+  user-select: none;
+  flex-shrink: 0;
 }
 
-.map-panel-bar button {
-  width: auto;
+.floating-window-bar:active {
+  cursor: grabbing;
 }
 
-.map-panel-title {
+.floating-window-title {
   font-family: var(--font-heading);
   font-size: 0.85rem;
   color: var(--amber-light);
+  white-space: nowrap;
 }
 
-.map-panel-zoom {
+.floating-window-actions {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.floating-window-actions button {
+  width: auto;
+}
+
+.floating-window-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* The chat list scrolls inside the window, so it gets the padding here rather
+   than on the shared body. */
+.chat-window .floating-window-body {
+  padding: 12px;
+}
+
+.chat-window .chat-message-list {
+  flex: 1;
+  max-height: none;
+}
+
+.floating-resize-grip {
+  position: absolute;
+  bottom: 0;
+  width: 18px;
+  height: 18px;
+  z-index: 2;
+}
+
+.floating-resize-grip.right {
+  right: 0;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 50%, var(--border) 50%, var(--border) 70%, transparent 70%);
+}
+
+.floating-resize-grip.left {
+  left: 0;
+  cursor: nesw-resize;
+  background: linear-gradient(225deg, transparent 50%, var(--border) 50%, var(--border) 70%, transparent 70%);
+}
+
+.floating-resize-grip:hover {
+  filter: brightness(1.8);
+}
+
+.map-panel-select {
+  width: auto;
+  max-width: 150px;
+  font-size: 0.75rem;
+  padding: 3px 6px;
+  cursor: pointer;
+}
+
+/* Header peek at the last few chat lines — visible even when chat is closed */
+.mini-chat-log {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  max-width: 240px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.7rem;
+  line-height: 1.25;
+  color: var(--text-muted);
+  text-align: left;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.mini-chat-log:hover {
+  border-color: var(--amber);
+}
+
+.mini-chat-line {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-chat-author {
+  color: var(--amber-light);
+}
+
+.mini-chat-empty {
+  font-style: italic;
+  opacity: 0.7;
 }
 
 .map-zoom-level {
@@ -2660,7 +2754,8 @@ button:hover {
 .map-viewport {
   position: relative;
   overflow: hidden;
-  aspect-ratio: 16 / 9;
+  flex: 1;
+  min-height: 0;
   background: #0a0704;
 }
 

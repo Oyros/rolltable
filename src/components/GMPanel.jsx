@@ -4,7 +4,13 @@ import { db } from '../firebase.js';
 import RulesEditor from './RulesEditor.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
 import { resolveQueueEntity as resolveEntityShared } from '../utils/initiativeEntity.js';
-import { entryLabel, entryCaption, groupByFolder, folderNames } from '../utils/library.js';
+import {
+  entryLabel,
+  entryCaption,
+  groupByFolder,
+  folderNames,
+  publishMapEntry,
+} from '../utils/library.js';
 
 export default function GMPanel({
   roomCode,
@@ -94,14 +100,7 @@ export default function GMPanel({
   }
 
   function publishMap(entry) {
-    const url = entry.imageUrl;
-    const payload = { mapImageUrl: url, updatedAt: Date.now() };
-    // Pin/token positions belong to the map they were placed on.
-    if (url !== (scene?.mapImageUrl || '')) {
-      payload.mapPins = null;
-      payload.mapTokens = null;
-    }
-    update(ref(db, `rooms/${roomCode}/scene`), payload);
+    publishMapEntry(roomCode, entry, scene?.mapImageUrl);
   }
 
   function removeMap(id) {

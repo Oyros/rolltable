@@ -29,6 +29,9 @@ import InitiativeBar from '../components/InitiativeBar.jsx';
 import CameraStrip from '../components/CameraStrip.jsx';
 import ResizableSidebar from '../components/ResizableSidebar.jsx';
 import MapPanel from '../components/MapPanel.jsx';
+import { publishMapEntry } from '../utils/library.js';
+import FloatingWindow from '../components/FloatingWindow.jsx';
+import MiniChatLog from '../components/MiniChatLog.jsx';
 import { applyTheme, DEFAULT_THEME_ID } from '../utils/themes.js';
 import { deleteRoomUploads, sweepOrphanedRoomUploads } from '../utils/upload.js';
 
@@ -55,6 +58,7 @@ export default function Room({ session, onLeave }) {
   const [showHelp, setShowHelp] = useState(false);
   const [showBottomPanel, setShowBottomPanel] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const [turnBannerActive, setTurnBannerActive] = useState(false);
   const flashSeenRef = useRef(undefined);
   const kickSeenRef = useRef(undefined);
@@ -310,6 +314,10 @@ export default function Room({ session, onLeave }) {
   const me = players[playerId];
   const liveName = me?.name || name;
 
+  function publishMap(entry) {
+    publishMapEntry(roomCode, entry, scene?.mapImageUrl);
+  }
+
   const header = (
     <header className="room-header">
       {settings?.bannerUrl && (
@@ -324,6 +332,14 @@ export default function Room({ session, onLeave }) {
           <span className="room-code">Oda: {roomCode}</span>
         </div>
         <div className="header-center">
+          <MiniChatLog roomCode={roomCode} onOpen={() => setChatOpen(true)} />
+          <button
+            type="button"
+            className="btn-ghost sound-toggle map-toggle-btn"
+            onClick={() => setChatOpen((v) => !v)}
+          >
+            {chatOpen ? '💬 Sohbeti Gizle' : '💬 Sohbeti Göster'}
+          </button>
           <InitiativeBar
             initiative={settings?.initiative}
             players={players}
@@ -468,22 +484,6 @@ export default function Room({ session, onLeave }) {
             </div>
           </details>
 
-          <details className="panel side-accordion" open>
-            <summary>
-              💬 Sohbet<span className="side-accordion-chevron">▾</span>
-            </summary>
-            <div className="side-accordion-body">
-              <ChatPanel
-                roomCode={roomCode}
-                name={liveName}
-                playerId={playerId}
-                isGM={role === 'gm'}
-                players={players}
-                readOnly={role === 'spectator'}
-              />
-            </div>
-          </details>
-
           <details className="panel side-accordion">
             <summary>
               📜 Görev Panosu<span className="side-accordion-chevron">▾</span>
@@ -577,15 +577,33 @@ export default function Room({ session, onLeave }) {
             canPin={role !== 'spectator'}
             players={players}
             savedFocuses={settings?.savedFocuses}
+            savedMaps={settings?.savedMaps}
             initiativeQueue={settings?.initiative?.queue}
+            onSelectMap={publishMap}
             onClose={() => setMapOpen(false)}
           />
         )}
 
+        {chatOpen && (
+          <FloatingWindow
+            title="💬 Sohbet"
+            storageKey="rolltable_chat_window_box"
+            defaultBox={{ x: 24, y: 150, w: 380, h: 420 }}
+            className="chat-window"
+            onClose={() => setChatOpen(false)}
+          >
+            <ChatPanel
+              roomCode={roomCode}
+              name={liveName}
+              playerId={playerId}
+              isGM={role === 'gm'}
+              players={players}
+              readOnly={role === 'spectator'}
+            />
+          </FloatingWindow>
+        )}
+
         <ResizableSidebar side="right" storageKey="rolltable_sidebar_right_width">
-          {/* Keeps the right-hand controls reachable from under the map, which
-              is pinned to this corner while open. */}
-          {mapOpen && scene?.mapImageUrl && <div className="map-panel-spacer" />}
           <details className="panel side-accordion" open>
             <summary>
               🎲 Zar<span className="side-accordion-chevron">▾</span>
