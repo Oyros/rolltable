@@ -229,7 +229,7 @@ export default function SceneDisplay({
   function selectPlayerImage(group, image) {
     update(ref(db, `rooms/${roomCode}/scene`), {
       focusImageUrl: image.url,
-      focusCaption: playerImageCaption(group.playerName, image),
+      focusCaption: playerImageCaption(group.playerName),
       updatedAt: Date.now(),
     });
     setFocusPickerOpen(false);

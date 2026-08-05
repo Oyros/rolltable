@@ -171,7 +171,7 @@ export default function GMPanel({
   function publishPlayerImage(group, image) {
     update(ref(db, `rooms/${roomCode}/scene`), {
       focusImageUrl: image.url,
-      focusCaption: playerImageCaption(group.playerName, image),
+      focusCaption: playerImageCaption(group.playerName),
       updatedAt: Date.now(),
     });
   }
@@ -533,7 +533,7 @@ export default function GMPanel({
                     type="button"
                     className={`btn-dice${scene?.focusImageUrl === image.url ? ' active' : ''}`}
                     onClick={() => publishPlayerImage(group, image)}
-                    title={`Sahnede: ${playerImageCaption(group.playerName, image)}`}
+                    title={`Sahnede: ${playerImageCaption(group.playerName)}`}
                   >
                     🖼️ {image.name}
                   </button>

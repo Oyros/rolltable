@@ -41,8 +41,8 @@ export function playerImageGroups(players) {
     .sort((a, b) => a.playerName.localeCompare(b.playerName, 'tr'));
 }
 
-// The scene caption for a player image: the name they gave it, or the
-// character's own name when they didn't give one.
-export function playerImageCaption(playerName, image) {
-  return image.label || playerName;
+// The scene caption for a player image is always the character's name — the
+// image's own name is a GM-side label only, never shown to the table.
+export function playerImageCaption(playerName) {
+  return playerName;
 }
