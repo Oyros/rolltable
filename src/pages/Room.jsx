@@ -332,7 +332,13 @@ export default function Room({ session, onLeave }) {
           <span className="room-code">Oda: {roomCode}</span>
         </div>
         <div className="header-center">
-          <MiniChatLog roomCode={roomCode} onOpen={() => setChatOpen(true)} />
+          <MiniChatLog
+            roomCode={roomCode}
+            players={players}
+            playerId={playerId}
+            isGM={role === 'gm'}
+            onOpen={() => setChatOpen(true)}
+          />
           <button
             type="button"
             className="btn-ghost sound-toggle map-toggle-btn"

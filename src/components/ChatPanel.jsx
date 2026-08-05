@@ -1,29 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ref, push, query, limitToLast, onValue } from 'firebase/database';
 import { db } from '../firebase.js';
-
-function buildWhisperEntries(players, playerId, isGM) {
-  const entries = [];
-  Object.entries(players || {}).forEach(([pid, p]) => {
-    Object.entries(p.whispers || {}).forEach(([key, w]) => {
-      const sentByMe = !!w.byId && w.byId === playerId;
-      const sentToMe = pid === playerId;
-      if (!isGM && !sentByMe && !sentToMe) return;
-
-      entries.push({
-        key: `w-${pid}-${key}`,
-        at: w.at,
-        kind: w.system ? 'system' : 'whisper',
-        text: w.text,
-        sentByMe,
-        sentToMe,
-        fromName: w.by || 'GM',
-        toName: p.name,
-      });
-    });
-  });
-  return entries;
-}
+import { buildFeed } from '../utils/chatFeed.js';
 
 export default function ChatPanel({ roomCode, name, playerId, isGM, players, readOnly = false }) {
   const [chatMessages, setChatMessages] = useState([]);
@@ -41,16 +19,7 @@ export default function ChatPanel({ roomCode, name, playerId, isGM, players, rea
     return () => unsub();
   }, [roomCode]);
 
-  const chatEntries = chatMessages.map(([key, m]) => ({
-    key: `c-${key}`,
-    at: m.at,
-    kind: 'chat',
-    text: m.text,
-    author: m.by,
-    isGM: m.isGM,
-  }));
-  const whisperEntries = buildWhisperEntries(players, playerId, isGM);
-  const merged = [...chatEntries, ...whisperEntries].sort((a, b) => (a.at || 0) - (b.at || 0));
+  const merged = buildFeed(chatMessages, players, playerId, isGM);
 
   const whisperTargets = Object.entries(players || {}).filter(
     ([id, p]) => id !== playerId && p.role !== 'spectator'

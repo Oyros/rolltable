@@ -188,7 +188,7 @@ export default function HelpGuide({ onClose }) {
             </li>
             <li>Traitler ve Perkler arasından işaretle — seçtiklerinin açıklaması altta çıkar.</li>
             <li>Yetenek/Dal metnini serbestçe yaz.</li>
-            <li>Envantere GM'in eşya kataloğundan seçerek veya kendi yazarak eşya ekle.</li>
+            <li>Envantere GM'in eşya kataloğundan seçerek veya kendi yazarak eşya ekle. Yanındaki <strong>Adet</strong> kutusuna bir sayı yazarsan eşya "×3" gibi sayılı eklenir ve envanterde +/- düğmeleriyle adedini artırıp azaltabilirsin (silip yeniden eklemene gerek kalmaz). Adet boş bırakılırsa eşya eskisi gibi tek satır olarak durur.</li>
             <li>
               <strong>XP Çubuğu</strong> — GM'in "Kuralları Düzenle"de belirlediği "Maksimum
               Seviye" ve "Seviye Başına Gereken XP" değerlerine göre doluyor. GM Parti panelinden
@@ -285,7 +285,9 @@ export default function HelpGuide({ onClose }) {
             harita penceresi gibi üst çubuğundan sürüklenip köşelerinden boyutlandırılabilir, yeri
             ve boyutu hatırlanır. Pencerenin solunda, sohbet kapalıyken bile <strong>son birkaç
             mesajı</strong> gösteren küçük bir kayıt duruyor; ona tıklayarak da sohbeti
-            açabilirsin. Üç tür mesaj aynı akışta, farklı görünümle karışık sırayla listelenir:
+            açabilirsin (o küçük kayıt da sohbetin tamamını yansıtır: fısıltılar ve sistem
+            kayıtları dahil, sadece senin görmeye yetkili olduğun kadarıyla). Üç tür mesaj aynı
+            akışta, farklı görünümle karışık sırayla listelenir:
           </p>
           <ul>
             <li>Normal sohbet mesajları — herkesin yazdığı, herkesin gördüğü.</li>

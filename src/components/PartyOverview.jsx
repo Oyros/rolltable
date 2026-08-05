@@ -5,6 +5,7 @@ import { STATUS_LABEL } from '../utils/stats.js';
 import { rollStat } from '../utils/statRoll.js';
 import { isSheetVisibleTo } from '../utils/sheetVisibility.js';
 import { rollModeLabel } from '../utils/rollMode.js';
+import { itemLabel } from '../utils/inventory.js';
 import CharacterSheet from './CharacterSheet.jsx';
 import Portal from './Portal.jsx';
 
@@ -207,8 +208,10 @@ export default function PartyOverview({
                       <p className="muted">Boş</p>
                     ) : (
                       <ul className="party-detail-inventory">
+                        {/* itemLabel handles both shapes; rendering the raw
+                            entry would throw once it's an object. */}
                         {(p.inventory || []).map((item, i) => (
-                          <li key={i}>{item}</li>
+                          <li key={i}>{itemLabel(item)}</li>
                         ))}
                       </ul>
                     )}

@@ -5,6 +5,7 @@ import { STATUS_LABEL } from '../utils/stats.js';
 import { rollStat as rollStatShared } from '../utils/statRoll.js';
 import { rollModeLabel } from '../utils/rollMode.js';
 import { newId } from '../utils/id.js';
+import { itemName, itemQty, itemLabel, makeItem } from '../utils/inventory.js';
 import Portal from './Portal.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
 
@@ -23,7 +24,9 @@ export default function CharacterSheet({
 }) {
   const path = `rooms/${roomCode}/players/${playerId}`;
   const [newItem, setNewItem] = useState('');
+  const [newItemQty, setNewItemQty] = useState('');
   const [catalogItemId, setCatalogItemId] = useState('');
+  const [catalogQty, setCatalogQty] = useState('');
   const [nameDraft, setNameDraft] = useState(player.name || '');
   const [skillsDraft, setSkillsDraft] = useState(player.skills || '');
   const [portraitDraft, setPortraitDraft] = useState(player.portraitUrl || '');
@@ -149,24 +152,41 @@ export default function CharacterSheet({
 
   function addItem() {
     if (!newItem.trim()) return;
-    patch({ inventory: [...(player.inventory || []), newItem.trim()] });
-    logChange(`Envantere eklendi: ${newItem.trim()}`);
+    const entry = makeItem(newItem.trim(), newItemQty);
+    patch({ inventory: [...(player.inventory || []), entry] });
+    logChange(`Envantere eklendi: ${itemLabel(entry)}`);
     setNewItem('');
+    setNewItemQty('');
   }
 
   function addCatalogItem() {
     if (!catalogItemId) return;
     const item = items.find((i) => i.id === catalogItemId);
     if (!item) return;
-    patch({ inventory: [...(player.inventory || []), item.name] });
-    logChange(`Envantere eklendi: ${item.name}`);
+    const entry = makeItem(item.name, catalogQty);
+    patch({ inventory: [...(player.inventory || []), entry] });
+    logChange(`Envantere eklendi: ${itemLabel(entry)}`);
     setCatalogItemId('');
+    setCatalogQty('');
+  }
+
+  function changeItemQty(index, delta) {
+    const list = [...(player.inventory || [])];
+    const item = list[index];
+    const qty = itemQty(item);
+    if (qty === null) return;
+    // Floor at 1 — clearing an item out is what the Sil button is for.
+    const next = Math.max(1, qty + delta);
+    if (next === qty) return;
+    list[index] = { name: itemName(item), qty: next };
+    patch({ inventory: list });
+    logChange(`${itemName(item)} adedi ${qty} → ${next} oldu`);
   }
 
   function removeItem(index) {
     const removed = (player.inventory || [])[index];
     patch({ inventory: (player.inventory || []).filter((_, i) => i !== index) });
-    if (removed) logChange(`Envanterden çıkarıldı: ${removed}`);
+    if (removed) logChange(`Envanterden çıkarıldı: ${itemLabel(removed)}`);
   }
 
   function toggleInList(field, id, catalog) {
@@ -653,14 +673,28 @@ export default function CharacterSheet({
       <div className="inventory">
         <span>Envanter</span>
         <ul>
-          {(player.inventory || []).map((item, i) => (
-            <li key={i}>
-              <span>{item}</span>
-              <button type="button" className="btn-ghost small" onClick={() => removeItem(i)}>
-                Sil
-              </button>
-            </li>
-          ))}
+          {(player.inventory || []).map((item, i) => {
+            const qty = itemQty(item);
+            return (
+              <li key={i}>
+                <span>{itemName(item)}</span>
+                {qty !== null && (
+                  <span className="inventory-qty">
+                    <button type="button" onClick={() => changeItemQty(i, -1)} title="Azalt">
+                      −
+                    </button>
+                    <span className="inventory-qty-value">{qty}</span>
+                    <button type="button" onClick={() => changeItemQty(i, 1)} title="Artır">
+                      +
+                    </button>
+                  </span>
+                )}
+                <button type="button" className="btn-ghost small" onClick={() => removeItem(i)}>
+                  Sil
+                </button>
+              </li>
+            );
+          })}
         </ul>
 
         {items.length > 0 && (
@@ -674,6 +708,14 @@ export default function CharacterSheet({
                   </option>
                 ))}
               </select>
+              <input
+                className="inventory-qty-input"
+                type="number"
+                min="1"
+                value={catalogQty}
+                onChange={(e) => setCatalogQty(e.target.value)}
+                placeholder="Adet"
+              />
               <button type="button" className="btn-primary small" onClick={addCatalogItem}>
                 Ekle
               </button>
@@ -693,6 +735,20 @@ export default function CharacterSheet({
             value={newItem}
             onChange={(e) => setNewItem(e.target.value)}
             placeholder="Özel eşya..."
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addItem();
+              }
+            }}
+          />
+          <input
+            className="inventory-qty-input"
+            type="number"
+            min="1"
+            value={newItemQty}
+            onChange={(e) => setNewItemQty(e.target.value)}
+            placeholder="Adet"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault();
