@@ -6,6 +6,8 @@
 // Shared by the chat window and the header's mini log so the two can never
 // disagree about what a given viewer should see.
 
+import { sendVisibleTo } from './handouts.js';
+
 export function buildWhisperEntries(players, playerId, isGM) {
   const entries = [];
   Object.entries(players || {}).forEach(([pid, p]) => {
@@ -41,16 +43,34 @@ export function buildChatEntries(chatMessages) {
   }));
 }
 
-export function buildFeed(chatMessages, players, playerId, isGM) {
+// Handouts the GM sent, as cards in the same timeline.
+export function buildHandoutEntries(handoutSends, playerId, isGM) {
+  return Object.entries(handoutSends || {})
+    .filter(([, send]) => sendVisibleTo(send, playerId, isGM))
+    .map(([key, send]) => ({
+      key: `h-${key}`,
+      at: send.at,
+      kind: 'handout',
+      title: send.title,
+      text: send.text,
+      imageUrl: send.imageUrl,
+      fromName: send.by || 'GM',
+      toAll: !!send.all,
+    }));
+}
+
+export function buildFeed(chatMessages, players, playerId, isGM, handoutSends) {
   return [
     ...buildChatEntries(chatMessages),
     ...buildWhisperEntries(players, playerId, isGM),
+    ...buildHandoutEntries(handoutSends, playerId, isGM),
   ].sort((a, b) => (a.at || 0) - (b.at || 0));
 }
 
 // Short "who" label for an entry, used by the compact header log.
 export function feedEntryLabel(entry) {
   if (entry.kind === 'chat') return entry.author;
+  if (entry.kind === 'handout') return '📜 Belge';
   if (entry.kind === 'system') return '📝';
   if (entry.sentByMe) return `🔒 → ${entry.toName}`;
   return `🔒 ${entry.fromName}`;

@@ -2585,6 +2585,89 @@ button:hover {
   font-size: 0.78rem;
 }
 
+/* Handouts — GM library */
+.handout-text-input {
+  width: 100%;
+  margin: 8px 0;
+}
+
+.handout-row {
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-top: 8px;
+}
+
+.handout-row-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.handout-row-title {
+  flex: 1;
+  min-width: 0;
+  color: var(--amber-light);
+  font-size: 0.88rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.handout-send-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+
+.handout-recipients {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.handout-sent-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Handouts — the card players see in the chat feed */
+.chat-message.handout {
+  border-left: 3px solid var(--amber);
+  background: rgba(207, 154, 63, 0.08);
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+.handout-card-title {
+  font-family: var(--font-heading);
+  color: var(--amber-light);
+  font-size: 0.95rem;
+}
+
+.handout-card-image {
+  display: block;
+  width: 100%;
+  max-height: 240px;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 6px 0;
+  background: #0a0704;
+}
+
+.handout-card-text {
+  white-space: pre-wrap;
+}
+
 /* Level-up reward rules (rules editor) */
 .reward-fields {
   align-items: flex-end;

@@ -3,6 +3,7 @@ import { ref, update, push, remove } from 'firebase/database';
 import { db } from '../firebase.js';
 import RulesEditor from './RulesEditor.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
+import HandoutLibrary from './HandoutLibrary.jsx';
 import { resolveQueueEntity as resolveEntityShared } from '../utils/initiativeEntity.js';
 import { playerImageGroups, playerImageCaption } from '../utils/portraits.js';
 import {
@@ -21,6 +22,7 @@ export default function GMPanel({
   players,
   settings,
   gameConfig,
+  handoutSends,
   onDeleteRoom,
   isOwner,
 }) {
@@ -568,6 +570,14 @@ export default function GMPanel({
             </details>
           ))}
       </div>
+
+      <HandoutLibrary
+        roomCode={roomCode}
+        handouts={settings?.handouts}
+        sends={handoutSends}
+        players={players}
+        gmName={name}
+      />
 
       <div className="gm-section">
         <h3 className="title-font gm-section-title">Müzik Kütüphanesi</h3>

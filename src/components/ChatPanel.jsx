@@ -3,7 +3,7 @@ import { ref, push, query, limitToLast, onValue } from 'firebase/database';
 import { db } from '../firebase.js';
 import { buildFeed } from '../utils/chatFeed.js';
 
-export default function ChatPanel({ roomCode, name, playerId, isGM, players, readOnly = false }) {
+export default function ChatPanel({ roomCode, name, playerId, isGM, players, handoutSends, readOnly = false }) {
   const [chatMessages, setChatMessages] = useState([]);
   const [text, setText] = useState('');
   const [whisperTarget, setWhisperTarget] = useState('');
@@ -19,7 +19,7 @@ export default function ChatPanel({ roomCode, name, playerId, isGM, players, rea
     return () => unsub();
   }, [roomCode]);
 
-  const merged = buildFeed(chatMessages, players, playerId, isGM);
+  const merged = buildFeed(chatMessages, players, playerId, isGM, handoutSends);
 
   const whisperTargets = Object.entries(players || {}).filter(
     ([id, p]) => id !== playerId && p.role !== 'spectator'
@@ -66,6 +66,22 @@ export default function ChatPanel({ roomCode, name, playerId, isGM, players, rea
                   {e.isGM ? ' (GM)' : ''}
                 </span>
                 <span className="chat-message-text">{e.text}</span>
+              </li>
+            );
+          }
+          if (e.kind === 'handout') {
+            return (
+              <li key={e.key} className="chat-message handout">
+                <span className="chat-message-author">
+                  📜 {e.fromName} bir belge paylaştı{e.toAll ? '' : ' (sana özel)'}
+                </span>
+                <strong className="handout-card-title">{e.title}</strong>
+                {e.imageUrl && (
+                  <a href={e.imageUrl} target="_blank" rel="noreferrer">
+                    <img className="handout-card-image" src={e.imageUrl} alt={e.title} />
+                  </a>
+                )}
+                {e.text && <span className="handout-card-text">{e.text}</span>}
               </li>
             );
           }

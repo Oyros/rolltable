@@ -97,6 +97,36 @@ export default function HelpGuide({ onClose }) {
         </details>
 
         <details>
+          <summary>📜 Belgeler (Handout)</summary>
+          <p>
+            GM Kontrol Paneli'ndeki <strong>Belge Kütüphanesi</strong>'nde mektup, not, gazete
+            kupürü, harita parçası gibi belgeler hazırlanır: bir başlık, isteğe bağlı metin ve
+            isteğe bağlı görsel (link ya da "📤 Yükle").
+          </p>
+          <ul>
+            <li>
+              Kaydetmek belgeyi kimseye göstermez — sadece kütüphaneye ekler. Oyun sırasında
+              <strong> "📤 Gönder"</strong> deyip <strong>herkese</strong> ya da işaretlediğin
+              <strong> tek tek oyunculara</strong> yollarsın.
+            </li>
+            <li>
+              Gönderilen belge alıcının <strong>sohbet akışına kart olarak</strong> düşer (görsel +
+              metin); görsele tıklayınca tam boy açılır. Yeni belge geldiğinde sohbet bildirim sesi
+              çalar ve küçük log yanıp söner. Sana özel gelen belgelerde "sana özel" yazar.
+            </li>
+            <li>
+              GM tüm gönderilen belgeleri görür. <strong>"📤 Gönderilenler"</strong> listesinden
+              <strong> "Geri Al"</strong> ile bir belgeyi alıcılardan geri çekebilirsin — kart
+              sohbetten kaybolur.
+            </li>
+            <li>
+              Gönderilen kopya bağımsızdır: kütüphanedeki belgeyi sonradan silmek, daha önce
+              gönderdiklerini bozmaz.
+            </li>
+          </ul>
+        </details>
+
+        <details>
           <summary>🎉 Seviye Atlama Ödülleri (sadece GM)</summary>
           <p>
             Kurulum ekranında ve "⚙️ Kuralları Düzenle"de, seviye atlayan bir karakterin ne
@@ -183,6 +213,7 @@ export default function HelpGuide({ onClose }) {
         <details>
           <summary>🎙️ İnisiyatif Sırası</summary>
           <p>
+            Sıra değiştiğinde sırası gelen oyuncu ekranında bir uyarı bandı görür ve kısa bir bildirim sesi duyar; masadaki herkesin inisiyatif şeridi de kısaca parlar (sessiz). Ses seviyesi zar sesleriyle aynı 🔊 ayarına bağlıdır.
             Header'ın orta kısmında sıradaki ve bir önceki kişinin adı gösterilir. GM'in "İnisiyatif
             Sırası" panelinden (GM Kontrol Paneli içinde) sıraya oyuncu ekler, oku ile yeniden
             sıralar ve "⏭ Sonraki" / "⏮ Önceki" ile sırayı ilerletir — bunu doğrudan header'daki

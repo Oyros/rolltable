@@ -51,6 +51,7 @@ export default function Room({ session, onLeave }) {
   const [settings, setSettings] = useState(null);
   const [gameConfig, setGameConfig] = useState(undefined);
   const [quests, setQuests] = useState({});
+  const [handoutSends, setHandoutSends] = useState({});
   const [flashActive, setFlashActive] = useState(false);
   const [ambianceVolume, setAmbianceVolumeState] = useState(loadAmbianceVolume);
   const [joinBlocked, setJoinBlocked] = useState(false);
@@ -171,6 +172,12 @@ export default function Room({ session, onLeave }) {
   useEffect(() => {
     const sceneRef = ref(db, `rooms/${roomCode}/scene`);
     const unsub = onValue(sceneRef, (snap) => setScene(snap.val()));
+    return () => unsub();
+  }, [roomCode]);
+
+  useEffect(() => {
+    const sendsRef = ref(db, `rooms/${roomCode}/handoutSends`);
+    const unsub = onValue(sendsRef, (snap) => setHandoutSends(snap.val() || {}));
     return () => unsub();
   }, [roomCode]);
 
@@ -353,6 +360,7 @@ export default function Room({ session, onLeave }) {
             players={players}
             playerId={playerId}
             isGM={role === 'gm'}
+            handoutSends={handoutSends}
             chatOpen={chatOpen}
             onOpen={() => setChatOpen(true)}
           />
@@ -564,6 +572,7 @@ export default function Room({ session, onLeave }) {
                     players={players}
                     settings={settings}
                     gameConfig={gameConfig}
+                    handoutSends={handoutSends}
                     onDeleteRoom={deleteRoom}
                     isOwner={isOwner}
                   />
@@ -617,6 +626,7 @@ export default function Room({ session, onLeave }) {
               playerId={playerId}
               isGM={role === 'gm'}
               players={players}
+              handoutSends={handoutSends}
               readOnly={role === 'spectator'}
             />
           </FloatingWindow>
