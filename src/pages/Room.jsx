@@ -607,6 +607,7 @@ export default function Room({ session, onLeave }) {
             savedFocuses={settings?.savedFocuses}
             savedMaps={settings?.savedMaps}
             initiativeQueue={settings?.initiative?.queue}
+            gameConfig={gameConfig}
             onSelectMap={publishMap}
             onClose={() => setMapOpen(false)}
           />

@@ -3,7 +3,9 @@ import { ref, update, push, remove } from 'firebase/database';
 import { db } from '../firebase.js';
 import { resolveQueueEntity } from '../utils/initiativeEntity.js';
 import { entryLabel, groupByFolder } from '../utils/library.js';
+import { playerHealth, npcHealth, healthTone, activeConditions } from '../utils/combat.js';
 import FloatingWindow from './FloatingWindow.jsx';
+import TokenCombatPanel from './TokenCombatPanel.jsx';
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
@@ -28,12 +30,15 @@ export default function MapPanel({
   savedFocuses,
   savedMaps,
   initiativeQueue,
+  gameConfig,
   onSelectMap,
   onClose,
 }) {
   const [zoom, setZoom] = useState(MIN_ZOOM);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [dragToken, setDragToken] = useState(null); // { id, x, y } while dragging
+  // Which token has its GM combat popover open.
+  const [openTokenId, setOpenTokenId] = useState(null);
 
   const canvasRef = useRef(null);
   const viewportRef = useRef(null);
@@ -189,7 +194,8 @@ export default function MapPanel({
     e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
     const token = scene?.mapTokens?.[id];
-    setDragToken({ id, x: token?.x ?? 50, y: token?.y ?? 50 });
+    const start = { x: token?.x ?? 50, y: token?.y ?? 50 };
+    setDragToken({ id, ...start, startX: start.x, startY: start.y });
   }
 
   function handleTokenPointerMove(e) {
@@ -207,12 +213,21 @@ export default function MapPanel({
     );
   }
 
-  function handleTokenPointerUp() {
+  function handleTokenPointerUp(id) {
     if (!dragToken) return;
-    update(ref(db, `rooms/${roomCode}/scene/mapTokens/${dragToken.id}`), {
-      x: dragToken.x,
-      y: dragToken.y,
-    });
+    // A press that didn't really move is a click: open the combat popover
+    // instead of writing the same position back.
+    const moved =
+      Math.abs(dragToken.x - dragToken.startX) > 0.5 ||
+      Math.abs(dragToken.y - dragToken.startY) > 0.5;
+    if (moved) {
+      update(ref(db, `rooms/${roomCode}/scene/mapTokens/${dragToken.id}`), {
+        x: dragToken.x,
+        y: dragToken.y,
+      });
+    } else {
+      setOpenTokenId((current) => (current === id ? null : id));
+    }
     setDragToken(null);
   }
 
@@ -283,10 +298,18 @@ export default function MapPanel({
             if (!dragging && !stored) return null;
             const x = dragging ? dragToken.x : stored.x;
             const y = dragging ? dragToken.y : stored.y;
+            const health = entity.isNpc
+              ? npcHealth(savedFocuses?.[id], scene.npcState?.[id])
+              : playerHealth(players?.[id], gameConfig);
+            const conditions = entity.isNpc
+              ? scene.npcState?.[id]?.conditions
+              : players?.[id]?.conditions;
+            const marks = activeConditions(conditions, gameConfig);
+            const tone = health ? healthTone(health.current, health.max) : null;
             return (
               <div
                 key={`token-${id}`}
-                className={`map-token${entity.isNpc ? ' enemy' : ''}${isGM ? ' draggable' : ''}${dragging ? ' dragging' : ''}`}
+                className={`map-token${entity.isNpc ? ' enemy' : ''}${isGM ? ' draggable' : ''}${dragging ? ' dragging' : ''}${tone === 'down' ? ' downed' : ''}${openTokenId === id ? ' menu-open' : ''}`}
                 style={{
                   left: `${x}%`,
                   top: `${y}%`,
@@ -294,11 +317,13 @@ export default function MapPanel({
                   // Counter-scale so tokens keep a constant on-screen size.
                   transform: `translate(-50%, -50%) scale(${1 / zoom})`,
                 }}
-                title={entity.name}
+                title={
+                  health ? `${entity.name} — ${health.current}/${health.max}` : entity.name
+                }
                 onClick={(e) => e.stopPropagation()}
                 onPointerDown={isGM ? (e) => handleTokenPointerDown(id, e) : undefined}
                 onPointerMove={isGM ? handleTokenPointerMove : undefined}
-                onPointerUp={isGM ? handleTokenPointerUp : undefined}
+                onPointerUp={isGM ? (e) => handleTokenPointerUp(id, e) : undefined}
               >
                 {entity.imageUrl ? (
                   <img src={entity.imageUrl} alt={entity.name} />
@@ -306,6 +331,34 @@ export default function MapPanel({
                   <span className="map-token-fallback">
                     {entity.isNpc ? '⚔️' : (entity.name || '?').charAt(0).toUpperCase()}
                   </span>
+                )}
+                {health && (
+                  <span className={`token-hp-bar tone-${tone}`}>
+                    <span
+                      className="token-hp-fill"
+                      style={{ width: `${(health.current / health.max) * 100}%` }}
+                    />
+                  </span>
+                )}
+                {marks.length > 0 && (
+                  <span className="token-conditions">
+                    {marks.map((c) => (
+                      <span key={c.id} title={c.name}>
+                        {c.icon}
+                      </span>
+                    ))}
+                  </span>
+                )}
+                {isGM && openTokenId === id && (
+                  <TokenCombatPanel
+                    roomCode={roomCode}
+                    entity={entity}
+                    entityId={id}
+                    health={health}
+                    conditions={conditions}
+                    gameConfig={gameConfig}
+                    onClose={() => setOpenTokenId(null)}
+                  />
                 )}
               </div>
             );

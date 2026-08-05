@@ -40,6 +40,7 @@ export default function GMPanel({
   const [focusDraftCaption, setFocusDraftCaption] = useState('');
   const [focusDraftFolder, setFocusDraftFolder] = useState('');
   const [focusDraftCategory, setFocusDraftCategory] = useState('karakter');
+  const [focusDraftHp, setFocusDraftHp] = useState('');
   const [musicDraftUrl, setMusicDraftUrl] = useState('');
   const [musicDraftName, setMusicDraftName] = useState('');
   const [musicDraftFolder, setMusicDraftFolder] = useState('');
@@ -154,10 +155,16 @@ export default function GMPanel({
       folder: focusDraftFolder.trim(),
       imageUrl: focusDraftUrl.trim(),
       category: focusDraftCategory,
+      // Only characters/NPCs fight, so only they carry health.
+      maxHp:
+        focusDraftCategory === 'karakter' && parseInt(focusDraftHp, 10) > 0
+          ? parseInt(focusDraftHp, 10)
+          : null,
     });
     setFocusDraftUrl('');
     setFocusDraftLabel('');
     setFocusDraftCaption('');
+    setFocusDraftHp('');
   }
 
   function publishFocus(entry) {
@@ -519,6 +526,16 @@ export default function GMPanel({
             <option value="karakter">🎭 Karakter / NPC</option>
             <option value="obje">📦 Obje / Eşya</option>
           </select>
+          {focusDraftCategory === 'karakter' && (
+            <input
+              type="number"
+              min="0"
+              value={focusDraftHp}
+              onChange={(e) => setFocusDraftHp(e.target.value)}
+              placeholder="Can (opsiyonel)"
+              title="Haritada bu NPC'nin can barı bu değerle başlar"
+            />
+          )}
           <button type="button" className="btn-primary small" onClick={saveFocus}>
             💾 Kaydet
           </button>

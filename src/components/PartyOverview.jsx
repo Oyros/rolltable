@@ -7,6 +7,7 @@ import { isSheetVisibleTo } from '../utils/sheetVisibility.js';
 import { rollModeLabel } from '../utils/rollMode.js';
 import { itemLabel, itemName } from '../utils/inventory.js';
 import { configGroups, groupEntries } from '../utils/traitGroups.js';
+import { activeConditions, playerHealth, healthTone } from '../utils/combat.js';
 import CharacterSheet from './CharacterSheet.jsx';
 import HoverTip from './HoverTip.jsx';
 import Portal from './Portal.jsx';
@@ -89,6 +90,8 @@ export default function PartyOverview({
             }))
             .filter((g) => g.entries.length > 0);
 
+          const marks = activeConditions(p.conditions, gameConfig);
+          const health = playerHealth(p, gameConfig);
           const isActiveTurn = activeTurnPlayerId && activeTurnPlayerId === id;
           const sheetVisible = isSheetVisibleTo({
             viewerIsGM: isGM,
@@ -153,6 +156,15 @@ export default function PartyOverview({
                   {p.name}
                 </span>
                 {isActiveTurn && <span className="active-turn-badge" title="Sırası">🎙️</span>}
+                {marks.length > 0 && (
+                  <span className="condition-strip">
+                    {marks.map((c) => (
+                      <span key={c.id} title={c.name}>
+                        {c.icon}
+                      </span>
+                    ))}
+                  </span>
+                )}
                 <span className="party-status-badge">{STATUS_LABEL[p.status] || 'İyi'}</span>
               </button>
               </HoverTip>
@@ -217,16 +229,22 @@ export default function PartyOverview({
                     </div>
                   )}
 
+
                   {resources.length > 0 && (
                     <div className="party-detail-section">
                       <span className="party-detail-heading">Kaynaklar</span>
                       {resources.map((r) => {
                         const current = p.resources?.[r.id] ?? r.max;
                         const pct = Math.round((current / r.max) * 100);
+                        // The resource acting as health is tinted by how hurt
+                        // they are, matching the token's bar on the map.
+                        const tone = health?.resourceId === r.id
+                          ? ` hp-${healthTone(current, r.max)}`
+                          : '';
                         return (
                           <div className="resource-mini" key={r.id}>
                             <span>{r.name}</span>
-                            <div className="resource-bar">
+                            <div className={`resource-bar${tone}`}>
                               <div className="resource-bar-fill" style={{ width: `${pct}%` }} />
                             </div>
                             <span>{current}/{r.max}</span>

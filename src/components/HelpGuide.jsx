@@ -87,13 +87,58 @@ export default function HelpGuide({ onClose }) {
           <p>Oda ilk kurulduğunda GM'den oyunun kurallarını tanımlaması istenir:</p>
           <ul>
             <li><strong>Kayıtlı Şablon Kullan</strong> — daha önce kaydettiğin bir kural setini tek tıkla uygula.</li>
-            <li><strong>Sıfırdan Oluştur</strong> — Senaryo Adı, Tasarım Teması (21 farklı tür arasından: fantazi, cyberpunk, western, korsan, vampir, uzay operası ve daha fazlası), <strong>Seviye Sistemi</strong> (maksimum seviye + seviye başına gereken XP), <strong>Stat Sistemi</strong> (statların hangi puandan hangi puana kadar çıkabileceği, ve bir stata tıklanınca atılan 1d20'ye hangi puanlardan itibaren +1/+2/+3 eklenip -1/-2/-3 düşüleceği), Statlar, <strong>Kaynaklar</strong> (Can Puanı, Stres, Kaynak Puanı gibi dolgu çubukları), Irklar, Sınıflar, Alt Sınıflar, <strong>Trait/Perk Kategorileri</strong>, <strong>Seviye Atlama Ödülleri</strong> ve Bulunabilecek Eşyalar listelerini kendin oluştur.</li>
+            <li><strong>Sıfırdan Oluştur</strong> — Senaryo Adı, Tasarım Teması (21 farklı tür arasından: fantazi, cyberpunk, western, korsan, vampir, uzay operası ve daha fazlası), <strong>Seviye Sistemi</strong> (maksimum seviye + seviye başına gereken XP), <strong>Stat Sistemi</strong> (statların hangi puandan hangi puana kadar çıkabileceği, ve bir stata tıklanınca atılan 1d20'ye hangi puanlardan itibaren +1/+2/+3 eklenip -1/-2/-3 düşüleceği), Statlar, <strong>Kaynaklar</strong> (Can Puanı, Stres, Kaynak Puanı gibi dolgu çubukları), <strong>Savaş ayarları</strong> (can kaynağı + durum etkileri), Irklar, Sınıflar, Alt Sınıflar, <strong>Trait/Perk Kategorileri</strong>, <strong>Seviye Atlama Ödülleri</strong> ve Bulunabilecek Eşyalar listelerini kendin oluştur.</li>
             <li>İstersen bu kural setini bir <strong>şablon olarak kaydedip</strong> başka odalarda tekrar kullanabilirsin.</li>
           </ul>
           <p>
             GM daha sonra <strong>"⚙️ Kuralları Düzenle"</strong> ile oyun ortasında yeni kayıt, eşya,
             ırk vb. ekleyebilir — oyuncuların mevcut seçimleri bozulmaz.
           </p>
+        </details>
+
+        <details>
+          <summary>⚔️ Savaş: Can Barı, Hasar ve Durumlar</summary>
+          <p>
+            Haritadaki token'lar artık savaş yönetiyor. Kurulumda/"⚙️ Kuralları Düzenle"de iki
+            ayar yaparsın:
+          </p>
+          <ul>
+            <li>
+              <strong>Can Kaynağı</strong> — kaynaklarından hangisi can sayılsın (Can Puanı,
+              Dayanıklılık, Gemi Bütünlüğü... ne tanımladıysan). Bu, karakter kağıdındaki
+              <em> aynı değerdir</em>: haritadan verilen hasar kağıda, kağıttan yapılan değişiklik
+              haritaya anında yansır. "Yok" seçersen can barı hiç çıkmaz.
+            </li>
+            <li>
+              <strong>Durum Etkileri</strong> — kendi listeni yazarsın (🩸 Kanama, 😵 Sersem,
+              🛡️ Korunma...). İkonu açılır menüden seçersin.
+            </li>
+          </ul>
+          <p>
+            <strong>NPC canı</strong>: Odak Kütüphanesi'nde bir kaydı "🎭 Karakter/NPC" olarak
+            eklerken "Can" kutusuna bir sayı yazarsan, o NPC haritaya çıktığında barı dolu başlar.
+            Boş bırakırsan o NPC'de bar olmaz.
+          </p>
+          <ul>
+            <li>
+              Token'ın altında ince bir <strong>can barı</strong> görünür; can azaldıkça yeşilden
+              sarıya, sonra kırmızıya döner. Can sıfırlanınca token griye düşer.
+            </li>
+            <li>
+              <strong>Sadece GM</strong> bir token'a tıklayarak hasar panelini açar: −1/−5/−10 ve
+              +1/+5/+10 hızlı tuşları, serbest miktar girip "⚔️ Hasar" / "✚ İyileş", ayrıca
+              "Tam doldur" ve "Sıfırla". (Sürüklemek token'ı taşır, tıklamak paneli açar.)
+            </li>
+            <li>
+              Aynı panelden <strong>durum etkilerini</strong> açıp kapatırsın; ikonlar token'ın
+              köşesinde, ayrıca Parti panelinde oyuncunun adının yanında ve karakter kağıdında
+              görünür.
+            </li>
+            <li>
+              Oyuncular canlarını kendi karakter kağıtlarındaki kaynak çubuğundan yönetmeye devam
+              eder; haritadan hasar veremezler.
+            </li>
+          </ul>
         </details>
 
         <details>

@@ -14,6 +14,7 @@ import {
   selectableEntries,
 } from '../utils/traitGroups.js';
 import { resolveLevelReward, describeReward } from '../utils/levelRewards.js';
+import { activeConditions, conditionLabel } from '../utils/combat.js';
 import Portal from './Portal.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
 
@@ -711,6 +712,20 @@ export default function CharacterSheet({
               </div>
             );
           })}
+        </div>
+      )}
+
+      {activeConditions(player.conditions, gameConfig).length > 0 && (
+        <div className="sheet-conditions">
+          <span className="entry-list-label">Durum Etkileri</span>
+          <div className="condition-strip">
+            {activeConditions(player.conditions, gameConfig).map((c) => (
+              <span key={c.id} className="condition-chip active">
+                {conditionLabel(c)}
+              </span>
+            ))}
+          </div>
+          <p className="muted small-hint">Bunları GM haritadan takıp çıkarır.</p>
         </div>
       )}
 

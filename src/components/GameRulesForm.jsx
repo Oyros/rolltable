@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import EntryListEditor from './EntryListEditor.jsx';
 import ResourceListEditor from './ResourceListEditor.jsx';
+import ConditionListEditor from './ConditionListEditor.jsx';
 import ParticleEffect from './ParticleEffect.jsx';
 import { THEMES, DEFAULT_THEME_ID } from '../utils/themes.js';
 import { configGroups, newGroupId, NO_GROUPS } from '../utils/traitGroups.js';
@@ -55,6 +56,7 @@ function RewardFields({ rule, groups, onChange }) {
 const EMPTY_LISTS = {
   stats: [],
   resources: [],
+  conditions: [],
   races: [],
   classes: [],
   subclasses: [],
@@ -77,6 +79,7 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
   const [lists, setLists] = useState({
     stats: initial?.stats || EMPTY_LISTS.stats,
     resources: initial?.resources || EMPTY_LISTS.resources,
+    conditions: initial?.conditions || EMPTY_LISTS.conditions,
     races: initial?.races || EMPTY_LISTS.races,
     classes: initial?.classes || EMPTY_LISTS.classes,
     subclasses: initial?.subclasses || EMPTY_LISTS.subclasses,
@@ -95,6 +98,8 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
   // Level-up rewards: one general rule plus optional per-level overrides.
   const [rewardDefault, setRewardDefault] = useState(() => defaultRule(initial));
   const [rewardOverrides, setRewardOverrides] = useState(() => levelOverrides(initial));
+  // Which resource counts as health on map tokens ('' = no health bars).
+  const [hpResourceId, setHpResourceId] = useState(initial?.hpResourceId || '');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -220,6 +225,7 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
         statThresholdNeg1: n1,
         statThresholdNeg2: n2,
         statThresholdNeg3: n3,
+        hpResourceId: lists.resources.some((r) => r.id === hpResourceId) ? hpResourceId : '',
         ...lists,
       });
     } catch (err) {
@@ -386,6 +392,28 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
         hideDescription
       />
       <ResourceListEditor items={lists.resources} onChange={(v) => updateList('resources', v)} />
+
+      <div className="level-system-field">
+        <span className="entry-list-label">Savaş: Can Kaynağı</span>
+        <p className="muted small-hint">
+          Haritadaki token'ların üzerinde can barı olarak hangi kaynak gösterilsin? Seçtiğin
+          kaynak karakter kağıdındakiyle aynı değerdir — haritadan verilen hasar kağıda da işler.
+          "Yok" dersen can barı hiç çıkmaz.
+        </p>
+        <select value={hpResourceId} onChange={(e) => setHpResourceId(e.target.value)}>
+          <option value="">Yok — can barı gösterme</option>
+          {lists.resources.map((r) => (
+            <option key={r.id} value={r.id}>
+              {r.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <ConditionListEditor
+        items={lists.conditions}
+        onChange={(v) => updateList('conditions', v)}
+      />
       <EntryListEditor label="Irklar" items={lists.races} onChange={(v) => updateList('races', v)} />
       <EntryListEditor
         label="Sınıflar"
