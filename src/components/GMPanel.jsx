@@ -18,8 +18,9 @@ export default function GMPanel({
   isOwner,
 }) {
   const [showRulesEditor, setShowRulesEditor] = useState(false);
-  const [mapImageUrl, setMapImageUrl] = useState('');
-  const mapSynced = useRef(false);
+  const [mapDraftUrl, setMapDraftUrl] = useState('');
+  const [mapDraftLabel, setMapDraftLabel] = useState('');
+  const [mapDraftFolder, setMapDraftFolder] = useState('');
 
   const [locationDraftUrl, setLocationDraftUrl] = useState('');
   const [locationDraftLabel, setLocationDraftLabel] = useState('');
@@ -43,13 +44,6 @@ export default function GMPanel({
 
   const [passwordDraft, setPasswordDraft] = useState('');
   const passwordSynced = useRef(false);
-
-  useEffect(() => {
-    if (!mapSynced.current && scene) {
-      setMapImageUrl(scene.mapImageUrl || '');
-      mapSynced.current = true;
-    }
-  }, [scene]);
 
   useEffect(() => {
     if (!bannerSynced.current && settings) {
@@ -88,14 +82,39 @@ export default function GMPanel({
     update(ref(db, `rooms/${roomCode}/settings`), { sessionActive: false });
   }
 
-  function publishMap() {
-    const trimmed = mapImageUrl.trim();
-    const payload = { mapImageUrl: trimmed, updatedAt: Date.now() };
-    if (trimmed !== (scene?.mapImageUrl || '')) {
+  function saveMap() {
+    if (!mapDraftUrl.trim() || !mapDraftLabel.trim()) return;
+    push(ref(db, `rooms/${roomCode}/settings/savedMaps`), {
+      label: mapDraftLabel.trim(),
+      folder: mapDraftFolder.trim(),
+      imageUrl: mapDraftUrl.trim(),
+    });
+    setMapDraftUrl('');
+    setMapDraftLabel('');
+  }
+
+  function publishMap(entry) {
+    const url = entry.imageUrl;
+    const payload = { mapImageUrl: url, updatedAt: Date.now() };
+    // Pin/token positions belong to the map they were placed on.
+    if (url !== (scene?.mapImageUrl || '')) {
       payload.mapPins = null;
       payload.mapTokens = null;
     }
     update(ref(db, `rooms/${roomCode}/scene`), payload);
+  }
+
+  function removeMap(id) {
+    remove(ref(db, `rooms/${roomCode}/settings/savedMaps/${id}`));
+  }
+
+  function clearMap() {
+    update(ref(db, `rooms/${roomCode}/scene`), {
+      mapImageUrl: '',
+      mapPins: null,
+      mapTokens: null,
+      updatedAt: Date.now(),
+    });
   }
 
   function saveLocation() {
@@ -199,6 +218,7 @@ export default function GMPanel({
   const savedLocations = Object.entries(settings?.savedLocations || {});
   const savedFocuses = Object.entries(settings?.savedFocuses || {});
   const savedMusicList = Object.entries(settings?.savedMusic || {});
+  const savedMaps = Object.entries(settings?.savedMaps || {});
 
   const initiative = settings?.initiative || {};
   const queue = initiative.queue || [];
@@ -583,23 +603,72 @@ export default function GMPanel({
       </div>
 
       <div className="gm-section">
-        <h3 className="title-font gm-section-title">Harita</h3>
+        <h3 className="title-font gm-section-title">Harita Kütüphanesi</h3>
+        <p className="muted small-hint">
+          İstediğin kadar harita kaydedip listeden tıklayarak canlı haritayı değiştirebilirsin.
+          Farklı bir harita yayınlandığında o haritaya ait pinler ve token'lar temizlenir.
+        </p>
         <div className="inline-form">
           <input
-            value={mapImageUrl}
-            onChange={(e) => setMapImageUrl(e.target.value)}
+            value={mapDraftUrl}
+            onChange={(e) => setMapDraftUrl(e.target.value)}
             placeholder="Harita görseli URL"
           />
           <FileUploadButton
             roomCode={roomCode}
             folder="map"
             accept="image/*"
-            onUploaded={setMapImageUrl}
+            onUploaded={setMapDraftUrl}
           />
-          <button type="button" className="btn-primary small" onClick={publishMap}>
-            Yayınla
+          <input
+            value={mapDraftLabel}
+            onChange={(e) => setMapDraftLabel(e.target.value)}
+            placeholder="Harita adı"
+          />
+          <input
+            value={mapDraftFolder}
+            onChange={(e) => setMapDraftFolder(e.target.value)}
+            placeholder="Klasör (opsiyonel)"
+            list="map-folders"
+          />
+          <datalist id="map-folders">
+            {folderNames(savedMaps).map((f) => (
+              <option key={f} value={f} />
+            ))}
+          </datalist>
+          <button type="button" className="btn-primary small" onClick={saveMap}>
+            💾 Kaydet
           </button>
         </div>
+        {savedMaps.length > 0 &&
+          groupByFolder(savedMaps).map(([folderName, entries]) => (
+            <details key={folderName} className="library-folder" open>
+              <summary>
+                📁 {folderName} <span className="muted">({entries.length})</span>
+              </summary>
+              <div className="sfx-library">
+                {entries.map(([id, m]) => (
+                  <div key={id} className="saved-scene-item">
+                    <button
+                      type="button"
+                      className={`btn-dice${scene?.mapImageUrl === m.imageUrl ? ' active' : ''}`}
+                      onClick={() => publishMap(m)}
+                    >
+                      🗺️ {entryLabel(m)}
+                    </button>
+                    <button type="button" className="btn-ghost small" onClick={() => removeMap(id)}>
+                      Sil
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </details>
+          ))}
+        {scene?.mapImageUrl && (
+          <button type="button" className="btn-ghost small danger" onClick={clearMap}>
+            🚫 Haritayı Kaldır
+          </button>
+        )}
       </div>
 
       <div className="gm-section">

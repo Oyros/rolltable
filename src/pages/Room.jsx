@@ -28,6 +28,7 @@ import GameCalendar from '../components/GameCalendar.jsx';
 import InitiativeBar from '../components/InitiativeBar.jsx';
 import CameraStrip from '../components/CameraStrip.jsx';
 import ResizableSidebar from '../components/ResizableSidebar.jsx';
+import MapPanel from '../components/MapPanel.jsx';
 import { applyTheme, DEFAULT_THEME_ID } from '../utils/themes.js';
 import { deleteRoomUploads, sweepOrphanedRoomUploads } from '../utils/upload.js';
 
@@ -53,6 +54,7 @@ export default function Room({ session, onLeave }) {
   const [ownerId, setOwnerId] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
   const [showBottomPanel, setShowBottomPanel] = useState(false);
+  const [mapOpen, setMapOpen] = useState(false);
   const [turnBannerActive, setTurnBannerActive] = useState(false);
   const flashSeenRef = useRef(undefined);
   const kickSeenRef = useRef(undefined);
@@ -329,6 +331,15 @@ export default function Room({ session, onLeave }) {
             isGM={role === 'gm'}
             onAdvance={advanceInitiative}
           />
+          {scene?.mapImageUrl && (
+            <button
+              type="button"
+              className="btn-ghost sound-toggle map-toggle-btn"
+              onClick={() => setMapOpen((v) => !v)}
+            >
+              {mapOpen ? '🗺️ Haritayı Gizle' : '🗺️ Haritayı Göster'}
+            </button>
+          )}
         </div>
         <div className="header-right">
           <SessionTimer startedAt={settings?.sessionStartedAt} active={!!settings?.sessionActive} />
@@ -494,17 +505,11 @@ export default function Room({ session, onLeave }) {
             scene={scene}
             roomCode={roomCode}
             isGM={role === 'gm'}
-            name={liveName}
-            playerId={playerId}
-            pinColor={me?.color}
             ambianceVolume={ambianceVolume}
             onAmbianceVolumeChange={setAmbianceVolume}
             savedLocations={settings?.savedLocations}
             savedFocuses={settings?.savedFocuses}
             savedMusic={settings?.savedMusic}
-            players={players}
-            initiativeQueue={settings?.initiative?.queue}
-            canPin={role !== 'spectator'}
           />
 
           {role !== 'spectator' && (
@@ -561,7 +566,26 @@ export default function Room({ session, onLeave }) {
           )}
         </div>
 
+        {mapOpen && scene?.mapImageUrl && (
+          <MapPanel
+            roomCode={roomCode}
+            scene={scene}
+            isGM={role === 'gm'}
+            name={liveName}
+            playerId={playerId}
+            pinColor={me?.color}
+            canPin={role !== 'spectator'}
+            players={players}
+            savedFocuses={settings?.savedFocuses}
+            initiativeQueue={settings?.initiative?.queue}
+            onClose={() => setMapOpen(false)}
+          />
+        )}
+
         <ResizableSidebar side="right" storageKey="rolltable_sidebar_right_width">
+          {/* Keeps the right-hand controls reachable from under the map, which
+              is pinned to this corner while open. */}
+          {mapOpen && scene?.mapImageUrl && <div className="map-panel-spacer" />}
           <details className="panel side-accordion" open>
             <summary>
               🎲 Zar<span className="side-accordion-chevron">▾</span>

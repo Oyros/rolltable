@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { ref, update, push, remove } from 'firebase/database';
 import { db } from '../firebase.js';
 import TypewriterText from './TypewriterText.jsx';
-import { resolveQueueEntity } from '../utils/initiativeEntity.js';
 import { entryLabel, entryCaption, groupByFolder } from '../utils/library.js';
 
 const VOLUME_KEY = 'sessizlik_volume';
@@ -17,17 +16,11 @@ export default function SceneDisplay({
   scene,
   roomCode,
   isGM,
-  name,
-  playerId,
-  pinColor,
   ambianceVolume,
   onAmbianceVolumeChange,
   savedLocations,
   savedFocuses,
   savedMusic,
-  players,
-  initiativeQueue,
-  canPin = true,
 }) {
   const audioRef = useRef(null);
   const ambianceRef = useRef(null);
@@ -35,16 +28,13 @@ export default function SceneDisplay({
   const pendingRef = useRef(false);
   const ambiancePendingRef = useRef(false);
   const sfxSeenRef = useRef(undefined);
-  const mapAreaRef = useRef(null);
   const loadedMusicUrlRef = useRef('');
 
   const [volume, setVolume] = useState(() => loadVolume(VOLUME_KEY, 0.6));
   const [soundError, setSoundError] = useState('');
   const [ambianceError, setAmbianceError] = useState('');
-  const [mapOpen, setMapOpen] = useState(false);
   const [locationPickerOpen, setLocationPickerOpen] = useState(false);
   const [focusPickerOpen, setFocusPickerOpen] = useState(false);
-  const [dragToken, setDragToken] = useState(null); // { id, x, y } while dragging
 
   const savedLocationList = Object.entries(savedLocations || {});
   const savedFocusList = Object.entries(savedFocuses || {});
@@ -243,70 +233,6 @@ export default function SceneDisplay({
     }
   }
 
-  function handleMapClick(e) {
-    if (!canPin) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    push(ref(db, `rooms/${roomCode}/scene/mapPins`), {
-      x,
-      y,
-      by: name || '',
-      byId: playerId || '',
-      color: pinColor || '',
-      gm: !!isGM,
-    });
-  }
-
-  function removePin(pinId, pin, e) {
-    e.stopPropagation();
-    if (!isGM && pin.byId !== playerId) return;
-    remove(ref(db, `rooms/${roomCode}/scene/mapPins/${pinId}`));
-  }
-
-  // GM auto-places a token for anyone in the initiative queue who doesn't
-  // have one yet, scattered along the bottom edge — GM drags from there.
-  useEffect(() => {
-    if (!isGM || !mapOpen) return;
-    const queue = initiativeQueue || [];
-    const existing = scene?.mapTokens || {};
-    const payload = {};
-    queue.forEach((id, i) => {
-      if (existing[id]) return;
-      payload[id] = { x: 8 + i * (84 / Math.max(queue.length - 1, 1)), y: 88 };
-    });
-    if (Object.keys(payload).length > 0) {
-      update(ref(db, `rooms/${roomCode}/scene/mapTokens`), payload);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isGM, mapOpen, roomCode, initiativeQueue, scene?.mapTokens]);
-
-  function handleTokenPointerDown(id, e) {
-    e.stopPropagation();
-    e.preventDefault();
-    e.currentTarget.setPointerCapture(e.pointerId);
-    const token = scene?.mapTokens?.[id];
-    setDragToken({ id, x: token?.x ?? 50, y: token?.y ?? 50 });
-  }
-
-  function handleTokenPointerMove(e) {
-    if (!dragToken) return;
-    const rect = mapAreaRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const x = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
-    const y = Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100));
-    setDragToken((d) => (d ? { ...d, x, y } : d));
-  }
-
-  function handleTokenPointerUp() {
-    if (!dragToken) return;
-    update(ref(db, `rooms/${roomCode}/scene/mapTokens/${dragToken.id}`), {
-      x: dragToken.x,
-      y: dragToken.y,
-    });
-    setDragToken(null);
-  }
-
   if (!scene) {
     return (
       <div className="scene-display panel scene-empty">
@@ -390,18 +316,8 @@ export default function SceneDisplay({
         </div>
       </div>
 
-      {(scene.mapImageUrl || scene.musicUrl || scene.ambianceUrl || (isGM && savedMusicList.length > 0)) && (
+      {(scene.musicUrl || scene.ambianceUrl || (isGM && savedMusicList.length > 0)) && (
         <div className="scene-toolbar">
-          {scene.mapImageUrl && (
-            <button
-              type="button"
-              className="btn-ghost sound-toggle"
-              onClick={() => setMapOpen((v) => !v)}
-            >
-              {mapOpen ? '🗺️ Haritayı Gizle' : '🗺️ Haritayı Göster'}
-            </button>
-          )}
-
           <div className="scene-audio-controls">
             {(scene.musicUrl || (isGM && savedMusicList.length > 0)) && (
               <div className="sound-controls">
@@ -484,85 +400,6 @@ export default function SceneDisplay({
               </div>
             )}
           </div>
-        </div>
-      )}
-
-      {mapOpen && scene.mapImageUrl && (
-        <div
-          className={`scene-image-box scene-image-map${canPin ? ' map-pin-area' : ''}`}
-          ref={mapAreaRef}
-          onClick={handleMapClick}
-        >
-          <img src={scene.mapImageUrl} alt="Harita" />
-          {(initiativeQueue || []).map((id) => {
-            const entity = resolveQueueEntity(id, players, savedFocuses);
-            if (!entity) return null;
-            const stored = scene.mapTokens?.[id];
-            const dragging = dragToken?.id === id;
-            if (!dragging && !stored) return null;
-            const x = dragging ? dragToken.x : stored.x;
-            const y = dragging ? dragToken.y : stored.y;
-            return (
-              <div
-                key={`token-${id}`}
-                className={`map-token${entity.isNpc ? ' enemy' : ''}${isGM ? ' draggable' : ''}${dragging ? ' dragging' : ''}`}
-                style={{
-                  left: `${x}%`,
-                  top: `${y}%`,
-                  borderColor: entity.isNpc ? undefined : entity.color || 'var(--amber)',
-                }}
-                title={entity.name}
-                onClick={(e) => e.stopPropagation()}
-                onPointerDown={isGM ? (e) => handleTokenPointerDown(id, e) : undefined}
-                onPointerMove={isGM ? handleTokenPointerMove : undefined}
-                onPointerUp={isGM ? handleTokenPointerUp : undefined}
-              >
-                {entity.imageUrl ? (
-                  <img src={entity.imageUrl} alt={entity.name} />
-                ) : (
-                  <span className="map-token-fallback">
-                    {entity.isNpc ? '⚔️' : (entity.name || '?').charAt(0).toUpperCase()}
-                  </span>
-                )}
-              </div>
-            );
-          })}
-          {Object.entries(scene.mapPins || {}).map(([id, pin]) => {
-            const canRemove = isGM || pin.byId === playerId;
-            const label = pin.by
-              ? `${pin.by} bıraktı${canRemove ? ' — kaldırmak için tıkla' : ''}`
-              : 'Kaldırmak için tıkla';
-
-            if (pin.gm) {
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  className={`map-pin map-pin-emoji${canRemove ? '' : ' map-pin-locked'}`}
-                  style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
-                  title={label}
-                  onClick={(e) => removePin(id, pin, e)}
-                >
-                  📍
-                </button>
-              );
-            }
-
-            return (
-              <button
-                key={id}
-                type="button"
-                className={`map-pin map-pin-marker${canRemove ? '' : ' map-pin-locked'}`}
-                style={{
-                  left: `${pin.x}%`,
-                  top: `${pin.y}%`,
-                  background: pin.color || 'var(--amber)',
-                }}
-                title={label}
-                onClick={(e) => removePin(id, pin, e)}
-              />
-            );
-          })}
         </div>
       )}
 

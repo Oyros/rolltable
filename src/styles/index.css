@@ -671,6 +671,13 @@ button:hover {
 .header-center {
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.map-toggle-btn {
+  width: auto;
+  flex-shrink: 0;
 }
 
 .header-right {
@@ -716,6 +723,7 @@ button:hover {
 }
 
 .room-body {
+  position: relative; /* anchors the map panel to this corner */
   display: flex;
   align-items: stretch;
   gap: 20px;
@@ -985,6 +993,18 @@ button:hover {
   }
 
   .sidebar-resizer {
+    display: none;
+  }
+
+  /* Stacked layout: pinning the map to a corner would just cover the page, so
+     it flows inline with everything else and its placeholder isn't needed. */
+  .map-panel {
+    position: static;
+    width: 100%;
+    max-width: none;
+  }
+
+  .map-panel-spacer {
     display: none;
   }
 
@@ -2580,6 +2600,86 @@ button:hover {
 
 .save-scene-form {
   margin-top: 14px;
+}
+
+/* Map panel — pinned to the top-right of the play area */
+.map-panel {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 6;
+  width: 460px;
+  max-width: calc(100% - 48px);
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Reserves the panel's footprint in the right sidebar so its accordions stay
+   reachable underneath. Kept in sync with .map-panel's height by hand. */
+.map-panel-spacer {
+  flex-shrink: 0;
+  height: 292px;
+}
+
+.map-panel-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel-alt);
+}
+
+.map-panel-bar button {
+  width: auto;
+}
+
+.map-panel-title {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  color: var(--amber-light);
+}
+
+.map-panel-zoom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.map-zoom-level {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 38px;
+  text-align: center;
+}
+
+.map-viewport {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: #0a0704;
+}
+
+.map-viewport.pannable .map-canvas {
+  cursor: grab;
+}
+
+.map-canvas {
+  position: absolute;
+  inset: 0;
+  transform-origin: center center;
+}
+
+.map-canvas > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  user-select: none;
 }
 
 /* Map pins */

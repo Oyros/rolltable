@@ -101,7 +101,7 @@ export default function HelpGuide({ onClose }) {
           <ul>
             <li><strong>Mekan Görseli</strong> ve <strong>Sahne Adı</strong> — sahne adı daktilo efektiyle yazılır.</li>
             <li><strong>Odak Görseli</strong> — o an konuşan karakter/eşya, kendi adıyla birlikte.</li>
-            <li><strong>Harita</strong> — "Haritayı Göster" ile açılır; üzerine tıklayarak pin bırakabilirsin (kendi renginde). Kendi pinini herkes, başkasının pinini sadece GM kaldırabilir.</li>
+            <li><strong>Harita</strong> — üst menüdeki inisiyatif sırasının sağındaki "🗺️ Haritayı Göster" ile açılır ve ekranın sağ üst köşesine sabitlenir (sağ menü onun altına kayar, kapatınca eski haline döner). Üzerine tıklayarak pin bırakabilirsin (kendi renginde); kendi pinini herkes, başkasının pinini sadece GM kaldırabilir. Başlıktaki ➕/➖ ile yakınlaştırıp uzaklaştırabilir, yakınlaştırdığında haritayı sürükleyerek gezebilirsin (⟲ sıfırlar). Pinler ve token'lar yakınlaştırmayla birlikte doğru yerlerinde kalır, boyutları sabit görünür.</li>
             <li><strong>Taktiksel Token'lar</strong> — inisiyatif sırasındaki her oyuncu ve NPC, harita açıldığında otomatik olarak bir token (portre + renkli halka; NPC'ler kırmızı) halinde haritada belirir. Sadece GM token'ları sürükleyip konumlandırabilir; oyuncular canlı olarak izler. Kuyruktan çıkarılan bir karakterin token'ı da haritadan kalkar.</li>
             <li><strong>Müzik / Ambiyans</strong> — GM çalar/durdurur, herkes kendi ses seviyesini ayarlar. Sahne değiştirmek müziğe dokunmaz: müzik kaldığı yerden çalmaya devam eder. Müzik yalnızca menüden farklı bir parça seçildiğinde (ya da "⏮ Baştan Başlat" denildiğinde) baştan başlar.</li>
             <li><strong>Vinyet, Flaş/Sarsıntı, Hava Durumu</strong> — GM'in tetiklediği görsel atmosfer efektleri (sağ kenardaki "Görsel Efektler"de).</li>
@@ -258,7 +258,7 @@ export default function HelpGuide({ onClose }) {
               gerektirir — değilse yükleme birkaç saniye içinde net bir hata verir, URL alanı her
               zaman alternatif olarak çalışmaya devam eder.
             </li>
-            <li><strong>Harita</strong> — URL gir, "Yayınla" ile canlı haritayı günceller (harita değişirse eski pinler temizlenir).</li>
+            <li><strong>Harita Kütüphanesi</strong> — mekan/odak kütüphaneleri gibi çalışır: istediğin kadar harita kaydedip (isteğe bağlı klasörleyip) listeden tıklayarak canlı haritayı değiştirirsin. Farklı bir harita yayınlandığında o haritaya ait pinler ve token'lar temizlenir. "🚫 Haritayı Kaldır" ile haritayı tamamen kapatabilirsin.</li>
             <li><strong>İnisiyatif Sırası</strong> — sıraya oyuncu ekle/çıkar, yeniden sırala, sırayı ilerlet (bkz. yukarıdaki "İnisiyatif Sırası" başlığı).</li>
             <li><strong>Gizli Fısıltı</strong> — tek bir oyuncuya ya da "📢 Herkese" özel mesaj gönder.</li>
           </ul>
