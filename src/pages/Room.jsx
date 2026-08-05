@@ -27,6 +27,7 @@ import LootGenerator from '../components/LootGenerator.jsx';
 import GameCalendar from '../components/GameCalendar.jsx';
 import InitiativeBar from '../components/InitiativeBar.jsx';
 import CameraStrip from '../components/CameraStrip.jsx';
+import ResizableSidebar from '../components/ResizableSidebar.jsx';
 import { applyTheme, DEFAULT_THEME_ID } from '../utils/themes.js';
 import { deleteRoomUploads, sweepOrphanedRoomUploads } from '../utils/upload.js';
 
@@ -425,7 +426,7 @@ export default function Room({ session, onLeave }) {
       {header}
 
       <div className="room-body">
-        <aside className="room-sidebar">
+        <ResizableSidebar side="left" storageKey="rolltable_sidebar_left_width">
           <GmSlotCard players={players} />
 
           <details className="panel side-accordion" open>
@@ -486,7 +487,7 @@ export default function Room({ session, onLeave }) {
               />
             </div>
           </details>
-        </aside>
+        </ResizableSidebar>
 
         <div className="room-content">
           <SceneDisplay
@@ -560,7 +561,7 @@ export default function Room({ session, onLeave }) {
           )}
         </div>
 
-        <aside className="room-sidebar">
+        <ResizableSidebar side="right" storageKey="rolltable_sidebar_right_width">
           <details className="panel side-accordion" open>
             <summary>
               🎲 Zar<span className="side-accordion-chevron">▾</span>
@@ -645,7 +646,7 @@ export default function Room({ session, onLeave }) {
               </div>
             </details>
           )}
-        </aside>
+        </ResizableSidebar>
       </div>
 
       <CameraStrip

@@ -692,14 +692,47 @@ button:hover {
   overflow: hidden;
 }
 
+/* Width comes from an inline style (drag-resizable, persisted per side). */
 .room-sidebar {
-  flex: 0 0 280px;
-  width: 280px;
+  flex-grow: 0;
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
+  min-width: 0;
+}
+
+.room-sidebar-content {
+  flex: 1;
+  min-width: 0;
   height: 100%;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.sidebar-resizer {
+  flex-shrink: 0;
+  width: 10px;
+  cursor: ew-resize;
+  position: relative;
+}
+
+/* Grip marker so the edge reads as draggable */
+.sidebar-resizer::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 44px;
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.sidebar-resizer:hover::after {
+  background: var(--amber);
 }
 
 .room-content {
@@ -891,13 +924,6 @@ button:hover {
   flex-shrink: 0;
 }
 
-@media (max-width: 1100px) {
-  .room-sidebar {
-    flex-basis: 240px;
-    width: 240px;
-  }
-}
-
 @media (max-width: 900px) {
   .room {
     height: auto;
@@ -911,10 +937,21 @@ button:hover {
     min-height: auto;
   }
 
+  /* Stacked layout: the panels span the full width, so the dragged width (an
+     inline style, hence !important here) and its grip no longer apply. */
   .room-sidebar {
-    width: 100%;
+    width: 100% !important;
+    flex-basis: auto !important;
+    height: auto;
+  }
+
+  .room-sidebar-content {
     height: auto;
     overflow-y: visible;
+  }
+
+  .sidebar-resizer {
+    display: none;
   }
 
   .room-content {

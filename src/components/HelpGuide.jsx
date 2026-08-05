@@ -14,6 +14,11 @@ export default function HelpGuide({ onClose }) {
         <p className="subtitle">
           RollTable'ın tüm bölümleri ve ne işe yaradıkları. Başlıklara tıklayıp açabilirsin.
         </p>
+        <p className="muted small-hint">
+          💡 Sol ve sağ panellerin iç kenarındaki tutamağı sağa/sola sürükleyerek genişliklerini,
+          alttaki kamera şeridinin tutamağını yukarı/aşağı sürükleyerek de yüksekliğini kendine
+          göre ayarlayabilirsin. Ayarların tarayıcında hatırlanır.
+        </p>
 
         <details open>
           <summary>🚪 Başlarken</summary>
