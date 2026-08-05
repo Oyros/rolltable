@@ -23,6 +23,40 @@
   box-sizing: border-box;
 }
 
+/* Themed scrollbars. These read the same custom properties applyTheme() sets
+   on the root element, so they re-tint with the room's theme automatically.
+   Firefox gets the standard two-value syntax; the ::-webkit- rules cover
+   Chrome/Edge/Safari, where the standard properties are not honoured. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--amber-dim) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--bg);
+  border-radius: 6px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--amber-dim);
+  border-radius: 6px;
+  /* Inset the thumb so it reads as a bar rather than filling the gutter. */
+  border: 2px solid var(--bg);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--amber);
+}
+
+*::-webkit-scrollbar-corner {
+  background: var(--bg);
+}
+
 html,
 body,
 #root {
