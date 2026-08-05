@@ -3,6 +3,7 @@ import { ref, update, push, remove } from 'firebase/database';
 import { db } from '../firebase.js';
 import TypewriterText from './TypewriterText.jsx';
 import { entryLabel, entryCaption, groupByFolder } from '../utils/library.js';
+import { playerImageGroups, playerImageCaption } from '../utils/portraits.js';
 
 const VOLUME_KEY = 'sessizlik_volume';
 
@@ -21,6 +22,7 @@ export default function SceneDisplay({
   savedLocations,
   savedFocuses,
   savedMusic,
+  players,
 }) {
   const audioRef = useRef(null);
   const ambianceRef = useRef(null);
@@ -39,6 +41,9 @@ export default function SceneDisplay({
   const savedLocationList = Object.entries(savedLocations || {});
   const savedFocusList = Object.entries(savedFocuses || {});
   const savedMusicList = Object.entries(savedMusic || {});
+  // Images the players uploaded on their own character sheets, offered to the
+  // GM as a virtual "Oyuncular" folder — nothing is copied into the library.
+  const playerGroups = playerImageGroups(players);
 
   const isPlaying = scene?.playing !== false;
   const isAmbiancePlaying = scene?.ambiancePlaying !== false;
@@ -221,6 +226,15 @@ export default function SceneDisplay({
     setFocusPickerOpen(false);
   }
 
+  function selectPlayerImage(group, image) {
+    update(ref(db, `rooms/${roomCode}/scene`), {
+      focusImageUrl: image.url,
+      focusCaption: playerImageCaption(group.playerName, image),
+      updatedAt: Date.now(),
+    });
+    setFocusPickerOpen(false);
+  }
+
   // Picking a different track is the one place music restarts from the top.
   function selectMusic(e) {
     const entry = savedMusicList.find(([id]) => id === e.target.value);
@@ -292,24 +306,46 @@ export default function SceneDisplay({
           {isGM && <span className="scene-image-edit-hint">🎭 Kütüphaneden seç</span>}
           {focusPickerOpen && (
             <div className="scene-image-picker" onClick={(e) => e.stopPropagation()}>
-              {savedFocusList.length === 0 ? (
+              {savedFocusList.length === 0 && playerGroups.length === 0 ? (
                 <p className="muted small-hint">Henüz kayıtlı odak yok — GM panelinden ekle.</p>
               ) : (
-                groupByFolder(savedFocusList).map(([folderName, entries]) => (
-                  <div key={folderName} className="scene-picker-group">
-                    <span className="scene-picker-folder">📁 {folderName}</span>
-                    {entries.map(([id, f]) => (
-                      <button
-                        key={id}
-                        type="button"
-                        className={`btn-ghost small${scene.focusImageUrl === f.imageUrl ? ' active' : ''}`}
-                        onClick={() => selectFocus(f)}
-                      >
-                        {entryLabel(f)}
-                      </button>
-                    ))}
-                  </div>
-                ))
+                <>
+                  {groupByFolder(savedFocusList).map(([folderName, entries]) => (
+                    <div key={folderName} className="scene-picker-group">
+                      <span className="scene-picker-folder">📁 {folderName}</span>
+                      {entries.map(([id, f]) => (
+                        <button
+                          key={id}
+                          type="button"
+                          className={`btn-ghost small${scene.focusImageUrl === f.imageUrl ? ' active' : ''}`}
+                          onClick={() => selectFocus(f)}
+                        >
+                          {entryLabel(f)}
+                        </button>
+                      ))}
+                    </div>
+                  ))}
+                  {playerGroups.length > 0 && (
+                    <div className="scene-picker-group">
+                      <span className="scene-picker-folder">👥 Oyuncular</span>
+                      {playerGroups.map((group) => (
+                        <div key={group.playerId} className="scene-picker-subgroup">
+                          <span className="scene-picker-subfolder">📁 {group.playerName}</span>
+                          {group.images.map((image) => (
+                            <button
+                              key={image.id}
+                              type="button"
+                              className={`btn-ghost small${scene.focusImageUrl === image.url ? ' active' : ''}`}
+                              onClick={() => selectPlayerImage(group, image)}
+                            >
+                              {image.name}
+                            </button>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}

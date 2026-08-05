@@ -6,6 +6,7 @@ import { rollStat as rollStatShared } from '../utils/statRoll.js';
 import { rollModeLabel } from '../utils/rollMode.js';
 import { newId } from '../utils/id.js';
 import { itemName, itemQty, itemLabel, makeItem } from '../utils/inventory.js';
+import { portraitUrl, portraitLabel, portraitDisplayName, makePortrait } from '../utils/portraits.js';
 import Portal from './Portal.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
 
@@ -30,6 +31,7 @@ export default function CharacterSheet({
   const [nameDraft, setNameDraft] = useState(player.name || '');
   const [skillsDraft, setSkillsDraft] = useState(player.skills || '');
   const [portraitDraft, setPortraitDraft] = useState(player.portraitUrl || '');
+  const [portraitNameDraft, setPortraitNameDraft] = useState('');
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [levelUpStatId, setLevelUpStatId] = useState('');
   const [levelUpPerkId, setLevelUpPerkId] = useState('');
@@ -63,7 +65,7 @@ export default function CharacterSheet({
   // map entry — surface it as a thumbnail too so it isn't stranded.
   const portraitEntries = Object.entries(portraits);
   const gallery =
-    player.portraitUrl && !portraitEntries.some(([, url]) => url === player.portraitUrl)
+    player.portraitUrl && !portraitEntries.some(([, e]) => portraitUrl(e) === player.portraitUrl)
       ? [[LEGACY_PORTRAIT_ID, player.portraitUrl], ...portraitEntries]
       : portraitEntries;
 
@@ -78,17 +80,37 @@ export default function CharacterSheet({
 
   // portraitUrl stays the *active* image (everything else — party panel,
   // initiative bar, map tokens — reads that single field), while `portraits`
-  // holds the gallery the player picks from.
+  // holds the gallery the player picks from. The name given here is what the
+  // GM sees in the focus picker, under Oyuncular › karakter adı.
   function addPortrait(url) {
     const trimmed = (url || '').trim();
     if (!trimmed) return;
-    if (Object.values(portraits).includes(trimmed)) {
-      patch({ portraitUrl: trimmed });
+    const existing = portraitEntries.find(([, e]) => portraitUrl(e) === trimmed);
+    if (existing) {
+      // Re-adding a URL just re-selects it, but a freshly typed name still
+      // gets applied to it.
+      const label = portraitNameDraft.trim();
+      patch({
+        portraitUrl: trimmed,
+        ...(label ? { [`portraits/${existing[0]}`]: makePortrait(trimmed, label) } : {}),
+      });
       setPortraitDraft('');
+      setPortraitNameDraft('');
       return;
     }
-    patch({ [`portraits/${newId('img')}`]: trimmed, portraitUrl: trimmed });
+    patch({
+      [`portraits/${newId('img')}`]: makePortrait(trimmed, portraitNameDraft),
+      portraitUrl: trimmed,
+    });
     setPortraitDraft('');
+    setPortraitNameDraft('');
+  }
+
+  function renamePortrait(id, entry) {
+    if (id === LEGACY_PORTRAIT_ID) return;
+    const next = window.prompt('Görsel adı (GM bu adla görür):', portraitLabel(entry));
+    if (next === null) return;
+    patch({ [`portraits/${id}`]: makePortrait(portraitUrl(entry), next) });
   }
 
   function removePortrait(id, url) {
@@ -98,7 +120,7 @@ export default function CharacterSheet({
     if (id !== LEGACY_PORTRAIT_ID) updates[`portraits/${id}`] = null;
     if (player.portraitUrl === url) {
       const fallback = gallery.find(([gid]) => gid !== id);
-      updates.portraitUrl = fallback ? fallback[1] : '';
+      updates.portraitUrl = fallback ? portraitUrl(fallback[1]) : '';
     }
     patch(updates);
   }
@@ -397,6 +419,15 @@ export default function CharacterSheet({
           <img className="portrait-preview" src={player.portraitUrl} alt={player.name} />
         )}
         <label>
+          Görsel Adı
+          <input
+            value={portraitNameDraft}
+            onChange={(e) => setPortraitNameDraft(e.target.value)}
+            placeholder="Örn. Zırhlı hali"
+            title="GM bu adla görür — Oyuncular › karakter adın altında"
+          />
+        </label>
+        <label>
           Görsel Ekle (URL)
           <input
             value={portraitDraft}
@@ -432,32 +463,44 @@ export default function CharacterSheet({
       {gallery.length > 0 && (
         <div className="portrait-gallery">
           <span className="entry-list-label">
-            Görsellerin — kullanmak istediğine tıkla
+            Görsellerin — kullanmak istediğine tıkla, adını değiştirmek için alt yazısına tıkla
           </span>
           <div className="portrait-gallery-list">
-            {gallery.map(([id, url]) => (
-              <div
-                key={id}
-                className={`portrait-thumb${url === player.portraitUrl ? ' active' : ''}`}
-              >
-                <button
-                  type="button"
-                  className="portrait-thumb-pick"
-                  onClick={() => patch({ portraitUrl: url })}
-                  title="Bu görseli kullan"
+            {gallery.map(([id, entry], index) => {
+              const url = portraitUrl(entry);
+              const displayName = portraitDisplayName(entry, index);
+              return (
+                <div
+                  key={id}
+                  className={`portrait-thumb${url === player.portraitUrl ? ' active' : ''}`}
                 >
-                  <img src={url} alt="" />
-                </button>
-                <button
-                  type="button"
-                  className="portrait-thumb-remove"
-                  onClick={() => removePortrait(id, url)}
-                  title="Sil"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+                  <button
+                    type="button"
+                    className="portrait-thumb-pick"
+                    onClick={() => patch({ portraitUrl: url })}
+                    title="Bu görseli kullan"
+                  >
+                    <img src={url} alt="" />
+                  </button>
+                  <button
+                    type="button"
+                    className="portrait-thumb-name"
+                    onClick={() => renamePortrait(id, entry)}
+                    title="Adını değiştir"
+                  >
+                    {displayName}
+                  </button>
+                  <button
+                    type="button"
+                    className="portrait-thumb-remove"
+                    onClick={() => removePortrait(id, url)}
+                    title="Sil"
+                  >
+                    ✕
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

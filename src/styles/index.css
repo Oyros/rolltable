@@ -788,10 +788,6 @@ button:hover {
   gap: 10px;
 }
 
-.room-bottom {
-  flex-shrink: 0;
-}
-
 /* Camera strip */
 .camera-strip {
   flex-shrink: 0;
@@ -929,42 +925,63 @@ button:hover {
   margin: 0;
 }
 
-.bottom-panel-trigger {
-  width: 100%;
+/* Header window toggles: map/quests side by side, the personal panel under
+   them, so the middle of the screen is display-only. */
+.header-window-toggles {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 22px;
-  cursor: pointer;
-  font-family: var(--font-heading);
-  font-size: 1.05rem;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.header-window-toggles-row {
+  display: flex;
+  gap: 6px;
+}
+
+.header-panel-btn {
+  width: 100%;
   color: var(--amber-light);
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.bottom-panel-trigger:hover {
-  border-color: var(--amber);
-  background: rgba(207, 154, 63, 0.08);
-}
-
-.bottom-panel-trigger-icon {
-  font-size: 1.4rem;
+  border-color: var(--amber-dim);
 }
 
 .bottom-panel-modal {
-  max-width: 640px;
+  max-width: min(1100px, 94vw);
   width: 100%;
-  max-height: 85vh;
+  max-height: 92vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .bottom-panel-close {
   align-self: flex-end;
   flex-shrink: 0;
+}
+
+/* Denser than the sidebar panels: this modal has a lot to fit and is only
+   open while you're actively working in it. */
+.bottom-panel-modal > .panel {
+  padding: 16px;
+}
+
+.bottom-panel-modal .gm-section {
+  margin-top: 12px;
+  padding-top: 10px;
+  gap: 8px;
+}
+
+.bottom-panel-modal .gm-section > .small-hint {
+  margin: 0;
+}
+
+.bottom-panel-modal .inline-form {
+  gap: 6px;
+}
+
+.bottom-panel-modal .library-folder {
+  margin: 0;
 }
 
 /* Compact laptops (1366×768 and similar). Above 900px the layout still has
@@ -1047,9 +1064,8 @@ button:hover {
     gap: 14px;
   }
 
-  .bottom-panel-trigger {
+  .bottom-panel-modal > .panel {
     padding: 12px;
-    font-size: 0.95rem;
   }
 
   .scene-images {
@@ -1109,16 +1125,12 @@ button:hover {
   .room-content {
     height: auto;
   }
-
-  .room-bottom {
-    overflow-y: visible;
-  }
 }
 
 /* Scene */
 /* Fills whatever height the column has left (scrolling internally when its
-   contents don't fit) so no dead space is left between the scene, the panel
-   trigger below it and the camera strip. */
+   contents don't fit) so no dead space is left between the scene and the
+   camera strip. */
 .scene-display {
   display: flex;
   flex-direction: column;
@@ -1254,6 +1266,25 @@ button:hover {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-muted);
+}
+
+/* Player galleries nest one level deeper: Oyuncular › karakter adı */
+.scene-picker-subgroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-left: 10px;
+  padding-left: 8px;
+  border-left: 1px solid var(--border);
+}
+
+.scene-picker-subgroup + .scene-picker-subgroup {
+  margin-top: 6px;
+}
+
+.scene-picker-subfolder {
+  font-size: 0.68rem;
+  color: var(--amber-light);
 }
 
 .music-quick-select {
@@ -1420,12 +1451,13 @@ button:hover {
 
 .portrait-thumb {
   position: relative;
-  width: 64px;
-  height: 64px;
+  width: 78px;
   border-radius: 8px;
   overflow: hidden;
   border: 2px solid var(--border);
   background: var(--bg-panel-alt);
+  display: flex;
+  flex-direction: column;
 }
 
 .portrait-thumb.active {
@@ -1435,12 +1467,33 @@ button:hover {
 
 .portrait-thumb-pick {
   width: 100%;
-  height: 100%;
+  height: 64px;
   padding: 0;
   border: none;
   background: none;
   cursor: pointer;
   display: block;
+}
+
+/* The name the GM sees in the focus picker — editable by clicking it. */
+.portrait-thumb-name {
+  width: 100%;
+  padding: 2px 4px;
+  border: none;
+  border-top: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text-muted);
+  font-size: 0.6rem;
+  line-height: 1.3;
+  text-align: center;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.portrait-thumb-name:hover {
+  color: var(--amber-light);
 }
 
 .portrait-thumb-pick img {

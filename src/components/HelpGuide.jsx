@@ -179,13 +179,15 @@ export default function HelpGuide({ onClose }) {
         <details>
           <summary>📜 Karakter Kağıdı (oyuncular)</summary>
           <p>
-            Orta bölümün altındaki <strong>"📜 Karakter Kağıdımı Aç"</strong> kartına tıklayınca
-            tam ekran açılır (kapatmak için "✕ Kapat" ya da dışına tıkla).
+            Üst menüde harita/görev tuşlarının altındaki <strong>"📜 Karakter Kağıdım"</strong>
+            tuşuna tıklayınca pencere olarak açılır (kapatmak için "✕ Kapat" ya da dışına tıkla).
+            Ekranın ortası tamamen sahneye ayrıldığı için bu tuş artık orada yer kaplamıyor.
           </p>
           <ul>
             <li><strong>Karakter Adı</strong> dilediğin zaman değiştirilebilir — odaya girerken seçtiğin isimle sınırlı değilsin, buradan güncelleyince sohbet, zar atışları ve Parti panelinde de anında yeni isim görünür.</li>
             <li>GM görünürlüğü zorlamadıysa, en üstteki <strong>"Karakter kağıdımı diğer oyunculara göster"</strong> anahtarıyla statların/trait/perk/envanterinin diğer oyunculara görünüp görünmeyeceğini kendin seçersin (portren, seviyen ve durumun her zaman görünür kalır).</li>
-            <li><strong>Karakter görselleri</strong> — link yapıştırıp "➕ Ekle" diyerek ya da "📤 Yükle" ile bilgisayarından seçerek istediğin kadar görsel biriktirebilirsin. Eklediklerin küçük kareler halinde listelenir; hangisini kullanmak istiyorsan ona tıklarsın (seçili olan altın çerçeveyle belli olur), köşesindeki ✕ ile de silersin. Seçtiğin görsel Parti panelinde, inisiyatif şeridinde ve haritadaki token'ında görünür.</li>
+            <li><strong>Karakter görselleri</strong> — link yapıştırıp "➕ Ekle" diyerek ya da "📤 Yükle" ile bilgisayarından seçerek istediğin kadar görsel biriktirebilirsin. Eklemeden önce <strong>"Görsel Adı"</strong> kutusuna bir isim yazarsan (örn. "Zırhlı hali") görsel o adla kaydedilir; boş bırakırsan "Görsel 1, 2..." diye adlandırılır. Eklediklerin küçük kareler halinde listelenir, adları altlarında yazar — adına tıklayarak sonradan değiştirebilirsin. Hangisini kullanmak istiyorsan karesine tıklarsın (seçili olan altın çerçeveyle belli olur), köşesindeki ✕ ile silersin. Seçtiğin görsel Parti panelinde, inisiyatif şeridinde ve haritadaki token'ında görünür.</li>
+            <li><strong>Görsellerin GM'e açıktır</strong> — yüklediğin her görsel, GM'in odak görseli seçtiği yerde <strong>👥 Oyuncular › karakter adın</strong> klasörü altında verdiğin isimle listelenir; GM istediğini seçip canlı sahneye verebilir. Sahnede yazacak metin, görsele verdiğin ad (ad vermediysen karakter adın) olur.</li>
             <li><strong>Profil rengi</strong> seç — bu renk Parti panelinde ve harita pinlerinde senin rengin olur.</li>
             <li>Irk / Sınıf / Alt Sınıf seç (varsa açıklamaları altında görünür).</li>
             <li>Statlarını +/- ile ayarla, Durumunu (İyi/Yaralı/Bitkin/Ölü) seç. Bir statın adına/değerine tıklayınca, GM'in belirlediği eşiklere göre bonus eklenmiş bir 1d20 atılır — sonuç herkesin gördüğü zar panelinde çıkar. Zar panelindeki Avantaj/Dezavantaj seçimin neyse (⬇ Dezavantaj / Normal / ⬆ Avantaj), stat atışların da otomatik olarak onu kullanır.</li>
@@ -233,10 +235,11 @@ export default function HelpGuide({ onClose }) {
         </details>
 
         <details>
-          <summary>🛠️ GM Kontrol Paneli (orta bölüm, sadece GM)</summary>
+          <summary>🛠️ GM Kontrol Paneli (üst menü, sadece GM)</summary>
           <p>
-            Orta bölümün altındaki <strong>"🛠️ GM Kontrol Panelini Aç"</strong> kartına tıklayınca
-            tam ekran açılır (kapatmak için "✕ Kapat" ya da dışına tıkla).
+            Üst menüde harita/görev tuşlarının altındaki <strong>"🛠️ GM Kontrol Paneli"</strong>
+            tuşuna tıklayınca pencere olarak açılır (kapatmak için "✕ Kapat" ya da dışına tıkla).
+            Ekranın ortası tamamen sahneye ayrıldığı için bu tuş artık orada yer kaplamıyor.
           </p>
           <ul>
             <li><strong>Oda Yönetimi</strong> — odayı kilitle/aç (yeni katılımı engelle), isteğe bağlı <strong>oda şifresi</strong> belirle, "▶️ Oturumu Başlat" / "⏹️ Oturumu Sonlandır" ile oturumu aç/kapa (kapatmak odayı veya verileri silmez — sadece "aktif değil" gösterir, tekrar başlatana kadar), odayı sil (sadece oda sahibi görür), <strong>Karakter Kağıdı Görünürlüğü</strong> ile oyuncuların birbirinin statlarını/traitlerini/envanterini görüp göremeyeceğini "Herkese zorla göster", "Herkesten zorla gizle" ya da "Oyuncunun kendi seçimine bırak" olarak ayarla (sen GM olarak her zaman herkesi tam görürsün).</li>
@@ -257,6 +260,14 @@ export default function HelpGuide({ onClose }) {
               isteğe bağlı bir <strong>klasör</strong> adı verip kütüphaneni gruplayabilirsin;
               klasörler hem GM panelinde hem de sahne seçim menüsünde ayrı başlıklar halinde
               görünür.
+            </li>
+            <li>
+              <strong>👥 Oyuncular klasörü</strong> — oyuncuların karakter kağıtlarına yükledikleri
+              görseller, odak seçim menüsünde (ve GM panelindeki Odak Kütüphanesi'nde) otomatik
+              olarak "Oyuncular" başlığı altında, her oyuncunun kendi adıyla açılan alt klasöründe
+              listelenir. Oyuncunun görsele verdiği ad neyse o görünür; seçince doğrudan canlı
+              sahneye odak görseli olarak verilir. Bunlar kütüphanene kopyalanmaz — oyuncu görseli
+              silerse listeden de düşer.
             </li>
             <li>
               Her görsel/ses alanının yanındaki <strong>"📤 Yükle"</strong> butonuyla bir link

@@ -355,22 +355,36 @@ export default function Room({ session, onLeave }) {
             isGM={role === 'gm'}
             onAdvance={advanceInitiative}
           />
-          {scene?.mapImageUrl && (
-            <button
-              type="button"
-              className="btn-ghost sound-toggle map-toggle-btn"
-              onClick={() => setMapOpen((v) => !v)}
-            >
-              {mapOpen ? '🗺️ Haritayı Gizle' : '🗺️ Haritayı Göster'}
-            </button>
-          )}
-          <button
-            type="button"
-            className="btn-ghost sound-toggle map-toggle-btn"
-            onClick={() => setQuestsOpen((v) => !v)}
-          >
-            {questsOpen ? '📜 Görevleri Gizle' : '📜 Görevleri Göster'}
-          </button>
+          {/* Window toggles stack so the play area below stays pure display. */}
+          <div className="header-window-toggles">
+            <div className="header-window-toggles-row">
+              {scene?.mapImageUrl && (
+                <button
+                  type="button"
+                  className="btn-ghost sound-toggle map-toggle-btn"
+                  onClick={() => setMapOpen((v) => !v)}
+                >
+                  {mapOpen ? '🗺️ Haritayı Gizle' : '🗺️ Haritayı Göster'}
+                </button>
+              )}
+              <button
+                type="button"
+                className="btn-ghost sound-toggle map-toggle-btn"
+                onClick={() => setQuestsOpen((v) => !v)}
+              >
+                {questsOpen ? '📜 Görevleri Gizle' : '📜 Görevleri Göster'}
+              </button>
+            </div>
+            {role !== 'spectator' && (
+              <button
+                type="button"
+                className="btn-ghost sound-toggle map-toggle-btn header-panel-btn"
+                onClick={() => setShowBottomPanel(true)}
+              >
+                {role === 'gm' ? '🛠️ GM Kontrol Paneli' : '📜 Karakter Kağıdım'}
+              </button>
+            )}
+          </div>
         </div>
         <div className="header-right">
           <SessionTimer startedAt={settings?.sessionStartedAt} active={!!settings?.sessionActive} />
@@ -511,20 +525,8 @@ export default function Room({ session, onLeave }) {
             savedLocations={settings?.savedLocations}
             savedFocuses={settings?.savedFocuses}
             savedMusic={settings?.savedMusic}
+            players={players}
           />
-
-          {role !== 'spectator' && (
-            <div className="room-bottom">
-              <button
-                type="button"
-                className="panel bottom-panel-trigger"
-                onClick={() => setShowBottomPanel(true)}
-              >
-                <span className="bottom-panel-trigger-icon">{role === 'gm' ? '🛠️' : '📜'}</span>
-                <span>{role === 'gm' ? 'GM Kontrol Panelini Aç' : 'Karakter Kağıdımı Aç'}</span>
-              </button>
-            </div>
-          )}
 
           {showBottomPanel && (
             <Portal>

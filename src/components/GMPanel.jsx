@@ -4,6 +4,7 @@ import { db } from '../firebase.js';
 import RulesEditor from './RulesEditor.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
 import { resolveQueueEntity as resolveEntityShared } from '../utils/initiativeEntity.js';
+import { playerImageGroups, playerImageCaption } from '../utils/portraits.js';
 import {
   entryLabel,
   entryCaption,
@@ -161,6 +162,16 @@ export default function GMPanel({
     update(ref(db, `rooms/${roomCode}/scene`), {
       focusImageUrl: entry.imageUrl,
       focusCaption: entryCaption(entry),
+      updatedAt: Date.now(),
+    });
+  }
+
+  // Player-uploaded images aren't library entries — they live on the character
+  // sheet and are only borrowed for the scene.
+  function publishPlayerImage(group, image) {
+    update(ref(db, `rooms/${roomCode}/scene`), {
+      focusImageUrl: image.url,
+      focusCaption: playerImageCaption(group.playerName, image),
       updatedAt: Date.now(),
     });
   }
@@ -510,6 +521,27 @@ export default function GMPanel({
             💾 Kaydet
           </button>
         </div>
+        {playerImageGroups(players).map((group) => (
+          <details key={group.playerId} className="library-folder">
+            <summary>
+              👤 Oyuncular › {group.playerName} <span className="muted">({group.images.length})</span>
+            </summary>
+            <div className="sfx-library">
+              {group.images.map((image) => (
+                <div key={image.id} className="saved-scene-item">
+                  <button
+                    type="button"
+                    className={`btn-dice${scene?.focusImageUrl === image.url ? ' active' : ''}`}
+                    onClick={() => publishPlayerImage(group, image)}
+                    title={`Sahnede: ${playerImageCaption(group.playerName, image)}`}
+                  >
+                    🖼️ {image.name}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </details>
+        ))}
         {savedFocuses.length > 0 &&
           groupByFolder(savedFocuses).map(([folderName, entries]) => (
             <details key={folderName} className="library-folder" open>
