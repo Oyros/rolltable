@@ -4,6 +4,7 @@ import { db } from '../firebase.js';
 import RulesEditor from './RulesEditor.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
 import HandoutLibrary from './HandoutLibrary.jsx';
+import FocusHpInput from './FocusHpInput.jsx';
 import { resolveQueueEntity as resolveEntityShared } from '../utils/initiativeEntity.js';
 import { playerImageGroups, playerImageCaption } from '../utils/portraits.js';
 import {
@@ -578,6 +579,9 @@ export default function GMPanel({
                     >
                       {(f.category || 'karakter') === 'karakter' ? '🎭' : '📦'} {entryLabel(f)}
                     </button>
+                    {(f.category || 'karakter') === 'karakter' && (
+                      <FocusHpInput roomCode={roomCode} focusId={id} value={f.maxHp} />
+                    )}
                     <button type="button" className="btn-ghost small" onClick={() => removeFocus(id)}>
                       Sil
                     </button>

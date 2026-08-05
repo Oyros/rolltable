@@ -2721,6 +2721,14 @@ button:hover {
   flex: 0 0 auto;
 }
 
+/* Inline NPC health editor in the focus library */
+.focus-hp-input {
+  width: 62px;
+  flex: 0 0 auto;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Condition chips on the character sheet and party panel */
 .condition-strip {
   display: flex;

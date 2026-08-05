@@ -117,7 +117,9 @@ export default function HelpGuide({ onClose }) {
           <p>
             <strong>NPC canı</strong>: Odak Kütüphanesi'nde bir kaydı "🎭 Karakter/NPC" olarak
             eklerken "Can" kutusuna bir sayı yazarsan, o NPC haritaya çıktığında barı dolu başlar.
-            Boş bırakırsan o NPC'de bar olmaz.
+            Boş bırakırsan o NPC'de bar olmaz. Sonradan da değiştirebilirsin: kütüphane
+            listesinde her NPC'nin yanındaki küçük can kutusuna yeni değeri yazıp Enter'a basman
+            (ya da kutudan çıkman) yeterli.
           </p>
           <ul>
             <li>
