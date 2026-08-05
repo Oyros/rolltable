@@ -1164,6 +1164,21 @@ button:hover {
   gap: 16px;
 }
 
+/* With the panel trigger gone from this column, the art claims every pixel
+   the scene panel has left instead of sitting at its 16:9 height with a dead
+   band underneath. Desktop only — the stacked mobile layout has no spare
+   height to hand out. */
+@media (min-width: 901px) {
+  .scene-display > .scene-images {
+    flex: 1 1 auto;
+    min-height: 200px;
+  }
+
+  .scene-images > .scene-image-box {
+    height: 100%;
+  }
+}
+
 .scene-image-box {
   position: relative;
   aspect-ratio: 16 / 9;
