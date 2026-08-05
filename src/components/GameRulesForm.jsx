@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import EntryListEditor from './EntryListEditor.jsx';
 import ResourceListEditor from './ResourceListEditor.jsx';
 import ConditionListEditor from './ConditionListEditor.jsx';
@@ -6,6 +6,7 @@ import ParticleEffect from './ParticleEffect.jsx';
 import { THEMES, DEFAULT_THEME_ID } from '../utils/themes.js';
 import { configGroups, newGroupId, NO_GROUPS } from '../utils/traitGroups.js';
 import { defaultRule, levelOverrides, levelKey } from '../utils/levelRewards.js';
+import { saveDraft, loadDraft, clearDraft, draftAgeLabel } from '../utils/formDraft.js';
 
 // Only counts above zero are stored, and picks for deleted categories are
 // dropped so they can't linger in the saved config.
@@ -63,7 +64,15 @@ const EMPTY_LISTS = {
   items: [],
 };
 
-export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeChange, children }) {
+export default function GameRulesForm({
+  initial,
+  submitLabel,
+  onSubmit,
+  onThemeChange,
+  draftScope,
+  onDirtyChange,
+  children,
+}) {
   const [name, setName] = useState(initial?.name || '');
   const [theme, setTheme] = useState(initial?.theme || DEFAULT_THEME_ID);
   const [maxLevel, setMaxLevel] = useState(initial?.maxLevel || 10);
@@ -102,6 +111,82 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
   const [hpResourceId, setHpResourceId] = useState(initial?.hpResourceId || '');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  // A draft found in this browser from a previous, unfinished edit.
+  const [pendingDraft, setPendingDraft] = useState(() =>
+    draftScope ? loadDraft(draftScope) : null
+  );
+
+  // Everything the form holds, as one serialisable object.
+  const snapshot = {
+    name,
+    theme,
+    maxLevel,
+    xpPerLevel,
+    statMin,
+    statMax,
+    statThreshold1,
+    statThreshold2,
+    statThreshold3,
+    statThresholdNeg1,
+    statThresholdNeg2,
+    statThresholdNeg3,
+    hpResourceId,
+    lists,
+    groups,
+    groupLists,
+    rewardDefault,
+    rewardOverrides,
+  };
+  const serialized = JSON.stringify(snapshot);
+  // What the form looked like when it opened — anything else counts as unsaved.
+  const baselineRef = useRef(serialized);
+  const savedRef = useRef(false);
+  const dirty = !savedRef.current && serialized !== baselineRef.current;
+
+  function applySnapshot(d) {
+    if (!d) return;
+    setName(d.name ?? '');
+    setTheme(d.theme ?? DEFAULT_THEME_ID);
+    setMaxLevel(d.maxLevel ?? 10);
+    setXpPerLevel(d.xpPerLevel ?? 100);
+    setStatMin(d.statMin ?? 0);
+    setStatMax(d.statMax ?? 10);
+    setStatThreshold1(d.statThreshold1 ?? 4);
+    setStatThreshold2(d.statThreshold2 ?? 6);
+    setStatThreshold3(d.statThreshold3 ?? 8);
+    setStatThresholdNeg1(d.statThresholdNeg1 ?? 2);
+    setStatThresholdNeg2(d.statThresholdNeg2 ?? 1);
+    setStatThresholdNeg3(d.statThresholdNeg3 ?? 0);
+    setHpResourceId(d.hpResourceId ?? '');
+    if (d.lists) setLists(d.lists);
+    if (d.groups) setGroups(d.groups);
+    if (d.groupLists) setGroupLists(d.groupLists);
+    if (d.rewardDefault) setRewardDefault(d.rewardDefault);
+    if (d.rewardOverrides) setRewardOverrides(d.rewardOverrides);
+  }
+
+  // Autosave, debounced so typing doesn't hammer localStorage.
+  useEffect(() => {
+    if (!draftScope || !dirty) return undefined;
+    const timer = setTimeout(() => saveDraft(draftScope, snapshot), 700);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serialized, draftScope, dirty]);
+
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
+
+  // The browser's own "leave site?" prompt, for tab closes and refreshes.
+  useEffect(() => {
+    if (!dirty) return undefined;
+    const warn = (e) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [dirty]);
 
   useEffect(() => {
     onThemeChange?.(theme);
@@ -206,6 +291,8 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
       rewardOverrides.forEach((o) => {
         byLevel[levelKey(o.level)] = ruleForSave(o.rule, liveGroupIds);
       });
+      savedRef.current = true;
+      if (draftScope) clearDraft(draftScope);
       await onSubmit({
         traitGroups: cleanGroups.length > 0 ? cleanGroups : NO_GROUPS,
         ...groupPayload,
@@ -237,6 +324,38 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
   return (
     <form onSubmit={handleSubmit} className="scene-form">
       <ParticleEffect theme={theme} />
+
+      {pendingDraft && (
+        <div className="draft-banner">
+          <span>
+            💾 Kaydedilmemiş bir taslak bulundu ({draftAgeLabel(pendingDraft.at)}). Geri
+            yüklensin mi?
+          </span>
+          <div className="draft-banner-actions">
+            <button
+              type="button"
+              className="btn-primary small"
+              onClick={() => {
+                applySnapshot(pendingDraft.data);
+                setPendingDraft(null);
+              }}
+            >
+              Geri Yükle
+            </button>
+            <button
+              type="button"
+              className="btn-ghost small"
+              onClick={() => {
+                clearDraft(draftScope);
+                setPendingDraft(null);
+              }}
+            >
+              Yoksay
+            </button>
+          </div>
+        </div>
+      )}
+
       <label>
         Senaryo Adı
         <input

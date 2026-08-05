@@ -2721,6 +2721,31 @@ button:hover {
   flex: 0 0 auto;
 }
 
+/* Unsaved-draft notice at the top of a long form */
+.draft-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  background: var(--amber-dim);
+  border: 1px solid var(--amber);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: var(--amber-light);
+}
+
+.draft-banner-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.draft-banner button {
+  width: auto;
+}
+
 /* GM panel tabs */
 .gm-tabs {
   display: flex;

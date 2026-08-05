@@ -105,7 +105,12 @@ export default function GameSetup({ roomCode }) {
 
         <div className="gm-section">
           <h3 className="title-font gm-section-title">Sıfırdan Oluştur</h3>
-          <GameRulesForm submitLabel="Oyunu Başlat" onSubmit={handleCreate} onThemeChange={applyTheme}>
+          <GameRulesForm
+            submitLabel="Oyunu Başlat"
+            onSubmit={handleCreate}
+            onThemeChange={applyTheme}
+            draftScope={`setup_${roomCode}`}
+          >
             <label className="toggle-field">
               <input
                 type="checkbox"

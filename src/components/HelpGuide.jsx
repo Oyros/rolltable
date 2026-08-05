@@ -94,6 +94,13 @@ export default function HelpGuide({ onClose }) {
             GM daha sonra <strong>"⚙️ Kuralları Düzenle"</strong> ile oyun ortasında yeni kayıt, eşya,
             ırk vb. ekleyebilir — oyuncuların mevcut seçimleri bozulmaz.
           </p>
+          <p>
+            <strong>Emeğin kaybolmaz</strong>: kurulum ve kural düzenleme ekranlarında yazdıkların
+            birkaç saniyede bir tarayıcına <em>taslak</em> olarak kaydedilir. Sekme kapanır ya da
+            kazara çıkarsan, ekranı bir daha açtığında "Kaydedilmemiş bir taslak bulundu — geri
+            yüklensin mi?" diye sorar. Kaydetmeden kapatmaya çalışırsan da uyarı alırsın. Taslak
+            sadece senin tarayıcında durur, odaya yazılmaz; "Kaydet" dediğin an silinir.
+          </p>
         </details>
 
         <details>
