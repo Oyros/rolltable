@@ -2078,6 +2078,13 @@ button:hover {
   font-size: 0.85rem;
 }
 
+/* Anything whose rules description shows up as a hover tooltip */
+.described {
+  text-decoration: underline dotted var(--text-muted);
+  text-underline-offset: 2px;
+  cursor: help;
+}
+
 .party-detail-heading {
   display: block;
   color: var(--amber-light);

@@ -5,13 +5,29 @@ import { STATUS_LABEL } from '../utils/stats.js';
 import { rollStat } from '../utils/statRoll.js';
 import { isSheetVisibleTo } from '../utils/sheetVisibility.js';
 import { rollModeLabel } from '../utils/rollMode.js';
-import { itemLabel } from '../utils/inventory.js';
+import { itemLabel, itemName } from '../utils/inventory.js';
 import { configGroups, groupEntries } from '../utils/traitGroups.js';
 import CharacterSheet from './CharacterSheet.jsx';
 import Portal from './Portal.jsx';
 
 function nameOf(list, id) {
   return list.find((x) => x.id === id)?.name;
+}
+
+function entryOf(list, id) {
+  return list.find((x) => x.id === id);
+}
+
+// Hovering shows whatever description the GM wrote for it in the rules. Uses
+// the native title tooltip on purpose: the sidebar scrolls, so a CSS tooltip
+// would be clipped by the panel.
+function DescribedName({ entry }) {
+  if (!entry?.description) return <span>{entry?.name}</span>;
+  return (
+    <span className="described" title={entry.description}>
+      {entry.name}
+    </span>
+  );
 }
 
 export default function PartyOverview({
@@ -44,6 +60,7 @@ export default function PartyOverview({
   const races = gameConfig?.races || [];
   const classes = gameConfig?.classes || [];
   const subclasses = gameConfig?.subclasses || [];
+  const items = gameConfig?.items || [];
   const groups = configGroups(gameConfig);
 
   return (
@@ -57,12 +74,13 @@ export default function PartyOverview({
           const subclassName = nameOf(subclasses, p.subclassId);
           const groupPicks = groups
             .map((g) => ({
+              id: g.id,
               name: g.name,
-              names: (p[g.id] || [])
-                .map((eid) => nameOf(groupEntries(gameConfig, g.id), eid))
+              entries: (p[g.id] || [])
+                .map((eid) => entryOf(groupEntries(gameConfig, g.id), eid))
                 .filter(Boolean),
             }))
-            .filter((g) => g.names.length > 0);
+            .filter((g) => g.entries.length > 0);
 
           const isActiveTurn = activeTurnPlayerId && activeTurnPlayerId === id;
           const sheetVisible = isSheetVisibleTo({
@@ -73,11 +91,27 @@ export default function PartyOverview({
             forceMode: settings?.sheetVisibilityForce,
           });
 
+          // Quick look without expanding the row. Race/class/subclass are
+          // public either way; the rest follows the sheet's visibility.
+          const hoverLines = [
+            `${p.name} · Seviye ${p.level || 1}`,
+            raceName && `Irk: ${raceName}`,
+            className && `Sınıf: ${className}`,
+            subclassName && `Alt Sınıf: ${subclassName}`,
+            ...(sheetVisible
+              ? [
+                  ...groupPicks.map((g) => `${g.name}: ${g.entries.map((e) => e.name).join(', ')}`),
+                  p.skills && `Özgeçmiş: ${p.skills}`,
+                ]
+              : ['🔒 Karakter kağıdının geri kalanı gizli']),
+          ].filter(Boolean);
+
           return (
             <li key={id} className={`party-row status-${p.status || 'iyi'}${isActiveTurn ? ' active-turn' : ''}`}>
               <button
                 type="button"
                 className="party-row-summary"
+                title={hoverLines.join('\n')}
                 onClick={() => setExpandedId(expanded ? null : id)}
               >
                 <span className="party-avatar" style={p.color ? { borderColor: p.color } : undefined}>
@@ -107,9 +141,16 @@ export default function PartyOverview({
                   )}
 
                   <p className="party-detail-rcs">
-                    {['Seviye ' + (p.level || 1), raceName, className, subclassName]
+                    <span>Seviye {p.level || 1}</span>
+                    {[
+                      entryOf(races, p.raceId),
+                      entryOf(classes, p.classId),
+                      entryOf(subclasses, p.subclassId),
+                    ]
                       .filter(Boolean)
-                      .join(' · ')}
+                      .map((entry) => (
+                        <span key={entry.id}> · <DescribedName entry={entry} /></span>
+                      ))}
                   </p>
 
                   {!sheetVisible ? (
@@ -188,9 +229,16 @@ export default function PartyOverview({
                   )}
 
                   {groupPicks.map((g) => (
-                    <div key={g.name} className="party-detail-section">
+                    <div key={g.id} className="party-detail-section">
                       <span className="party-detail-heading">{g.name}</span>
-                      <p>{g.names.join(', ')}</p>
+                      <p>
+                        {g.entries.map((entry, i) => (
+                          <span key={entry.id}>
+                            {i > 0 && ', '}
+                            <DescribedName entry={entry} />
+                          </span>
+                        ))}
+                      </p>
                     </div>
                   ))}
 
@@ -209,9 +257,20 @@ export default function PartyOverview({
                       <ul className="party-detail-inventory">
                         {/* itemLabel handles both shapes; rendering the raw
                             entry would throw once it's an object. */}
-                        {(p.inventory || []).map((item, i) => (
-                          <li key={i}>{itemLabel(item)}</li>
-                        ))}
+                        {(p.inventory || []).map((item, i) => {
+                          // Inventory stores names, so the catalogue entry is
+                          // matched by name to surface its description.
+                          const catalogItem = items.find((c) => c.name === itemName(item));
+                          return (
+                            <li
+                              key={i}
+                              className={catalogItem?.description ? 'described' : undefined}
+                              title={catalogItem?.description || undefined}
+                            >
+                              {itemLabel(item)}
+                            </li>
+                          );
+                        })}
                       </ul>
                     )}
                   </div>
