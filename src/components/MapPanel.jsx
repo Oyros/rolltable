@@ -4,6 +4,7 @@ import { db } from '../firebase.js';
 import { resolveQueueEntity } from '../utils/initiativeEntity.js';
 import { entryLabel, groupByFolder } from '../utils/library.js';
 import { playerHealth, npcHealth, healthTone, activeConditions } from '../utils/combat.js';
+import { trackedRemove } from '../utils/journal.js';
 import FloatingWindow from './FloatingWindow.jsx';
 import TokenCombatPanel from './TokenCombatPanel.jsx';
 
@@ -169,7 +170,10 @@ export default function MapPanel({
   function removePin(pinId, pin, e) {
     e.stopPropagation();
     if (!isGM && pin.byId !== playerId) return;
-    remove(ref(db, `rooms/${roomCode}/scene/mapPins/${pinId}`));
+    trackedRemove(roomCode, { id: playerId, name }, {
+      path: `scene/mapPins/${pinId}`,
+      label: `Harita pini kaldırıldı${pin.by ? ` (${pin.by})` : ''}`,
+    });
   }
 
   // GM auto-places a token for anyone in the initiative queue who doesn't
@@ -352,6 +356,7 @@ export default function MapPanel({
                 {isGM && openTokenId === id && (
                   <TokenCombatPanel
                     roomCode={roomCode}
+                    actor={{ id: playerId, name }}
                     entity={entity}
                     entityId={id}
                     health={health}

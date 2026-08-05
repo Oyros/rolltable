@@ -34,6 +34,8 @@ import FloatingWindow from '../components/FloatingWindow.jsx';
 import MiniChatLog from '../components/MiniChatLog.jsx';
 import { playTurnChime, effectVolume } from '../utils/diceSound.js';
 import { loadBindings, actionForEvent } from '../utils/shortcuts.js';
+import { nextUndoable, undoEntry } from '../utils/journal.js';
+import UndoHistory from '../components/UndoHistory.jsx';
 import { applyTheme, DEFAULT_THEME_ID } from '../utils/themes.js';
 import { deleteRoomUploads, sweepOrphanedRoomUploads } from '../utils/upload.js';
 
@@ -53,6 +55,8 @@ export default function Room({ session, onLeave }) {
   const [gameConfig, setGameConfig] = useState(undefined);
   const [quests, setQuests] = useState({});
   const [handoutSends, setHandoutSends] = useState({});
+  const [journal, setJournal] = useState({});
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [flashActive, setFlashActive] = useState(false);
   const [ambianceVolume, setAmbianceVolumeState] = useState(loadAmbianceVolume);
   const [joinBlocked, setJoinBlocked] = useState(false);
@@ -183,6 +187,12 @@ export default function Room({ session, onLeave }) {
   }, [roomCode]);
 
   useEffect(() => {
+    const journalRef = ref(db, `rooms/${roomCode}/journal`);
+    const unsub = onValue(journalRef, (snap) => setJournal(snap.val() || {}));
+    return () => unsub();
+  }, [roomCode]);
+
+  useEffect(() => {
     const ownerRef = ref(db, `rooms/${roomCode}/ownerId`);
     const unsub = onValue(ownerRef, (snap) => setOwnerId(snap.val()));
     return () => unsub();
@@ -270,6 +280,7 @@ export default function Room({ session, onLeave }) {
         // Innermost first, so Esc peels one layer at a time.
         if (showHelp) return setShowHelp(false);
         if (showBottomPanel) return setShowBottomPanel(false);
+        if (historyOpen) return setHistoryOpen(false);
         if (questsOpen) return setQuestsOpen(false);
         if (mapOpen) return setMapOpen(false);
         if (chatOpen) return setChatOpen(false);
@@ -280,6 +291,7 @@ export default function Room({ session, onLeave }) {
       if (action === 'map') return setMapOpen((v) => !v);
       if (action === 'quests') return setQuestsOpen((v) => !v);
       if (action === 'chat') return setChatOpen((v) => !v);
+      if (action === 'history') return setHistoryOpen((v) => !v);
       if (action === 'panel') {
         if (role !== 'spectator') setShowBottomPanel((v) => !v);
         return undefined;
@@ -297,7 +309,24 @@ export default function Room({ session, onLeave }) {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [showHelp, showBottomPanel, questsOpen, mapOpen, chatOpen, role]);
+  }, [showHelp, showBottomPanel, questsOpen, mapOpen, chatOpen, historyOpen, role]);
+
+  // Ctrl+Z undoes the most recent action this viewer is allowed to take back.
+  useEffect(() => {
+    function onUndoKey(e) {
+      if (!(e.ctrlKey || e.metaKey) || (e.key || '').toLowerCase() !== 'z') return;
+      const target = e.target;
+      const tag = (target?.tagName || '').toLowerCase();
+      // Leave the browser's own text undo alone while typing.
+      if (tag === 'input' || tag === 'textarea' || target?.isContentEditable) return;
+      const next = nextUndoable(journal, playerId, role === 'gm');
+      if (!next) return;
+      e.preventDefault();
+      undoEntry(roomCode, next[0], next[1]);
+    }
+    window.addEventListener('keydown', onUndoKey);
+    return () => window.removeEventListener('keydown', onUndoKey);
+  }, [journal, playerId, role, roomCode]);
 
   // Re-arms the CSS animation by remounting the class on each turn change.
   useEffect(() => {
@@ -438,6 +467,14 @@ export default function Room({ session, onLeave }) {
                 onClick={() => setQuestsOpen((v) => !v)}
               >
                 {questsOpen ? '📜 Görevleri Gizle' : '📜 Görevleri Göster'}
+              </button>
+              <button
+                type="button"
+                className="btn-ghost sound-toggle map-toggle-btn"
+                onClick={() => setHistoryOpen((v) => !v)}
+                title="Son işlemler ve geri alma (Ctrl+Z)"
+              >
+                ↩️ Geçmiş
               </button>
             </div>
             {role !== 'spectator' && (
@@ -674,6 +711,16 @@ export default function Room({ session, onLeave }) {
           </FloatingWindow>
         )}
 
+        {historyOpen && (
+          <UndoHistory
+            roomCode={roomCode}
+            journal={journal}
+            playerId={playerId}
+            isGM={role === 'gm'}
+            onClose={() => setHistoryOpen(false)}
+          />
+        )}
+
         {questsOpen && (
           <FloatingWindow
             title="📜 Görev Panosu"
@@ -687,6 +734,7 @@ export default function Room({ session, onLeave }) {
               isGM={role === 'gm'}
               players={players}
               calendar={settings?.calendar}
+              actor={{ id: playerId, name: liveName }}
             />
           </FloatingWindow>
         )}

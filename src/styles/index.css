@@ -4445,3 +4445,44 @@ button:hover {
   border-color: var(--amber);
   background: var(--amber-dim);
 }
+
+/* Undo history window */
+.undo-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.undo-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 10px;
+}
+
+.undo-item.undone {
+  opacity: 0.5;
+}
+
+.undo-item-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.undo-item-label {
+  font-size: 0.82rem;
+}
+
+.undo-item-meta {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}

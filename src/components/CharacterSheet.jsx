@@ -15,6 +15,7 @@ import {
 } from '../utils/traitGroups.js';
 import { resolveLevelReward, describeReward } from '../utils/levelRewards.js';
 import { activeConditions, conditionLabel } from '../utils/combat.js';
+import { trackedSet } from '../utils/journal.js';
 import Portal from './Portal.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
 
@@ -235,7 +236,13 @@ export default function CharacterSheet({
 
   function removeItem(index) {
     const removed = (player.inventory || [])[index];
-    patch({ inventory: (player.inventory || []).filter((_, i) => i !== index) });
+    // Journalled as a whole-list write so "geri al" puts the item back in the
+    // same position.
+    trackedSet(roomCode, { id: playerId, name: player.name }, {
+      path: `players/${playerId}/inventory`,
+      value: (player.inventory || []).filter((_, i) => i !== index),
+      label: `Envanterden çıkarıldı: ${itemLabel(removed)}`,
+    });
     if (removed) logChange(`Envanterden çıkarıldı: ${itemLabel(removed)}`);
   }
 

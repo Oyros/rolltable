@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ref, push, update, remove } from 'firebase/database';
+import { trackedRemove } from '../utils/journal.js';
 import { db } from '../firebase.js';
 
 function totalHours(day, hour, minute = 0) {
@@ -16,7 +17,7 @@ function formatRemaining(quest, calendar) {
   return `${hours} saat kaldı`;
 }
 
-export default function QuestBoard({ roomCode, quests, isGM, players, calendar }) {
+export default function QuestBoard({ roomCode, quests, isGM, players, calendar, actor }) {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   const [priority, setPriority] = useState('normal');
@@ -72,7 +73,10 @@ export default function QuestBoard({ roomCode, quests, isGM, players, calendar }
   }
 
   function removeQuest(id) {
-    remove(ref(db, `rooms/${roomCode}/quests/${id}`));
+    trackedRemove(roomCode, actor, {
+      path: `quests/${id}`,
+      label: `Görev silindi: ${quests?.[id]?.title || 'görev'}`,
+    });
   }
 
   function renderQuest(id, q) {

@@ -7,6 +7,7 @@ import HandoutLibrary from './HandoutLibrary.jsx';
 import FocusHpInput from './FocusHpInput.jsx';
 import LibraryFilter from './LibraryFilter.jsx';
 import { publishMapEntry } from '../utils/mapPublish.js';
+import { trackedRemove } from '../utils/journal.js';
 import { resolveQueueEntity as resolveEntityShared } from '../utils/initiativeEntity.js';
 import { playerImageGroups, playerImageCaption } from '../utils/portraits.js';
 import {
@@ -37,6 +38,8 @@ export default function GMPanel({
   onDeleteRoom,
   isOwner,
 }) {
+  // Who to credit in the undo journal.
+  const actor = { id: playerId, name };
   const [showRulesEditor, setShowRulesEditor] = useState(false);
   // Which section of the panel is showing; remembered between sessions.
   const [tab, setTab] = useState(() => {
@@ -132,7 +135,11 @@ export default function GMPanel({
   }
 
   function removeMap(id) {
-    remove(ref(db, `rooms/${roomCode}/settings/savedMaps/${id}`));
+    const label = entryLabel(settings?.savedMaps?.[id]) || 'harita';
+    trackedRemove(roomCode, actor, {
+      path: `settings/savedMaps/${id}`,
+      label: `Harita silindi: ${label}`,
+    });
   }
 
   function clearMap() {
@@ -168,7 +175,11 @@ export default function GMPanel({
   }
 
   function removeLocation(id) {
-    remove(ref(db, `rooms/${roomCode}/settings/savedLocations/${id}`));
+    const label = entryLabel(settings?.savedLocations?.[id]) || 'mekan';
+    trackedRemove(roomCode, actor, {
+      path: `settings/savedLocations/${id}`,
+      label: `Mekan silindi: ${label}`,
+    });
   }
 
   function saveFocus() {
@@ -210,7 +221,11 @@ export default function GMPanel({
   }
 
   function removeFocus(id) {
-    remove(ref(db, `rooms/${roomCode}/settings/savedFocuses/${id}`));
+    const label = entryLabel(settings?.savedFocuses?.[id]) || 'odak';
+    trackedRemove(roomCode, actor, {
+      path: `settings/savedFocuses/${id}`,
+      label: `Odak silindi: ${label}`,
+    });
   }
 
   function saveMusic() {
@@ -237,7 +252,11 @@ export default function GMPanel({
   }
 
   function removeMusic(id) {
-    remove(ref(db, `rooms/${roomCode}/settings/savedMusic/${id}`));
+    const label = entryLabel(settings?.savedMusic?.[id]) || 'müzik';
+    trackedRemove(roomCode, actor, {
+      path: `settings/savedMusic/${id}`,
+      label: `Müzik silindi: ${label}`,
+    });
     if (selectedMusicId === id) setSelectedMusicId('');
   }
 
@@ -652,6 +671,7 @@ export default function GMPanel({
         sends={handoutSends}
         players={players}
         gmName={name}
+        gmId={playerId}
       />
 
       <div className="gm-section">

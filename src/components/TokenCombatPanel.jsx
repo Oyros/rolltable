@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { ref, update } from 'firebase/database';
-import { db } from '../firebase.js';
 import { applyDelta, conditionList } from '../utils/combat.js';
+import { trackedUpdate } from '../utils/journal.js';
 
 const QUICK = [1, 5, 10];
 
@@ -10,6 +9,7 @@ const QUICK = [1, 5, 10];
 // the map and the sheet stay one value; NPC health lives on the scene.
 export default function TokenCombatPanel({
   roomCode,
+  actor,
   entity,
   entityId,
   health,
@@ -22,11 +22,18 @@ export default function TokenCombatPanel({
   const allConditions = conditionList(gameConfig);
 
   function writeHealth(next) {
+    const label = `${entity.name}: can ${health?.current ?? '?'} → ${next}`;
     if (entity.isNpc) {
-      update(ref(db, `rooms/${roomCode}/scene/npcState/${entityId}`), { hp: next });
+      trackedUpdate(roomCode, actor, {
+        path: `scene/npcState/${entityId}`,
+        patch: { hp: next },
+        label,
+      });
     } else if (health?.resourceId) {
-      update(ref(db, `rooms/${roomCode}/players/${entityId}/resources`), {
-        [health.resourceId]: next,
+      trackedUpdate(roomCode, actor, {
+        path: `players/${entityId}/resources`,
+        patch: { [health.resourceId]: next },
+        label,
       });
     }
   }
@@ -46,13 +53,12 @@ export default function TokenCombatPanel({
   function toggleCondition(condId) {
     const on = !conditions?.[condId];
     const value = on ? true : null;
-    if (entity.isNpc) {
-      update(ref(db, `rooms/${roomCode}/scene/npcState/${entityId}/conditions`), {
-        [condId]: value,
-      });
-    } else {
-      update(ref(db, `rooms/${roomCode}/players/${entityId}/conditions`), { [condId]: value });
-    }
+    const name = allConditions.find((c) => c.id === condId)?.name || 'durum';
+    const label = `${entity.name}: ${name} ${on ? 'eklendi' : 'kaldırıldı'}`;
+    const path = entity.isNpc
+      ? `scene/npcState/${entityId}/conditions`
+      : `players/${entityId}/conditions`;
+    trackedUpdate(roomCode, actor, { path, patch: { [condId]: value }, label });
   }
 
   return (

@@ -3,11 +3,12 @@ import { ref, push, remove } from 'firebase/database';
 import { db } from '../firebase.js';
 import FileUploadButton from './FileUploadButton.jsx';
 import { buildSendPayload, recipientLabel } from '../utils/handouts.js';
+import { trackedRemove } from '../utils/journal.js';
 
 // GM-only. Handouts are written once here, then sent to the whole table or to
 // individual players; each send shows up as a card in their chat feed and can
 // be taken back.
-export default function HandoutLibrary({ roomCode, handouts, sends, players, gmName }) {
+export default function HandoutLibrary({ roomCode, handouts, sends, players, gmName, gmId }) {
   const [title, setTitle] = useState('');
   const [text, setText] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -98,7 +99,10 @@ export default function HandoutLibrary({ roomCode, handouts, sends, players, gmN
               className="btn-ghost small danger"
               onClick={() => {
                 if (window.confirm(`"${h.title}" kütüphaneden silinsin mi? Gönderilmiş kopyalar kalır.`)) {
-                  remove(ref(db, `${libraryPath}/${id}`));
+                  trackedRemove(roomCode, { id: gmId, name: gmName }, {
+                    path: `settings/handouts/${id}`,
+                    label: `Belge silindi: ${h.title}`,
+                  });
                 }
               }}
             >
@@ -157,7 +161,12 @@ export default function HandoutLibrary({ roomCode, handouts, sends, players, gmN
                 <button
                   type="button"
                   className="btn-ghost small danger"
-                  onClick={() => remove(ref(db, `${sendsPath}/${sendId}`))}
+                  onClick={() =>
+                    trackedRemove(roomCode, { id: gmId, name: gmName }, {
+                      path: `handoutSends/${sendId}`,
+                      label: `Belge geri alındı: ${s.title}`,
+                    })
+                  }
                   title="Alıcılardan geri al"
                 >
                   Geri Al

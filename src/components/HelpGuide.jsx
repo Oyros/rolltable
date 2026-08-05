@@ -22,6 +22,38 @@ export default function HelpGuide({ onClose }) {
         </p>
 
         <details>
+          <summary>↩️ Geri Alma & İşlem Geçmişi</summary>
+          <p>
+            Üst menüdeki <strong>"↩️ Geçmiş"</strong> tuşu (ya da <strong>Ctrl+Z</strong>) son
+            işlemleri gösterir. Her satırda ne yapıldığı, kimin yaptığı ve ne zaman olduğu yazar;
+            geri alabileceklerinin yanında <strong>"Geri Al"</strong> düğmesi çıkar.
+          </p>
+          <ul>
+            <li>
+              <strong>Kim neyi geri alabilir</strong>: oyuncular kendi işlemlerini, GM masadaki
+              <em> tüm</em> işlemleri geri alabilir.
+            </li>
+            <li>
+              <strong>Ctrl+Z</strong> geri alabildiğin en son işlemi geri alır. Bir yazı
+              kutusundayken çalışmaz — orada tarayıcının kendi geri alması devrede kalır.
+            </li>
+            <li>
+              Son <strong>20 işlem</strong> tutulur, eskiler otomatik düşer. Geri alınan bir işlem
+              listede soluk görünür, ikinci kez geri alınamaz.
+            </li>
+            <li>
+              Şu an kapsananlar: kütüphane silmeleri (mekan/odak/müzik/harita/belge), belge geri
+              alma, görev silme, harita pini kaldırma, envanterden eşya çıkarma, token'a verilen
+              hasar/iyileşme ve durum etkileri.
+            </li>
+            <li>
+              Geri alma yalnızca <em>dokunulan alanları</em> eski değerine döndürür; o sırada
+              başkasının yaptığı ilgisiz değişiklikler bozulmaz.
+            </li>
+          </ul>
+        </details>
+
+        <details>
           <summary>⌨️ Klavye Kısayolları (kendi tuşlarını seç)</summary>
           <p>
             Oda ekranındayken tek tuşla pencere açıp kapatabilirsin. Bir yazı kutusuna
