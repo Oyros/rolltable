@@ -3817,6 +3817,29 @@ button:hover {
   justify-content: center;
 }
 
+/* Silent cue for everyone whose turn it *isn't* — the active player gets the
+   banner and the chime instead. */
+@keyframes initiative-turn-flash {
+  0%,
+  100% {
+    filter: none;
+  }
+
+  40% {
+    filter: drop-shadow(0 0 10px var(--amber)) brightness(1.25);
+  }
+}
+
+.initiative-bar.turn-changed {
+  animation: initiative-turn-flash 0.85s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .initiative-bar.turn-changed {
+    animation: none;
+  }
+}
+
 .initiative-strip {
   display: flex;
   align-items: flex-end;

@@ -1,5 +1,15 @@
 let audioCtx;
 
+// Every effect in the app shares the dice panel's volume slider, so there's a
+// single place to turn sound down (0 silences them all).
+const VOLUME_KEY = 'rolltable_dice_volume';
+
+export function effectVolume() {
+  const raw = localStorage.getItem(VOLUME_KEY);
+  const parsed = raw ? parseFloat(raw) : 0.35;
+  return Number.isFinite(parsed) ? Math.min(1, Math.max(0, parsed)) : 0.35;
+}
+
 function getContext() {
   if (!audioCtx) {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -137,6 +147,35 @@ export function playChatPing(volume = 0.3) {
       gain.connect(ctx.destination);
       osc.start(now + delay);
       osc.stop(now + delay + 0.18);
+    });
+  } catch {
+    // Web Audio unavailable or blocked — fail silently
+  }
+}
+
+// "It's your turn" — a rising two-note call, warmer and more attention-getting
+// than the chat ping so the two can't be confused.
+export function playTurnChime(volume = 0.35) {
+  try {
+    const ctx = getContext();
+    const now = ctx.currentTime;
+    [
+      { freq: 587, delay: 0 },
+      { freq: 880, delay: 0.13 },
+    ].forEach(({ freq, delay }) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now + delay);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, now + delay);
+      gain.gain.exponentialRampToValueAtTime(volume * 0.5, now + delay + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + 0.34);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + delay);
+      osc.stop(now + delay + 0.36);
     });
   } catch {
     // Web Audio unavailable or blocked — fail silently

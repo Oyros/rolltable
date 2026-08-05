@@ -2,17 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { ref, query, limitToLast, onValue } from 'firebase/database';
 import { db } from '../firebase.js';
 import { buildFeed, feedEntryLabel } from '../utils/chatFeed.js';
-import { playChatPing } from '../utils/diceSound.js';
+import { playChatPing, effectVolume } from '../utils/diceSound.js';
 
 const PREVIEW_COUNT = 3;
-// Shares the dice-sound slider so there's a single place to turn effects down.
-const VOLUME_KEY = 'rolltable_dice_volume';
-
-function pingVolume() {
-  const raw = localStorage.getItem(VOLUME_KEY);
-  const parsed = raw ? parseFloat(raw) : 0.35;
-  return Number.isFinite(parsed) ? Math.min(1, Math.max(0, parsed)) : 0.35;
-}
 
 // Always-visible peek at the tail of the room feed, shown in the header next
 // to the toggle so nothing is missed while the chat window is closed. Uses the
@@ -49,7 +41,7 @@ export default function MiniChatLog({ roomCode, players, playerId, isGM, chatOpe
         lastKeyRef.current = latest[0];
         // No ping for your own message — you just sent it.
         if (latest[1].byId !== playerId) {
-          playChatPing(pingVolume());
+          playChatPing(effectVolume());
           if (!chatOpenRef.current) setHasUnread(true);
         }
       }

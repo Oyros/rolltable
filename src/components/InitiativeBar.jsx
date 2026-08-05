@@ -10,7 +10,7 @@ function buildSlots(queue, currentIndex) {
   return slots;
 }
 
-export default function InitiativeBar({ initiative, players, npcs, isGM, onAdvance }) {
+export default function InitiativeBar({ initiative, players, npcs, isGM, onAdvance, flashing }) {
   const queue = initiative?.queue || [];
   if (queue.length === 0) return null;
 
@@ -21,7 +21,7 @@ export default function InitiativeBar({ initiative, players, npcs, isGM, onAdvan
   const slots = buildSlots(queue, currentIndex);
 
   return (
-    <div className="initiative-bar">
+    <div className={`initiative-bar${flashing ? ' turn-changed' : ''}`}>
       <div className="initiative-strip">
         {isGM && (
           <button type="button" className="initiative-nav" onClick={() => onAdvance(-1)}>

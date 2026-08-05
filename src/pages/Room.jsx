@@ -32,6 +32,7 @@ import MapPanel from '../components/MapPanel.jsx';
 import { publishMapEntry } from '../utils/library.js';
 import FloatingWindow from '../components/FloatingWindow.jsx';
 import MiniChatLog from '../components/MiniChatLog.jsx';
+import { playTurnChime, effectVolume } from '../utils/diceSound.js';
 import { applyTheme, DEFAULT_THEME_ID } from '../utils/themes.js';
 import { deleteRoomUploads, sweepOrphanedRoomUploads } from '../utils/upload.js';
 
@@ -61,6 +62,8 @@ export default function Room({ session, onLeave }) {
   const [chatOpen, setChatOpen] = useState(false);
   const [questsOpen, setQuestsOpen] = useState(false);
   const [turnBannerActive, setTurnBannerActive] = useState(false);
+  const [initiativeFlash, setInitiativeFlash] = useState(0);
+  const [flashingInitiative, setFlashingInitiative] = useState(false);
   const flashSeenRef = useRef(undefined);
   const kickSeenRef = useRef(undefined);
   const turnSeenRef = useRef(undefined);
@@ -225,24 +228,36 @@ export default function Room({ session, onLeave }) {
     }
   }, [scene?.flashAt]);
 
+  // Turn changes: the one whose turn it is gets a banner and a chime, everyone
+  // else just gets a silent flash on the initiative strip.
   useEffect(() => {
-    if (role === 'gm') return;
     const at = settings?.initiative?.at;
     if (at === undefined) return;
     if (turnSeenRef.current === undefined) {
       turnSeenRef.current = at;
       return;
     }
-    if (at !== turnSeenRef.current) {
-      turnSeenRef.current = at;
-      const queue = settings?.initiative?.queue || [];
-      const currentId = queue[settings?.initiative?.currentIndex ?? 0];
-      if (currentId === playerId) {
-        setTurnBannerActive(true);
-        setTimeout(() => setTurnBannerActive(false), 3500);
-      }
+    if (at === turnSeenRef.current) return;
+    turnSeenRef.current = at;
+
+    const queue = settings?.initiative?.queue || [];
+    const currentId = queue[settings?.initiative?.currentIndex ?? 0];
+    if (currentId === playerId && role !== 'gm') {
+      setTurnBannerActive(true);
+      playTurnChime(effectVolume());
+      setTimeout(() => setTurnBannerActive(false), 3500);
+    } else {
+      setInitiativeFlash((n) => n + 1);
     }
   }, [settings?.initiative, role, playerId]);
+
+  // Re-arms the CSS animation by remounting the class on each turn change.
+  useEffect(() => {
+    if (initiativeFlash === 0) return undefined;
+    setFlashingInitiative(true);
+    const timer = setTimeout(() => setFlashingInitiative(false), 900);
+    return () => clearTimeout(timer);
+  }, [initiativeFlash]);
 
   useEffect(() => {
     const v = scene?.vignette ?? 0;
@@ -354,6 +369,7 @@ export default function Room({ session, onLeave }) {
             npcs={settings?.savedFocuses}
             isGM={role === 'gm'}
             onAdvance={advanceInitiative}
+            flashing={flashingInitiative}
           />
           {/* Window toggles stack so the play area below stays pure display. */}
           <div className="header-window-toggles">
