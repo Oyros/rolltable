@@ -6,6 +6,7 @@ import { rollStat } from '../utils/statRoll.js';
 import { isSheetVisibleTo } from '../utils/sheetVisibility.js';
 import { rollModeLabel } from '../utils/rollMode.js';
 import { itemLabel } from '../utils/inventory.js';
+import { configGroups, groupEntries } from '../utils/traitGroups.js';
 import CharacterSheet from './CharacterSheet.jsx';
 import Portal from './Portal.jsx';
 
@@ -43,8 +44,7 @@ export default function PartyOverview({
   const races = gameConfig?.races || [];
   const classes = gameConfig?.classes || [];
   const subclasses = gameConfig?.subclasses || [];
-  const traits = gameConfig?.traits || [];
-  const perks = gameConfig?.perks || [];
+  const groups = configGroups(gameConfig);
 
   return (
     <>
@@ -55,8 +55,14 @@ export default function PartyOverview({
           const raceName = nameOf(races, p.raceId);
           const className = nameOf(classes, p.classId);
           const subclassName = nameOf(subclasses, p.subclassId);
-          const traitNames = (p.traits || []).map((tid) => nameOf(traits, tid)).filter(Boolean);
-          const perkNames = (p.perks || []).map((pid) => nameOf(perks, pid)).filter(Boolean);
+          const groupPicks = groups
+            .map((g) => ({
+              name: g.name,
+              names: (p[g.id] || [])
+                .map((eid) => nameOf(groupEntries(gameConfig, g.id), eid))
+                .filter(Boolean),
+            }))
+            .filter((g) => g.names.length > 0);
 
           const isActiveTurn = activeTurnPlayerId && activeTurnPlayerId === id;
           const sheetVisible = isSheetVisibleTo({
@@ -181,23 +187,16 @@ export default function PartyOverview({
                     </div>
                   )}
 
-                  {traitNames.length > 0 && (
-                    <div className="party-detail-section">
-                      <span className="party-detail-heading">Traitler</span>
-                      <p>{traitNames.join(', ')}</p>
+                  {groupPicks.map((g) => (
+                    <div key={g.name} className="party-detail-section">
+                      <span className="party-detail-heading">{g.name}</span>
+                      <p>{g.names.join(', ')}</p>
                     </div>
-                  )}
-
-                  {perkNames.length > 0 && (
-                    <div className="party-detail-section">
-                      <span className="party-detail-heading">Perkler</span>
-                      <p>{perkNames.join(', ')}</p>
-                    </div>
-                  )}
+                  ))}
 
                   {p.skills && (
                     <div className="party-detail-section">
-                      <span className="party-detail-heading">Yetenek / Dal</span>
+                      <span className="party-detail-heading">Özgeçmiş</span>
                       <p>{p.skills}</p>
                     </div>
                   )}

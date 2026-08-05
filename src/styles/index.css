@@ -2520,6 +2520,68 @@ button:hover {
   font-size: 0.78rem;
 }
 
+/* Renameable trait/perk categories */
+.trait-groups {
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.trait-group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trait-group-name {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-heading);
+  color: var(--amber-light);
+}
+
+/* The editor inside a category already sits in its own block, so it drops the
+   shared bottom rule. */
+.trait-group .entry-list-editor {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+}
+
+/* Per-entry class/subclass restriction */
+.entry-restrict {
+  margin-top: 4px;
+  font-size: 0.75rem;
+}
+
+.entry-restrict > summary {
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.entry-restrict > summary:hover {
+  color: var(--amber-light);
+}
+
+.entry-restrict-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 8px 0 4px;
+}
+
+.entry-restrict-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.entry-restrict-heading {
+  color: var(--amber-light);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .entry-list-add {
   display: flex;
   gap: 8px;

@@ -7,6 +7,13 @@ import { rollModeLabel } from '../utils/rollMode.js';
 import { newId } from '../utils/id.js';
 import { itemName, itemQty, itemLabel, makeItem } from '../utils/inventory.js';
 import { portraitUrl, portraitLabel, portraitDisplayName, makePortrait } from '../utils/portraits.js';
+import {
+  configGroups,
+  groupEntries,
+  levelUpGroup,
+  entryAvailableTo,
+  selectableEntries,
+} from '../utils/traitGroups.js';
 import Portal from './Portal.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
 
@@ -41,9 +48,11 @@ export default function CharacterSheet({
   const races = gameConfig.races || [];
   const classes = gameConfig.classes || [];
   const subclasses = gameConfig.subclasses || [];
-  const traits = gameConfig.traits || [];
-  const perks = gameConfig.perks || [];
   const items = gameConfig.items || [];
+  const groups = configGroups(gameConfig);
+  // Level-ups still hand out one entry from the perk-style group.
+  const perkGroup = levelUpGroup(groups);
+  const perks = perkGroup ? groupEntries(gameConfig, perkGroup.id) : [];
 
   const locked = !!player.sheetLocked;
   const editable = isGM || !locked;
@@ -58,7 +67,10 @@ export default function CharacterSheet({
   const canLevelUp = !atMaxLevel && (isGM || qualifiedLevel > level);
   const xpIntoLevel = xp - (level - 1) * xpPerLevel;
   const xpBarPct = atMaxLevel ? 100 : Math.max(0, Math.min(100, (xpIntoLevel / xpPerLevel) * 100));
-  const availablePerksToGain = perks.filter((p) => !(player.perks || []).includes(p.id));
+  const ownedPerkIds = (perkGroup ? player[perkGroup.id] : null) || [];
+  const availablePerksToGain = perks.filter(
+    (p) => !ownedPerkIds.includes(p.id) && entryAvailableTo(p, player)
+  );
 
   const portraits = player.portraits || {};
   // Characters created before the gallery existed have a portraitUrl but no
@@ -211,12 +223,11 @@ export default function CharacterSheet({
     if (removed) logChange(`Envanterden çıkarıldı: ${itemLabel(removed)}`);
   }
 
-  function toggleInList(field, id, catalog) {
+  function toggleInList(field, id, catalog, label) {
     const current = player[field] || [];
     const adding = !current.includes(id);
     const next = adding ? [...current, id] : current.filter((x) => x !== id);
     patch({ [field]: next });
-    const label = field === 'traits' ? 'Trait' : 'Perk';
     const itemName = catalog.find((c) => c.id === id)?.name || id;
     logChange(`${label} ${adding ? 'eklendi' : 'çıkarıldı'}: ${itemName}`);
   }
@@ -248,10 +259,10 @@ export default function CharacterSheet({
       logs.push(`${statName} statı ${current} → ${next}`);
     }
 
-    if (levelUpPerkId) {
-      updates.perks = [...(player.perks || []), levelUpPerkId];
+    if (levelUpPerkId && perkGroup) {
+      updates[perkGroup.id] = [...ownedPerkIds, levelUpPerkId];
       const perkName = perks.find((p) => p.id === levelUpPerkId)?.name || levelUpPerkId;
-      logs.push(`yeni perk: ${perkName}`);
+      logs.push(`yeni ${perkGroup.name.toLowerCase()}: ${perkName}`);
     }
 
     if (resources.length > 0) {
@@ -270,8 +281,6 @@ export default function CharacterSheet({
   const selectedClass = classes.find((c) => c.id === player.classId);
   const selectedSubclass = subclasses.find((s) => s.id === player.subclassId);
 
-  const selectedTraits = traits.filter((t) => (player.traits || []).includes(t.id));
-  const selectedPerks = perks.filter((p) => (player.perks || []).includes(p.id));
   const selectedCatalogItem = items.find((i) => i.id === catalogItemId);
 
   return (
@@ -352,7 +361,9 @@ export default function CharacterSheet({
 
             {availablePerksToGain.length > 0 && (
               <div className="level-up-section">
-                <span className="pick-list-label">Yeni bir perk almak ister misin?</span>
+                <span className="pick-list-label">
+                  Yeni bir {(perkGroup?.name || 'perk').toLowerCase()} almak ister misin?
+                </span>
                 <div className="pick-list-options">
                   <label className="pick-list-option">
                     <input
@@ -642,74 +653,53 @@ export default function CharacterSheet({
         </select>
       </label>
 
-      {traits.length > 0 && (
-        <div className="pick-list">
-          <span className="pick-list-label">Traitler</span>
-          <div className="pick-list-options">
-            {traits.map((t) => (
-              <label key={t.id} className="pick-list-option">
-                <input
-                  type="checkbox"
-                  checked={(player.traits || []).includes(t.id)}
-                  onChange={() => toggleInList('traits', t.id, traits)}
-                />
-                {t.name}
-              </label>
-            ))}
-          </div>
-          {selectedTraits.some((t) => t.description) && (
-            <div className="rcs-descriptions">
-              {selectedTraits.map(
-                (t) =>
-                  t.description && (
-                    <p key={t.id}>
-                      <strong>{t.name}:</strong> {t.description}
-                    </p>
-                  )
-              )}
+      {groups.map((group) => {
+        const entries = groupEntries(gameConfig, group.id);
+        if (entries.length === 0) return null;
+        const chosen = player[group.id] || [];
+        // Entries locked to another class simply aren't offered here.
+        const visible = selectableEntries(entries, player, chosen);
+        if (visible.length === 0) return null;
+        const selected = visible.filter((e) => chosen.includes(e.id));
+        return (
+          <div key={group.id} className="pick-list">
+            <span className="pick-list-label">{group.name}</span>
+            <div className="pick-list-options">
+              {visible.map((e) => (
+                <label key={e.id} className="pick-list-option">
+                  <input
+                    type="checkbox"
+                    checked={chosen.includes(e.id)}
+                    onChange={() => toggleInList(group.id, e.id, entries, group.name)}
+                  />
+                  {e.name}
+                </label>
+              ))}
             </div>
-          )}
-        </div>
-      )}
-
-      {perks.length > 0 && (
-        <div className="pick-list">
-          <span className="pick-list-label">Perkler</span>
-          <div className="pick-list-options">
-            {perks.map((p) => (
-              <label key={p.id} className="pick-list-option">
-                <input
-                  type="checkbox"
-                  checked={(player.perks || []).includes(p.id)}
-                  onChange={() => toggleInList('perks', p.id, perks)}
-                />
-                {p.name}
-              </label>
-            ))}
+            {selected.some((e) => e.description) && (
+              <div className="rcs-descriptions">
+                {selected.map(
+                  (e) =>
+                    e.description && (
+                      <p key={e.id}>
+                        <strong>{e.name}:</strong> {e.description}
+                      </p>
+                    )
+                )}
+              </div>
+            )}
           </div>
-          {selectedPerks.some((p) => p.description) && (
-            <div className="rcs-descriptions">
-              {selectedPerks.map(
-                (p) =>
-                  p.description && (
-                    <p key={p.id}>
-                      <strong>{p.name}:</strong> {p.description}
-                    </p>
-                  )
-              )}
-            </div>
-          )}
-        </div>
-      )}
+        );
+      })}
 
       <label className="skills-field">
-        Yetenek / Dal
+        Özgeçmiş
         <textarea
           value={skillsDraft}
           onChange={(e) => setSkillsDraft(e.target.value)}
           onBlur={commitSkills}
           rows={4}
-          placeholder="Karakterinin yetenek ve dal metnini yaz..."
+          placeholder="Karakterinin özgeçmişini yaz..."
         />
       </label>
 

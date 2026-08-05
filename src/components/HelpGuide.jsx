@@ -87,13 +87,44 @@ export default function HelpGuide({ onClose }) {
           <p>Oda ilk kurulduğunda GM'den oyunun kurallarını tanımlaması istenir:</p>
           <ul>
             <li><strong>Kayıtlı Şablon Kullan</strong> — daha önce kaydettiğin bir kural setini tek tıkla uygula.</li>
-            <li><strong>Sıfırdan Oluştur</strong> — Senaryo Adı, Tasarım Teması (21 farklı tür arasından: fantazi, cyberpunk, western, korsan, vampir, uzay operası ve daha fazlası), <strong>Seviye Sistemi</strong> (maksimum seviye + seviye başına gereken XP), <strong>Stat Sistemi</strong> (statların hangi puandan hangi puana kadar çıkabileceği, ve bir stata tıklanınca atılan 1d20'ye hangi puanlardan itibaren +1/+2/+3 eklenip -1/-2/-3 düşüleceği), Statlar, <strong>Kaynaklar</strong> (Can Puanı, Stres, Kaynak Puanı gibi dolgu çubukları), Irklar, Sınıflar, Alt Sınıflar, Traitler, Perkler ve Bulunabilecek Eşyalar listelerini kendin oluştur.</li>
+            <li><strong>Sıfırdan Oluştur</strong> — Senaryo Adı, Tasarım Teması (21 farklı tür arasından: fantazi, cyberpunk, western, korsan, vampir, uzay operası ve daha fazlası), <strong>Seviye Sistemi</strong> (maksimum seviye + seviye başına gereken XP), <strong>Stat Sistemi</strong> (statların hangi puandan hangi puana kadar çıkabileceği, ve bir stata tıklanınca atılan 1d20'ye hangi puanlardan itibaren +1/+2/+3 eklenip -1/-2/-3 düşüleceği), Statlar, <strong>Kaynaklar</strong> (Can Puanı, Stres, Kaynak Puanı gibi dolgu çubukları), Irklar, Sınıflar, Alt Sınıflar, <strong>Trait/Perk Kategorileri</strong> ve Bulunabilecek Eşyalar listelerini kendin oluştur.</li>
             <li>İstersen bu kural setini bir <strong>şablon olarak kaydedip</strong> başka odalarda tekrar kullanabilirsin.</li>
           </ul>
           <p>
-            GM daha sonra <strong>"⚙️ Kuralları Düzenle"</strong> ile oyun ortasında yeni perk, eşya,
+            GM daha sonra <strong>"⚙️ Kuralları Düzenle"</strong> ile oyun ortasında yeni kayıt, eşya,
             ırk vb. ekleyebilir — oyuncuların mevcut seçimleri bozulmaz.
           </p>
+        </details>
+
+        <details>
+          <summary>🏷️ Trait / Perk Kategorileri (sadece GM)</summary>
+          <p>
+            Kurulum ekranında ve "⚙️ Kuralları Düzenle"de, karakter kağıdındaki işaretlemeli
+            listeler artık tamamen senin kontrolünde:
+          </p>
+          <ul>
+            <li>
+              <strong>İsimlerini değiştir</strong> — varsayılan "Traitler" ve "Perkler" adlarını
+              silip ne istersen yazabilirsin (Yetenekler, Büyüler, Kusurlar, Ekipman Dalları...).
+              Yeni ad karakter kağıdında, Parti panelinde ve sistem kayıtlarında da görünür.
+            </li>
+            <li>
+              <strong>İstediğin kadar kategori ekle</strong> — "➕ Kategori Ekle" ile ikiden fazla
+              liste oluşturabilirsin; her birinin kendi kayıtları ve açıklamaları olur. Bir
+              kategoriyi silmek içindeki kayıtları da siler (onay ister).
+            </li>
+            <li>
+              <strong>Sınıfa/alt sınıfa özel kayıtlar</strong> — her kaydın altındaki "Herkese
+              açık" satırına tıklayıp kaydı belirli sınıf ve/veya alt sınıflara sınırlayabilirsin.
+              Sınırlı bir kaydı yalnızca o sınıf/alt sınıftaki karakterler kendi kağıtlarında
+              görür; hiçbiri işaretli değilse herkes görür. Bir oyuncu daha önce seçtiği bir kaydı,
+              sınıfını değiştirse bile kağıdında görmeye devam eder (kaldırabilsin diye).
+            </li>
+            <li>
+              Seviye atlarken verilen ödül, "Perkler" kategorisinden (o kategoriyi sildiysen
+              listedeki ikinci kategoriden) seçilir ve o kategorinin adıyla anılır.
+            </li>
+          </ul>
         </details>
 
         <details>
@@ -195,8 +226,8 @@ export default function HelpGuide({ onClose }) {
               <strong>Kaynaklar</strong> (varsa — Can Puanı, Stres, Fate Puanı gibi) dolgu
               çubuğu olarak görünür, +/- ile değiştirirsin; üst sınırı GM'in tanımladığı değerdir.
             </li>
-            <li>Traitler ve Perkler arasından işaretle — seçtiklerinin açıklaması altta çıkar.</li>
-            <li>Yetenek/Dal metnini serbestçe yaz.</li>
+            <li>GM'in tanımladığı kategorilerden (varsayılan adlarıyla Traitler ve Perkler, ama GM bunları yeniden adlandırıp yenilerini ekleyebilir) işaretle — seçtiklerinin açıklaması altta çıkar. Bir kayıt belirli sınıf/alt sınıflara sınırlandıysa <strong>sadece o sınıftaki karakterler</strong> onu listede görür; sonradan sınıf değiştirsen bile önceden seçtiklerin kaybolmaz, istersen kaldırabilirsin.</li>
+            <li><strong>Özgeçmiş</strong> metnini serbestçe yaz.</li>
             <li>Envantere GM'in eşya kataloğundan seçerek veya kendi yazarak eşya ekle. Yanındaki <strong>Adet</strong> kutusuna bir sayı yazarsan eşya "×3" gibi sayılı eklenir ve envanterde +/- düğmeleriyle adedini artırıp azaltabilirsin (silip yeniden eklemene gerek kalmaz). Adet boş bırakılırsa eşya eskisi gibi tek satır olarak durur.</li>
             <li>
               <strong>XP Çubuğu</strong> — GM'in "Kuralları Düzenle"de belirlediği "Maksimum

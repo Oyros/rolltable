@@ -3,6 +3,7 @@ import EntryListEditor from './EntryListEditor.jsx';
 import ResourceListEditor from './ResourceListEditor.jsx';
 import ParticleEffect from './ParticleEffect.jsx';
 import { THEMES, DEFAULT_THEME_ID } from '../utils/themes.js';
+import { configGroups, newGroupId, NO_GROUPS } from '../utils/traitGroups.js';
 
 const EMPTY_LISTS = {
   stats: [],
@@ -10,8 +11,6 @@ const EMPTY_LISTS = {
   races: [],
   classes: [],
   subclasses: [],
-  traits: [],
-  perks: [],
   items: [],
 };
 
@@ -34,9 +33,17 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
     races: initial?.races || EMPTY_LISTS.races,
     classes: initial?.classes || EMPTY_LISTS.classes,
     subclasses: initial?.subclasses || EMPTY_LISTS.subclasses,
-    traits: initial?.traits || EMPTY_LISTS.traits,
-    perks: initial?.perks || EMPTY_LISTS.perks,
     items: initial?.items || EMPTY_LISTS.items,
+  });
+  // Trait/perk style categories: freely named, any number of them, each with
+  // its own entry list keyed by the group id.
+  const [groups, setGroups] = useState(() => configGroups(initial));
+  const [groupLists, setGroupLists] = useState(() => {
+    const start = {};
+    configGroups(initial).forEach((g) => {
+      start[g.id] = initial?.[g.id] || [];
+    });
+    return start;
   });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -48,6 +55,35 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
 
   function updateList(key, newItems) {
     setLists((prev) => ({ ...prev, [key]: newItems }));
+  }
+
+  function updateGroupList(groupId, newItems) {
+    setGroupLists((prev) => ({ ...prev, [groupId]: newItems }));
+  }
+
+  function renameGroup(groupId, name) {
+    setGroups((prev) => prev.map((g) => (g.id === groupId ? { ...g, name } : g)));
+  }
+
+  function addGroup() {
+    const id = newGroupId();
+    setGroups((prev) => [...prev, { id, name: '' }]);
+    setGroupLists((prev) => ({ ...prev, [id]: [] }));
+  }
+
+  function removeGroup(groupId) {
+    const group = groups.find((g) => g.id === groupId);
+    const count = (groupLists[groupId] || []).length;
+    const question = count
+      ? `"${group?.name || 'Kategori'}" kategorisi ve içindeki ${count} kayıt silinsin mi? Oyuncuların bu kategorideki seçimleri de görünmez olur.`
+      : `"${group?.name || 'Kategori'}" kategorisi silinsin mi?`;
+    if (!window.confirm(question)) return;
+    setGroups((prev) => prev.filter((g) => g.id !== groupId));
+    setGroupLists((prev) => {
+      const next = { ...prev };
+      delete next[groupId];
+      return next;
+    });
   }
 
   function toInt(value, fallback) {
@@ -76,7 +112,22 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
       const n1 = Math.min(max, toInt(statThresholdNeg1, 2));
       const n2 = Math.min(n1, toInt(statThresholdNeg2, 1));
       const n3 = Math.min(n2, toInt(statThresholdNeg3, 0));
+      const cleanGroups = groups.map((g, i) => ({
+        id: g.id,
+        name: g.name.trim() || `Kategori ${i + 1}`,
+      }));
+      const groupPayload = {};
+      cleanGroups.forEach((g) => {
+        groupPayload[g.id] = groupLists[g.id] || [];
+      });
+      // Rules are saved with update(), so a dropped category's entries have to
+      // be nulled out explicitly or they'd linger in the config.
+      configGroups(initial).forEach((g) => {
+        if (!cleanGroups.some((c) => c.id === g.id)) groupPayload[g.id] = null;
+      });
       await onSubmit({
+        traitGroups: cleanGroups.length > 0 ? cleanGroups : NO_GROUPS,
+        ...groupPayload,
         name: name.trim(),
         theme,
         maxLevel: Math.max(1, parseInt(maxLevel, 10) || 10),
@@ -266,12 +317,45 @@ export default function GameRulesForm({ initial, submitLabel, onSubmit, onThemeC
         items={lists.subclasses}
         onChange={(v) => updateList('subclasses', v)}
       />
-      <EntryListEditor
-        label="Traitler"
-        items={lists.traits}
-        onChange={(v) => updateList('traits', v)}
-      />
-      <EntryListEditor label="Perkler" items={lists.perks} onChange={(v) => updateList('perks', v)} />
+      <div className="trait-groups">
+        <span className="entry-list-label">Trait / Perk Kategorileri</span>
+        <p className="muted small-hint">
+          Kategori adını dilediğin gibi değiştirebilir, istediğin kadar yeni kategori
+          ekleyebilirsin. Her kaydı belirli sınıf/alt sınıflara sınırlarsan, o kaydı sadece o
+          sınıftaki karakterler görür.
+        </p>
+        {groups.map((group, index) => (
+          <div key={group.id} className="trait-group">
+            <EntryListEditor
+              label={group.name.trim() || `Kategori ${index + 1}`}
+              labelSlot={
+                <span className="trait-group-head">
+                  <input
+                    className="trait-group-name"
+                    value={group.name}
+                    onChange={(e) => renameGroup(group.id, e.target.value)}
+                    placeholder={`Kategori ${index + 1} adı`}
+                  />
+                  <button
+                    type="button"
+                    className="btn-ghost small danger"
+                    onClick={() => removeGroup(group.id)}
+                  >
+                    Kategoriyi Sil
+                  </button>
+                </span>
+              }
+              items={groupLists[group.id] || []}
+              onChange={(v) => updateGroupList(group.id, v)}
+              restrictClasses={lists.classes}
+              restrictSubclasses={lists.subclasses}
+            />
+          </div>
+        ))}
+        <button type="button" className="btn-ghost small" onClick={addGroup}>
+          ➕ Kategori Ekle
+        </button>
+      </div>
       <EntryListEditor
         label="Bulunabilecek Eşyalar"
         items={lists.items}
