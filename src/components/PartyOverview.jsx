@@ -128,7 +128,9 @@ export default function PartyOverview({
 
           return (
             <li key={id} className={`party-row status-${p.status || 'iyi'}${isActiveTurn ? ' active-turn' : ''}`}>
-              <HoverTip wrapperTag="div" content={rowTip}>
+              {/* The expanded card already shows all of this, so the summary
+                  tooltip is only for collapsed rows. */}
+              <HoverTip wrapperTag="div" content={expanded ? null : rowTip}>
               <button
                 type="button"
                 className="party-row-summary"
