@@ -29,7 +29,7 @@ import InitiativeBar from '../components/InitiativeBar.jsx';
 import CameraStrip from '../components/CameraStrip.jsx';
 import ResizableSidebar from '../components/ResizableSidebar.jsx';
 import MapPanel from '../components/MapPanel.jsx';
-import { publishMapEntry } from '../utils/library.js';
+import { publishMapEntry } from '../utils/mapPublish.js';
 import FloatingWindow from '../components/FloatingWindow.jsx';
 import MiniChatLog from '../components/MiniChatLog.jsx';
 import { playTurnChime, effectVolume } from '../utils/diceSound.js';

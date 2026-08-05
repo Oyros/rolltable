@@ -4,23 +4,7 @@
 // players see on the scene) separately, plus an optional `folder`. Entries
 // saved before this change only have `name`, so both fall back to it.
 
-import { ref, update } from 'firebase/database';
-import { db } from '../firebase.js';
-
 export const UNFILED = 'Klasörsüz';
-
-// Pin/token coordinates belong to the map they were placed on, so switching to
-// a different image clears them. Shared by the GM panel's library list and the
-// map window's own switcher.
-export function publishMapEntry(roomCode, entry, currentUrl) {
-  const url = entry.imageUrl;
-  const payload = { mapImageUrl: url, updatedAt: Date.now() };
-  if (url !== (currentUrl || '')) {
-    payload.mapPins = null;
-    payload.mapTokens = null;
-  }
-  update(ref(db, `rooms/${roomCode}/scene`), payload);
-}
 
 export function entryLabel(entry) {
   return entry?.label || entry?.name || '';
@@ -48,6 +32,22 @@ export function groupByFolder(entries) {
     if (b[0] === UNFILED) return -1;
     return a[0].localeCompare(b[0], 'tr');
   });
+}
+
+// Case- and accent-tolerant enough for Turkish: lowercases with the tr locale
+// so "İ"/"I" behave, then matches on label, caption and folder together.
+export function matchesQuery(entry, query) {
+  const q = (query || '').trim().toLocaleLowerCase('tr');
+  if (!q) return true;
+  const haystack = [entryLabel(entry), entryCaption(entry), entryFolder(entry)]
+    .join(' ')
+    .toLocaleLowerCase('tr');
+  return haystack.includes(q);
+}
+
+export function filterEntries(entries, query) {
+  if (!(query || '').trim()) return entries;
+  return entries.filter(([, entry]) => matchesQuery(entry, query));
 }
 
 // Existing folder names, for the "pick or type a new one" datalist.

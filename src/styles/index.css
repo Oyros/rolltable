@@ -2721,6 +2721,18 @@ button:hover {
   flex: 0 0 auto;
 }
 
+/* Library search box */
+.library-filter {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.library-filter input {
+  flex: 1;
+  min-width: 0;
+}
+
 /* Inline NPC health editor in the focus library */
 .focus-hp-input {
   width: 62px;

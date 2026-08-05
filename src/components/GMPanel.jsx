@@ -5,6 +5,8 @@ import RulesEditor from './RulesEditor.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
 import HandoutLibrary from './HandoutLibrary.jsx';
 import FocusHpInput from './FocusHpInput.jsx';
+import LibraryFilter from './LibraryFilter.jsx';
+import { publishMapEntry } from '../utils/mapPublish.js';
 import { resolveQueueEntity as resolveEntityShared } from '../utils/initiativeEntity.js';
 import { playerImageGroups, playerImageCaption } from '../utils/portraits.js';
 import {
@@ -12,7 +14,7 @@ import {
   entryCaption,
   groupByFolder,
   folderNames,
-  publishMapEntry,
+  filterEntries,
 } from '../utils/library.js';
 
 export default function GMPanel({
@@ -28,6 +30,8 @@ export default function GMPanel({
   isOwner,
 }) {
   const [showRulesEditor, setShowRulesEditor] = useState(false);
+  // One search box per library, shown once the list gets long.
+  const [queries, setQueries] = useState({});
   const [mapDraftUrl, setMapDraftUrl] = useState('');
   const [mapDraftLabel, setMapDraftLabel] = useState('');
   const [mapDraftFolder, setMapDraftFolder] = useState('');
@@ -457,8 +461,14 @@ export default function GMPanel({
             💾 Kaydet
           </button>
         </div>
+        <LibraryFilter
+          value={queries.location || ''}
+          onChange={(v) => setQueries((q) => ({ ...q, location: v }))}
+          count={savedLocations.length}
+          placeholder="Mekan ara..."
+        />
         {savedLocations.length > 0 &&
-          groupByFolder(savedLocations).map(([folderName, entries]) => (
+          groupByFolder(filterEntries(savedLocations, queries.location)).map(([folderName, entries]) => (
             <details key={folderName} className="library-folder" open>
               <summary>
                 📁 {folderName} <span className="muted">({entries.length})</span>
@@ -562,8 +572,14 @@ export default function GMPanel({
             </div>
           </details>
         ))}
+        <LibraryFilter
+          value={queries.focus || ''}
+          onChange={(v) => setQueries((q) => ({ ...q, focus: v }))}
+          count={savedFocuses.length}
+          placeholder="Odak ara..."
+        />
         {savedFocuses.length > 0 &&
-          groupByFolder(savedFocuses).map(([folderName, entries]) => (
+          groupByFolder(filterEntries(savedFocuses, queries.focus)).map(([folderName, entries]) => (
             <details key={folderName} className="library-folder" open>
               <summary>
                 📁 {folderName} <span className="muted">({entries.length})</span>
@@ -702,8 +718,14 @@ export default function GMPanel({
             💾 Kaydet
           </button>
         </div>
+        <LibraryFilter
+          value={queries.map || ''}
+          onChange={(v) => setQueries((q) => ({ ...q, map: v }))}
+          count={savedMaps.length}
+          placeholder="Harita ara..."
+        />
         {savedMaps.length > 0 &&
-          groupByFolder(savedMaps).map(([folderName, entries]) => (
+          groupByFolder(filterEntries(savedMaps, queries.map)).map(([folderName, entries]) => (
             <details key={folderName} className="library-folder" open>
               <summary>
                 📁 {folderName} <span className="muted">({entries.length})</span>

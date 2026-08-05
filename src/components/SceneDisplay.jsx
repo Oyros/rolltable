@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { ref, update, push, remove } from 'firebase/database';
 import { db } from '../firebase.js';
 import TypewriterText from './TypewriterText.jsx';
-import { entryLabel, entryCaption, groupByFolder } from '../utils/library.js';
+import { entryLabel, entryCaption, groupByFolder, filterEntries } from '../utils/library.js';
 import { playerImageGroups, playerImageCaption } from '../utils/portraits.js';
+import LibraryFilter from './LibraryFilter.jsx';
 
 const VOLUME_KEY = 'sessizlik_volume';
 
@@ -37,6 +38,8 @@ export default function SceneDisplay({
   const [ambianceError, setAmbianceError] = useState('');
   const [locationPickerOpen, setLocationPickerOpen] = useState(false);
   const [focusPickerOpen, setFocusPickerOpen] = useState(false);
+  const [locationQuery, setLocationQuery] = useState('');
+  const [focusQuery, setFocusQuery] = useState('');
 
   const savedLocationList = Object.entries(savedLocations || {});
   const savedFocusList = Object.entries(savedFocuses || {});
@@ -271,10 +274,16 @@ export default function SceneDisplay({
           {isGM && <span className="scene-image-edit-hint">🖼️ Kütüphaneden seç</span>}
           {locationPickerOpen && (
             <div className="scene-image-picker" onClick={(e) => e.stopPropagation()}>
+              <LibraryFilter
+                value={locationQuery}
+                onChange={setLocationQuery}
+                count={savedLocationList.length}
+                placeholder="Mekan ara..."
+              />
               {savedLocationList.length === 0 ? (
                 <p className="muted small-hint">Henüz kayıtlı mekan yok — GM panelinden ekle.</p>
               ) : (
-                groupByFolder(savedLocationList).map(([folderName, entries]) => (
+                groupByFolder(filterEntries(savedLocationList, locationQuery)).map(([folderName, entries]) => (
                   <div key={folderName} className="scene-picker-group">
                     <span className="scene-picker-folder">📁 {folderName}</span>
                     {entries.map(([id, l]) => (
@@ -306,11 +315,17 @@ export default function SceneDisplay({
           {isGM && <span className="scene-image-edit-hint">🎭 Kütüphaneden seç</span>}
           {focusPickerOpen && (
             <div className="scene-image-picker" onClick={(e) => e.stopPropagation()}>
+              <LibraryFilter
+                value={focusQuery}
+                onChange={setFocusQuery}
+                count={savedFocusList.length}
+                placeholder="Odak ara..."
+              />
               {savedFocusList.length === 0 && playerGroups.length === 0 ? (
                 <p className="muted small-hint">Henüz kayıtlı odak yok — GM panelinden ekle.</p>
               ) : (
                 <>
-                  {groupByFolder(savedFocusList).map(([folderName, entries]) => (
+                  {groupByFolder(filterEntries(savedFocusList, focusQuery)).map(([folderName, entries]) => (
                     <div key={folderName} className="scene-picker-group">
                       <span className="scene-picker-folder">📁 {folderName}</span>
                       {entries.map(([id, f]) => (
@@ -325,7 +340,7 @@ export default function SceneDisplay({
                       ))}
                     </div>
                   ))}
-                  {playerGroups.length > 0 && (
+                  {playerGroups.length > 0 && !focusQuery.trim() && (
                     <div className="scene-picker-group">
                       <span className="scene-picker-folder">👥 Oyuncular</span>
                       {playerGroups.map((group) => (
