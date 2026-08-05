@@ -1206,8 +1206,9 @@ button:hover {
   display: block;
 }
 
-/* Focus art and maps must be seen whole — the box's dark background shows
+/* Scene art and maps must be seen whole — the box's dark background shows
    through as letterbox bands when the aspect ratios don't match. */
+.scene-image-location img,
 .scene-image-focus img,
 .scene-image-map img {
   object-fit: contain;
