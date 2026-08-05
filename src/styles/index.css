@@ -2721,6 +2721,47 @@ button:hover {
   flex: 0 0 auto;
 }
 
+/* GM panel tabs */
+.gm-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 14px 0 4px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+}
+
+.gm-tab {
+  flex: 1 1 auto;
+  padding: 7px 10px;
+  font-size: 0.82rem;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.gm-tab:hover {
+  color: var(--amber-light);
+}
+
+.gm-tab.active {
+  background: var(--bg-panel-alt);
+  border-color: var(--border);
+  border-bottom-color: transparent;
+  color: var(--amber-light);
+}
+
+/* The first section in a tab doesn't need the divider that separates it from
+   whatever used to sit above it. */
+.gm-tab-body > .gm-section:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
 /* Library search box */
 .library-filter {
   display: flex;

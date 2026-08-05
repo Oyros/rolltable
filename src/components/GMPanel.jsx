@@ -17,6 +17,14 @@ import {
   filterEntries,
 } from '../utils/library.js';
 
+const GM_TABS = [
+  { id: 'oda', label: '🏠 Oda' },
+  { id: 'kutuphane', label: '📚 Kütüphaneler' },
+  { id: 'insiyatif', label: '⚔️ İnisiyatif' },
+  { id: 'araclar', label: '🔧 Araçlar' },
+];
+const TAB_KEY = 'rolltable_gm_tab';
+
 export default function GMPanel({
   roomCode,
   playerId,
@@ -30,6 +38,17 @@ export default function GMPanel({
   isOwner,
 }) {
   const [showRulesEditor, setShowRulesEditor] = useState(false);
+  // Which section of the panel is showing; remembered between sessions.
+  const [tab, setTab] = useState(() => {
+    const saved = localStorage.getItem(TAB_KEY);
+    return GM_TABS.some((t) => t.id === saved) ? saved : 'oda';
+  });
+
+  function selectTab(id) {
+    setTab(id);
+    localStorage.setItem(TAB_KEY, id);
+  }
+
   // One search box per library, shown once the list gets long.
   const [queries, setQueries] = useState({});
   const [mapDraftUrl, setMapDraftUrl] = useState('');
@@ -333,6 +352,22 @@ export default function GMPanel({
         />
       )}
 
+      <div className="gm-tabs" role="tablist">
+        {GM_TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.id}
+            className={`gm-tab${tab === t.id ? ' active' : ''}`}
+            onClick={() => selectTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'oda' && <div className="gm-tab-body">
       <div className="gm-section" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>
         <h3 className="title-font gm-section-title">Oda Yönetimi</h3>
         <div className="room-manage-buttons">
@@ -418,6 +453,9 @@ export default function GMPanel({
         />
       </div>
 
+      </div>}
+
+      {tab === 'kutuphane' && <div className="gm-tab-body">
       <div className="gm-section" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>
         <h3 className="title-font gm-section-title">Mekan Kütüphanesi</h3>
         <p className="muted small-hint">
@@ -755,6 +793,9 @@ export default function GMPanel({
         )}
       </div>
 
+      </div>}
+
+      {tab === 'insiyatif' && <div className="gm-tab-body">
       <div className="gm-section">
         <h3 className="title-font gm-section-title">İnisiyatif Sırası</h3>
         {queue.length === 0 ? (
@@ -839,6 +880,9 @@ export default function GMPanel({
         )}
       </div>
 
+      </div>}
+
+      {tab === 'araclar' && <div className="gm-tab-body">
       <div className="gm-section">
         <h3 className="title-font gm-section-title">Gizli Fısıltı</h3>
         <form onSubmit={sendWhisper} className="whisper-form">
@@ -862,6 +906,8 @@ export default function GMPanel({
           </button>
         </form>
       </div>
+      </div>}
+
     </div>
   );
 }

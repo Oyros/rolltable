@@ -382,6 +382,10 @@ export default function HelpGuide({ onClose }) {
             Üst menüde harita/görev tuşlarının altındaki <strong>"🛠️ GM Kontrol Paneli"</strong>
             tuşuna tıklayınca pencere olarak açılır (kapatmak için "✕ Kapat" ya da dışına tıkla).
             Ekranın ortası tamamen sahneye ayrıldığı için bu tuş artık orada yer kaplamıyor.
+            Panel dört sekmeye ayrılmıştır — <strong>🏠 Oda</strong>, <strong>📚 Kütüphaneler</strong>,
+            <strong> ⚔️ İnisiyatif</strong>, <strong>🔧 Araçlar</strong> — ve son kullandığın sekme
+            hatırlanır. Kütüphaneler uzadıkça listelerin başında bir <strong>arama kutusu</strong>
+            belirir; aynı arama sahnedeki mekan/odak seçim menüsünde de vardır.
           </p>
           <ul>
             <li><strong>Oda Yönetimi</strong> — odayı kilitle/aç (yeni katılımı engelle), isteğe bağlı <strong>oda şifresi</strong> belirle, "▶️ Oturumu Başlat" / "⏹️ Oturumu Sonlandır" ile oturumu aç/kapa (kapatmak odayı veya verileri silmez — sadece "aktif değil" gösterir, tekrar başlatana kadar), odayı sil (sadece oda sahibi görür), <strong>Karakter Kağıdı Görünürlüğü</strong> ile oyuncuların birbirinin statlarını/traitlerini/envanterini görüp göremeyeceğini "Herkese zorla göster", "Herkesten zorla gizle" ya da "Oyuncunun kendi seçimine bırak" olarak ayarla (sen GM olarak her zaman herkesi tam görürsün).</li>
