@@ -173,7 +173,8 @@ export default function HelpGuide({ onClose }) {
           <ul>
             <li><strong>Karakter Adı</strong> dilediğin zaman değiştirilebilir — odaya girerken seçtiğin isimle sınırlı değilsin, buradan güncelleyince sohbet, zar atışları ve Parti panelinde de anında yeni isim görünür.</li>
             <li>GM görünürlüğü zorlamadıysa, en üstteki <strong>"Karakter kağıdımı diğer oyunculara göster"</strong> anahtarıyla statların/trait/perk/envanterinin diğer oyunculara görünüp görünmeyeceğini kendin seçersin (portren, seviyen ve durumun her zaman görünür kalır).</li>
-            <li>Karakter görseli ve <strong>profil rengi</strong> seç — bu renk Parti panelinde ve harita pinlerinde senin rengin olur.</li>
+            <li><strong>Karakter görselleri</strong> — link yapıştırıp "➕ Ekle" diyerek ya da "📤 Yükle" ile bilgisayarından seçerek istediğin kadar görsel biriktirebilirsin. Eklediklerin küçük kareler halinde listelenir; hangisini kullanmak istiyorsan ona tıklarsın (seçili olan altın çerçeveyle belli olur), köşesindeki ✕ ile de silersin. Seçtiğin görsel Parti panelinde, inisiyatif şeridinde ve haritadaki token'ında görünür.</li>
+            <li><strong>Profil rengi</strong> seç — bu renk Parti panelinde ve harita pinlerinde senin rengin olur.</li>
             <li>Irk / Sınıf / Alt Sınıf seç (varsa açıklamaları altında görünür).</li>
             <li>Statlarını +/- ile ayarla, Durumunu (İyi/Yaralı/Bitkin/Ölü) seç. Bir statın adına/değerine tıklayınca, GM'in belirlediği eşiklere göre bonus eklenmiş bir 1d20 atılır — sonuç herkesin gördüğü zar panelinde çıkar. Zar panelindeki Avantaj/Dezavantaj seçimin neyse (⬇ Dezavantaj / Normal / ⬆ Avantaj), stat atışların da otomatik olarak onu kullanır.</li>
             <li>

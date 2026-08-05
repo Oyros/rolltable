@@ -4,8 +4,13 @@ import { db } from '../firebase.js';
 import { STATUS_LABEL } from '../utils/stats.js';
 import { rollStat as rollStatShared } from '../utils/statRoll.js';
 import { rollModeLabel } from '../utils/rollMode.js';
+import { newId } from '../utils/id.js';
 import Portal from './Portal.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
+
+// Marks the pre-gallery portraitUrl when it's shown as a thumbnail; it has no
+// entry under `portraits`, so it must never be treated as a deletable key.
+const LEGACY_PORTRAIT_ID = '__current';
 
 export default function CharacterSheet({
   roomCode,
@@ -50,6 +55,15 @@ export default function CharacterSheet({
   const xpBarPct = atMaxLevel ? 100 : Math.max(0, Math.min(100, (xpIntoLevel / xpPerLevel) * 100));
   const availablePerksToGain = perks.filter((p) => !(player.perks || []).includes(p.id));
 
+  const portraits = player.portraits || {};
+  // Characters created before the gallery existed have a portraitUrl but no
+  // map entry — surface it as a thumbnail too so it isn't stranded.
+  const portraitEntries = Object.entries(portraits);
+  const gallery =
+    player.portraitUrl && !portraitEntries.some(([, url]) => url === player.portraitUrl)
+      ? [[LEGACY_PORTRAIT_ID, player.portraitUrl], ...portraitEntries]
+      : portraitEntries;
+
   function patch(data) {
     update(ref(db, path), data);
   }
@@ -59,8 +73,31 @@ export default function CharacterSheet({
     push(ref(db, `${path}/whispers`), { text: `📝 ${text}`, at: Date.now(), system: true });
   }
 
-  function commitPortrait() {
-    if (portraitDraft !== player.portraitUrl) patch({ portraitUrl: portraitDraft });
+  // portraitUrl stays the *active* image (everything else — party panel,
+  // initiative bar, map tokens — reads that single field), while `portraits`
+  // holds the gallery the player picks from.
+  function addPortrait(url) {
+    const trimmed = (url || '').trim();
+    if (!trimmed) return;
+    if (Object.values(portraits).includes(trimmed)) {
+      patch({ portraitUrl: trimmed });
+      setPortraitDraft('');
+      return;
+    }
+    patch({ [`portraits/${newId('img')}`]: trimmed, portraitUrl: trimmed });
+    setPortraitDraft('');
+  }
+
+  function removePortrait(id, url) {
+    const updates = {};
+    // A pre-gallery portrait isn't in the map — there's nothing to delete,
+    // only the active field to clear.
+    if (id !== LEGACY_PORTRAIT_ID) updates[`portraits/${id}`] = null;
+    if (player.portraitUrl === url) {
+      const fallback = gallery.find(([gid]) => gid !== id);
+      updates.portraitUrl = fallback ? fallback[1] : '';
+    }
+    patch(updates);
   }
 
   function commitName() {
@@ -336,26 +373,31 @@ export default function CharacterSheet({
       )}
 
       <div className="portrait-field">
-        {portraitDraft && (
-          <img className="portrait-preview" src={portraitDraft} alt={player.name} />
+        {player.portraitUrl && (
+          <img className="portrait-preview" src={player.portraitUrl} alt={player.name} />
         )}
         <label>
-          Karakter Görseli (URL)
+          Görsel Ekle (URL)
           <input
             value={portraitDraft}
             onChange={(e) => setPortraitDraft(e.target.value)}
-            onBlur={commitPortrait}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addPortrait(portraitDraft);
+              }
+            }}
             placeholder="https://..."
           />
         </label>
+        <button type="button" className="btn-ghost small" onClick={() => addPortrait(portraitDraft)}>
+          ➕ Ekle
+        </button>
         <FileUploadButton
           roomCode={roomCode}
           folder="portrait"
           accept="image/*"
-          onUploaded={(url) => {
-            setPortraitDraft(url);
-            patch({ portraitUrl: url });
-          }}
+          onUploaded={(url) => addPortrait(url)}
         />
         <label className="color-field">
           Profil Rengi
@@ -366,6 +408,39 @@ export default function CharacterSheet({
           />
         </label>
       </div>
+
+      {gallery.length > 0 && (
+        <div className="portrait-gallery">
+          <span className="entry-list-label">
+            Görsellerin — kullanmak istediğine tıkla
+          </span>
+          <div className="portrait-gallery-list">
+            {gallery.map(([id, url]) => (
+              <div
+                key={id}
+                className={`portrait-thumb${url === player.portraitUrl ? ' active' : ''}`}
+              >
+                <button
+                  type="button"
+                  className="portrait-thumb-pick"
+                  onClick={() => patch({ portraitUrl: url })}
+                  title="Bu görseli kullan"
+                >
+                  <img src={url} alt="" />
+                </button>
+                <button
+                  type="button"
+                  className="portrait-thumb-remove"
+                  onClick={() => removePortrait(id, url)}
+                  title="Sil"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {(races.length > 0 || classes.length > 0 || subclasses.length > 0) && (
         <div className="rcs-grid">

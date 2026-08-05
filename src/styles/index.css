@@ -586,8 +586,8 @@ button:hover {
 .room-header {
   position: relative;
   overflow: hidden;
-  padding: 14px 24px;
-  min-height: 190px;
+  padding: 10px 24px;
+  min-height: 132px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
   background: var(--bg);
@@ -645,7 +645,7 @@ button:hover {
 
 @media (max-width: 700px) {
   .room-header {
-    min-height: 120px;
+    min-height: 96px;
   }
 
   .room-header-content {
@@ -1170,6 +1170,72 @@ button:hover {
 .portrait-field label {
   flex: 1;
   margin-bottom: 0;
+}
+
+.portrait-field > button {
+  width: auto;
+  flex-shrink: 0;
+}
+
+.portrait-gallery {
+  margin-bottom: 16px;
+}
+
+.portrait-gallery-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.portrait-thumb {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  background: var(--bg-panel-alt);
+}
+
+.portrait-thumb.active {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 1px var(--amber-dim);
+}
+
+.portrait-thumb-pick {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: block;
+}
+
+.portrait-thumb-pick img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.portrait-thumb-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: var(--text);
+  font-size: 0.65rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .portrait-field .color-field {
@@ -3007,11 +3073,11 @@ button:hover {
 .initiative-strip {
   display: flex;
   align-items: flex-end;
-  gap: 12px;
+  gap: 10px;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.25));
   border: 1px solid var(--border);
   border-radius: 18px;
-  padding: 10px 18px;
+  padding: 7px 14px;
   backdrop-filter: blur(2px);
 }
 
@@ -3062,8 +3128,8 @@ button:hover {
 
 .initiative-avatar {
   position: relative;
-  width: 58px;
-  height: 58px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   border: 2px solid var(--border);
   background: var(--bg-panel);
@@ -3075,8 +3141,8 @@ button:hover {
 }
 
 .initiative-slot[data-offset='0'] .initiative-avatar {
-  width: 92px;
-  height: 92px;
+  width: 68px;
+  height: 68px;
   border-width: 3px;
   border-color: var(--amber);
 }
@@ -3091,11 +3157,11 @@ button:hover {
 .initiative-avatar-fallback {
   font-family: var(--font-heading);
   color: var(--amber-light);
-  font-size: 1.3rem;
+  font-size: 1.05rem;
 }
 
 .initiative-slot[data-offset='0'] .initiative-avatar-fallback {
-  font-size: 1.9rem;
+  font-size: 1.5rem;
 }
 
 .initiative-avatar-ring {
@@ -3121,9 +3187,9 @@ button:hover {
 }
 
 .initiative-slot-name {
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
-  max-width: 90px;
+  max-width: 80px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -3133,8 +3199,8 @@ button:hover {
 .initiative-slot[data-offset='0'] .initiative-slot-name {
   color: var(--amber-light);
   font-weight: 600;
-  font-size: 1.05rem;
-  max-width: 120px;
+  font-size: 0.95rem;
+  max-width: 110px;
 }
 
 .initiative-avatar.enemy {
