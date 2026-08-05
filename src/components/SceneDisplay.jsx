@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ref, update, push, remove } from 'firebase/database';
+import { ref, update } from 'firebase/database';
 import { db } from '../firebase.js';
 import TypewriterText from './TypewriterText.jsx';
 import { entryLabel, entryCaption, groupByFolder, filterEntries } from '../utils/library.js';

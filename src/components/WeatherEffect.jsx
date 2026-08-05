@@ -18,7 +18,6 @@ export default function WeatherEffect({ weather }) {
       drift: weather === 'snow' ? rand(-30, 30) : rand(-8, -2),
       opacity: weather === 'snow' ? rand(0.4, 0.9) : rand(0.25, 0.55),
     }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [weather, count]);
 
   if (!count) return null;

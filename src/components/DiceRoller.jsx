@@ -43,6 +43,9 @@ export default function DiceRoller({ roomCode, name, isGM, canRoll = true }) {
   const isFirstSnapshot = useRef(true);
   const critSoundRef = useRef(null);
   const diceVolumeRef = useRef(diceVolume);
+  // Read inside the roll listener, which is bound once per room.
+  const isGMRef = useRef(isGM);
+  isGMRef.current = isGM;
   diceVolumeRef.current = diceVolume;
 
   useEffect(() => {
@@ -63,7 +66,7 @@ export default function DiceRoller({ roomCode, name, isGM, canRoll = true }) {
           setHiddenKey(key);
           playDiceRattle(SPIN_MS, diceVolumeRef.current);
 
-          const canSeeResult = !data.hidden || isGM;
+          const canSeeResult = !data.hidden || isGMRef.current;
           const playCritSound = () => {
             if (!canSeeResult) return;
             const natural = naturalValueOf(data);

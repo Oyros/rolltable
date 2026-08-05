@@ -31,12 +31,14 @@ export default function GameSetup({ roomCode }) {
     try {
       const builtin = DEFAULT_TEMPLATES.find((t) => t.id === selectedTemplateId);
       if (builtin) {
+        // eslint-disable-next-line no-unused-vars -- id/label are dropped on purpose
         const { id, label, ...rest } = builtin;
         await update(ref(db, `rooms/${roomCode}/gameConfig`), { ...rest, createdAt: Date.now() });
       } else {
         const snap = await get(ref(db, `gameTemplates/${selectedTemplateId}`));
         const tmpl = snap.val();
         if (tmpl) {
+          // eslint-disable-next-line no-unused-vars -- the old timestamp is replaced below
           const { createdAt, ...rest } = tmpl;
           await update(ref(db, `rooms/${roomCode}/gameConfig`), { ...rest, createdAt: Date.now() });
         }

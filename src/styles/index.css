@@ -4581,3 +4581,49 @@ button:hover {
     padding: 12px;
   }
 }
+
+/* Crash screen (ErrorBoundary) */
+.error-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.error-card {
+  max-width: 620px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.error-actions button {
+  width: auto;
+}
+
+.error-details summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.error-details pre {
+  margin-top: 8px;
+  padding: 10px;
+  max-height: 240px;
+  overflow: auto;
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.72rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

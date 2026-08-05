@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { ref, onValue } from 'firebase/database';
 import { auth, db } from './firebase.js';
-import Auth from './pages/Auth.jsx';
-import Profile from './pages/Profile.jsx';
-import Room from './pages/Room.jsx';
+// Split per page: someone signing in shouldn't download the whole room
+// (Firebase, WebRTC, the map, the GM panel) before they can even see the form.
+const Auth = lazy(() => import('./pages/Auth.jsx'));
+const Profile = lazy(() => import('./pages/Profile.jsx'));
+const Room = lazy(() => import('./pages/Room.jsx'));
 
 const SESSION_KEY = 'sessizlik_session';
 
@@ -15,6 +17,11 @@ function loadSession() {
   } catch {
     return null;
   }
+}
+
+// Each page arrives as its own chunk, so there's a beat before it renders.
+function page(node) {
+  return <Suspense fallback={<LoadingScreen text="Yükleniyor..." />}>{node}</Suspense>;
 }
 
 function LoadingScreen({ text, action }) {
@@ -101,7 +108,7 @@ export default function App() {
   }
 
   if (!authUser) {
-    return <Auth mode="login-or-signup" />;
+    return page(<Auth mode="login-or-signup" />);
   }
 
   if (profile === undefined) {
@@ -109,12 +116,14 @@ export default function App() {
   }
 
   if (!profile) {
-    return <Auth authUser={authUser} mode="complete-profile" />;
+    return page(<Auth authUser={authUser} mode="complete-profile" />);
   }
 
   if (!session) {
-    return <Profile authUser={authUser} profile={profile} playerId={authUser.uid} onJoin={handleJoin} />;
+    return page(
+      <Profile authUser={authUser} profile={profile} playerId={authUser.uid} onJoin={handleJoin} />
+    );
   }
 
-  return <Room session={session} onLeave={handleLeave} />;
+  return page(<Room session={session} onLeave={handleLeave} />);
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ref, push, update, remove } from 'firebase/database';
+import { ref, push, update } from 'firebase/database';
 import { trackedRemove } from '../utils/journal.js';
 import { db } from '../firebase.js';
 

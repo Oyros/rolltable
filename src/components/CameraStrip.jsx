@@ -398,15 +398,17 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
 
   // Full teardown on unmount (leaving the room).
   useEffect(() => {
+    // Captured now: by the time cleanup runs the refs may have been reassigned.
+    const connections = peerConnectionsRef.current;
+    const stream = localStreamRef;
     return () => {
-      if (localStreamRef.current) {
-        localStreamRef.current.getTracks().forEach((t) => t.stop());
+      if (stream.current) {
+        stream.current.getTracks().forEach((t) => t.stop());
       }
-      peerConnectionsRef.current.forEach((pc) => pc.close());
-      peerConnectionsRef.current.clear();
+      connections.forEach((pc) => pc.close());
+      connections.clear();
       remove(ref(db, `rooms/${roomCode}/webrtc/peers/${playerId}`)).catch(() => {});
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomCode, playerId]);
 
   // The local preview <video> only mounts once cameraOn flips true, so the

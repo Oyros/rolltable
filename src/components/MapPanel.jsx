@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ref, update, push, remove } from 'firebase/database';
+import { ref, update, push } from 'firebase/database';
 import { db } from '../firebase.js';
 import { resolveQueueEntity } from '../utils/initiativeEntity.js';
 import { entryLabel, groupByFolder } from '../utils/library.js';
@@ -190,7 +190,6 @@ export default function MapPanel({
     if (Object.keys(payload).length > 0) {
       update(ref(db, `rooms/${roomCode}/scene/mapTokens`), payload);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isGM, roomCode, initiativeQueue, scene?.mapTokens]);
 
   function handleTokenPointerDown(id, e) {

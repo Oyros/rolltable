@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ref, push, remove } from 'firebase/database';
+import { ref, push } from 'firebase/database';
 import { db } from '../firebase.js';
 import FileUploadButton from './FileUploadButton.jsx';
 import { buildSendPayload, recipientLabel } from '../utils/handouts.js';
