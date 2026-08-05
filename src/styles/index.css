@@ -4402,3 +4402,46 @@ button:hover {
   flex-wrap: wrap;
   margin-top: 8px;
 }
+
+/* Keyboard shortcut settings (help guide) */
+.shortcut-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.shortcut-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+.shortcut-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.85rem;
+}
+
+.shortcut-key {
+  min-width: 84px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-panel);
+  color: var(--amber-light);
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.shortcut-key.listening {
+  border-color: var(--amber);
+  background: var(--amber-dim);
+}

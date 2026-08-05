@@ -33,6 +33,7 @@ import { publishMapEntry } from '../utils/mapPublish.js';
 import FloatingWindow from '../components/FloatingWindow.jsx';
 import MiniChatLog from '../components/MiniChatLog.jsx';
 import { playTurnChime, effectVolume } from '../utils/diceSound.js';
+import { loadBindings, actionForEvent } from '../utils/shortcuts.js';
 import { applyTheme, DEFAULT_THEME_ID } from '../utils/themes.js';
 import { deleteRoomUploads, sweepOrphanedRoomUploads } from '../utils/upload.js';
 
@@ -257,6 +258,46 @@ export default function Room({ session, onLeave }) {
       setInitiativeFlash((n) => n + 1);
     }
   }, [settings?.initiative, role, playerId]);
+
+  // Keyboard shortcuts. Bindings are read fresh on every press so changing
+  // them in the help panel takes effect immediately.
+  useEffect(() => {
+    function onKeyDown(e) {
+      const action = actionForEvent(e, loadBindings());
+      if (!action) return;
+
+      if (action === 'close') {
+        // Innermost first, so Esc peels one layer at a time.
+        if (showHelp) return setShowHelp(false);
+        if (showBottomPanel) return setShowBottomPanel(false);
+        if (questsOpen) return setQuestsOpen(false);
+        if (mapOpen) return setMapOpen(false);
+        if (chatOpen) return setChatOpen(false);
+        return undefined;
+      }
+
+      e.preventDefault();
+      if (action === 'map') return setMapOpen((v) => !v);
+      if (action === 'quests') return setQuestsOpen((v) => !v);
+      if (action === 'chat') return setChatOpen((v) => !v);
+      if (action === 'panel') {
+        if (role !== 'spectator') setShowBottomPanel((v) => !v);
+        return undefined;
+      }
+      if (action === 'focusChat') {
+        setChatOpen(true);
+        // The input only exists once the window has rendered.
+        setTimeout(() => {
+          document.querySelector('.chat-form input')?.focus();
+        }, 60);
+        return undefined;
+      }
+      return undefined;
+    }
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [showHelp, showBottomPanel, questsOpen, mapOpen, chatOpen, role]);
 
   // Re-arms the CSS animation by remounting the class on each turn change.
   useEffect(() => {

@@ -1,4 +1,5 @@
 import Portal from './Portal.jsx';
+import ShortcutSettings from './ShortcutSettings.jsx';
 
 export default function HelpGuide({ onClose }) {
   return (
@@ -19,6 +20,16 @@ export default function HelpGuide({ onClose }) {
           alttaki kamera şeridinin tutamağını yukarı/aşağı sürükleyerek de yüksekliğini kendine
           göre ayarlayabilirsin. Ayarların tarayıcında hatırlanır.
         </p>
+
+        <details>
+          <summary>⌨️ Klavye Kısayolları (kendi tuşlarını seç)</summary>
+          <p>
+            Oda ekranındayken tek tuşla pencere açıp kapatabilirsin. Bir yazı kutusuna
+            yazarken kısayollar devre dışı kalır — yani sohbete "m" yazmak haritayı açmaz.
+            (Esc her zaman çalışır, açık pencereyi kapatır.)
+          </p>
+          <ShortcutSettings />
+        </details>
 
         <details open>
           <summary>🚪 Başlarken</summary>
