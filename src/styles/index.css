@@ -720,18 +720,51 @@ button:hover {
 .camera-strip {
   flex-shrink: 0;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 24px;
+  flex-direction: column;
   background: var(--bg-panel);
   border-top: 1px solid var(--border);
+}
+
+.camera-strip-handle {
+  flex-shrink: 0;
+  height: 10px;
+  cursor: ns-resize;
+  position: relative;
+  background: var(--bg-panel-alt);
+}
+
+/* Grip marker so the handle reads as draggable */
+.camera-strip-handle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.camera-strip-handle:hover::after {
+  background: var(--amber);
+}
+
+.camera-strip-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 24px;
   overflow-x: auto;
 }
 
 .camera-controls {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
   flex-shrink: 0;
 }
 
@@ -741,18 +774,20 @@ button:hover {
 
 .camera-tiles {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 10px;
   flex: 1;
   min-width: 0;
+  height: 100%;
   overflow-x: auto;
 }
 
+/* Height-driven so dragging the handle scales every camera at once. */
 .camera-tile {
   position: relative;
   flex-shrink: 0;
-  width: 180px;
-  height: 110px;
+  height: 100%;
+  aspect-ratio: 16 / 9;
   border-radius: 8px;
   overflow: hidden;
   background: #0a0704;

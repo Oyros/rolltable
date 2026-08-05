@@ -298,7 +298,9 @@ export default function HelpGuide({ onClose }) {
         <details>
           <summary>📷 Kamera & Mikrofon (alt kenar)</summary>
           <p>
-            Ekranın en altında sabit bir şerit — GM ve oyuncular <strong>"📷 Kamerayı Aç"</strong>
+            Ekranın en altında sabit bir şerit. Şeridin en üstündeki tutamağı yukarı/aşağı
+            sürükleyerek yüksekliğini ayarlayabilirsin — kameralar şeridin yüksekliğine göre
+            büyüyüp küçülür, ayarın tarayıcında hatırlanır. GM ve oyuncular <strong>"📷 Kamerayı Aç"</strong>
             ile kendi kamera/mikrofonunu açabilir, açıkken <strong>"🎤 Sustur"</strong> ile sadece
             mikrofonu kapatabilir. İzleyiciler kamera açamaz ama şeritteki herkesi izleyebilir.
             Görüntü/ses tarayıcılar arasında doğrudan (uçtan uca şifreli) akar, hiçbir sunucudan

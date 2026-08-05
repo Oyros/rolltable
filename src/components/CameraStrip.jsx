@@ -3,6 +3,24 @@ import { ref, update, remove, push, onValue, onChildAdded, onDisconnect } from '
 import { db } from '../firebase.js';
 import { createPeerConnection } from '../utils/webrtc.js';
 
+const STRIP_HEIGHT_KEY = 'rolltable_camera_strip_height';
+const MIN_STRIP_HEIGHT = 96;
+const DEFAULT_STRIP_HEIGHT = 150;
+
+function maxStripHeight() {
+  return Math.round(window.innerHeight * 0.6);
+}
+
+function clampStripHeight(value) {
+  return Math.min(Math.max(value, MIN_STRIP_HEIGHT), maxStripHeight());
+}
+
+function loadStripHeight() {
+  const raw = localStorage.getItem(STRIP_HEIGHT_KEY);
+  const parsed = raw ? parseInt(raw, 10) : DEFAULT_STRIP_HEIGHT;
+  return clampStripHeight(Number.isFinite(parsed) ? parsed : DEFAULT_STRIP_HEIGHT);
+}
+
 let sharedAudioCtx;
 
 function getAudioCtx() {
@@ -123,6 +141,7 @@ function RemoteTile({ uid, stream, name, color, micOn }) {
 }
 
 export default function CameraStrip({ roomCode, playerId, name, role, color, players }) {
+  const [stripHeight, setStripHeight] = useState(loadStripHeight);
   const [cameraOn, setCameraOn] = useState(false);
   const [micOn, setMicOn] = useState(true);
   const [broadcasters, setBroadcasters] = useState({});
@@ -139,6 +158,29 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
 
   const canBroadcast = role !== 'spectator';
   const localSpeaking = useSpeaking(localStream);
+
+  // Drag the handle to resize the strip; the tiles fill its height, so making
+  // it taller makes every camera bigger. Listeners go on the window so the
+  // drag keeps tracking even when the pointer leaves the thin handle.
+  function startResize(e) {
+    e.preventDefault();
+    const startY = e.clientY;
+    const startHeight = stripHeight;
+    let latest = startHeight;
+
+    const onMove = (moveEvent) => {
+      latest = clampStripHeight(startHeight - (moveEvent.clientY - startY));
+      setStripHeight(latest);
+    };
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      localStorage.setItem(STRIP_HEIGHT_KEY, String(latest));
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  }
 
   function sendSignal(toUid, type, data) {
     // Surface failures instead of swallowing them — a denied write here (e.g.
@@ -425,7 +467,13 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
   if (!canBroadcast && remoteBroadcasterIds.length === 0) return null;
 
   return (
-    <div className="camera-strip">
+    <div className="camera-strip" style={{ height: stripHeight }}>
+      <div
+        className="camera-strip-handle"
+        onPointerDown={startResize}
+        title="Yüksekliği ayarlamak için yukarı/aşağı sürükle"
+      />
+      <div className="camera-strip-body">
       <div className="camera-controls">
         {canBroadcast &&
           (cameraOn ? (
@@ -469,6 +517,7 @@ export default function CameraStrip({ roomCode, playerId, name, role, color, pla
             />
           );
         })}
+      </div>
       </div>
     </div>
   );
